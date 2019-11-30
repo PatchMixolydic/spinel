@@ -17,18 +17,32 @@ section .rodata
     .null:
         dq      0
     .kernelCode:
-        dw      0FFFFh ; Limit
+        dw      0xFFFF ; Limit
         dw      0 ; Base
-        dw      0 ; Base
-        db      10011010b ; Present, privilege 0, code, readable, nonconforming
-        db      11001111b ; 4kiB granularity
         db      0 ; Base
-    .kernel:
-        dw      0FFFFh ; Limit
+        db      0b1001_1010 ; Present, privilege 0, code, readable, nonconforming
+        db      0b1100_1111 ; 4kiB granularity, 32 bit, limit
+        db      0 ; Base
+    .kernelData:
+        dw      0xFFFF ; Limit
         dw      0 ; Base
+        db      0 ; Base
+        db      0b1001_0010 ; Present, privilege 0, data, expand down, writable, nonconforming
+        db      0b1100_1111 ; 4kiB granularity, 32 bit, limit
+        db      0 ; Base
+    .userCode:
+        dw      0xFFFF ; Limit
         dw      0 ; Base
-        db      10010010b ; Present, privilege 0, data, expand down, writable, nonconforming
-        db      11001111b ; 4kiB granularity
+        db      0 ; Base
+        db      0b1111_1010 ; Present, privilege 3, code, readable, nonconforming
+        db      0b1100_1111 ; 4kiB granularity, 32 bit, limit
+        db      0 ; Base
+    .userData:
+        dw      0xFFFF ; Limit
+        dw      0 ; Base
+        db      0 ; Base
+        db      0b1111_0010 ; Present, privilege 3, data, expand down, writable, nonconforming
+        db      0b1100_1111 ; 4kiB granularity, 32 bit, limit
         db      0 ; Base
     .end:
 
