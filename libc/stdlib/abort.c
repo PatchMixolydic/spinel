@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 __attribute__((__noreturn__))
-void abort(void) {
+void abort() {
 #if defined(__is_libk)
 	// TODO: Add proper kernel panic.
 	printf("kernel: panic: abort()\n");

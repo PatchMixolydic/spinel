@@ -2,7 +2,7 @@
 
 #include <kernel/tty.h>
 
-void kernelMain(void) {
+void kernelMain() {
 	terminalInitialize();
 	printf("The system is coming up.\n");
 }

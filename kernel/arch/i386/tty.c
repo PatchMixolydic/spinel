@@ -16,14 +16,14 @@ static size_t terminalY;
 static uint8_t terminalColour;
 static uint16_t* terminalBuffer;
 
-void terminalInitialize(void) {
+void terminalInitialize() {
     terminalX = 0;
     terminalY = 0;
     terminalSetColour(vgaCharacterColour(VGAWhite, VGABlack));
     terminalBuffer = VGAMemory;
 }
 
-void terminalClear(void) {
+void terminalClear() {
     for (size_t y = 0; y < VGAHeight; y++) {
         for (size_t x = 0; x < VGAWidth; x++) {
             const size_t index = y * VGAWidth + x;

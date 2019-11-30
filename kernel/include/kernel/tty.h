@@ -3,8 +3,8 @@
 
 #include <stddef.h>
 
-void terminalInitialize(void);
-void terminalClear(void);
+void terminalInitialize();
+void terminalClear();
 void terminalPutChar(char c);
 void terminalWrite(const char* data, size_t size);
 void terminalWriteString(const char* data);
