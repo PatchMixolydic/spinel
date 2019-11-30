@@ -60,8 +60,10 @@ align 16
 ; Code
 section .text
     global _start:function (_start.end - _start)
-    extern kernelMain
     extern _init
+    extern kernelMain
+    extern terminalInitialize
+    extern panic
 
     _start:
         cli
@@ -70,6 +72,7 @@ section .text
         mov     ds, ax ; move 0 to data segment
         lgdt    [gdt.desc] ; load GDT
         call    _init
+        call    terminalInitialize ; initialize terminal so we can panic
         call    kernelMain
         ; If kernelMain ever returns, spin forever
         cli
