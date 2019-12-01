@@ -8,4 +8,4 @@ done
 
 rm -rf sysroot
 rm -rf isodir
-rm -rf nyaaOS.iso
+rm -rf spinel.iso

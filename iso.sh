@@ -6,10 +6,10 @@ mkdir -p isodir
 mkdir -p isodir/boot
 mkdir -p isodir/boot/grub
 
-cp sysroot/boot/nyaaOS.kernel isodir/boot/nyaaOS.kernel
+cp sysroot/boot/spinel.kernel isodir/boot/spinel.kernel
 cat > isodir/boot/grub/grub.cfg << EOF
-menuentry "nyaaOS" {
-	multiboot /boot/nyaaOS.kernel
+menuentry "spinel" {
+	multiboot /boot/spinel.kernel
 }
 EOF
-grub-mkrescue -o nyaaOS.iso isodir
+grub-mkrescue -o spinel.iso isodir
