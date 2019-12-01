@@ -61,22 +61,24 @@ align 16
 section .text
     global _start:function (_start.end - _start)
     extern _init
-    extern kernelMain
     extern terminalInitialize
+    extern bootC
     extern panic
+    extern kernelMain
 
     _start:
         cli
         mov     esp, stackTop ; set up stack
         push    eax ; first things first, push eax and ebx before they get
         push    ebx ; clobbered
+        ; eax = magic number, ebx = multiboot info
         xor     ax, ax ; zero ax
         mov     ds, ax ; move 0 to data segment
         lgdt    [gdt.desc] ; load GDT
         call    _init
         call    terminalInitialize ; initialize terminal so we can panic
-        ; nothing before this point can take arguments
-        call    kernelMain
+        call    bootC ; now, let's call some additional C boot code
+        call    kernelMain ; Finally, let's go to the kernel!
         ; If kernelMain ever returns, spin forever
         cli
     .hang:

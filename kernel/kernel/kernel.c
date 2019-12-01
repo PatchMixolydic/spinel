@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <kernel/multiboot.h>
 #include <kernel/panic.h>
-#include <kernel/pic.h>
 
 void kernelMain(multiboot_info_t* mbd, unsigned int magicNum) {
 	terminalDisableCursor();
@@ -27,8 +26,6 @@ void kernelMain(multiboot_info_t* mbd, unsigned int magicNum) {
 		// mmap->size fails to account for itself
 		mmap = (multiboot_memory_map_t*) ((unsigned int)mmap + mmap->size + sizeof(mmap->size));
 	}
-
-	picInitialize(PICMasterOffset, PICSubservientOffset);
 
 	panic("nevermind");
 }

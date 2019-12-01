@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include <kernel/pic.h>
+#include "pic.h"
 #include "io.h"
 
 // The PICs are here named master and subservient for no good reason
@@ -10,8 +10,8 @@ const uint16_t PICMasterDataPort = 0x0021;
 const uint16_t PICSubservientCommandPort = 0x00A0;
 const uint16_t PICSubservientDataPort = 0x00A1;
 // Commands
-const uint16_t PICReadIRRCommand = 0x0A;
-const uint16_t PICReadISRCommand = 0x0B;
+const uint16_t PICReadIRRCommand = 0x0A; // IRQ register
+const uint16_t PICReadISRCommand = 0x0B; // In service register
 const uint16_t PICEndOfInterruptCommand = 0x20;
 // Data
 const uint16_t PICDisableData = 0xFF;
@@ -69,7 +69,7 @@ void picEndOfInterrupt(bool toSubserv) {
 uint16_t picGetIRQRegister() {
     outb(PICMasterCommandPort, PICReadIRRCommand);
     outb(PICSubservientCommandPort, PICReadIRRCommand);
-    // We are indeed reading the command port. PCs sure are weird
+    // We are indeed reading the command port. IBM PCs sure are weird
     return (inb(PICSubservientCommandPort) << 8) | inb(PICMasterCommandPort);
 }
 
