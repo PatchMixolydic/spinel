@@ -28,6 +28,7 @@ void terminalInitialize() {
     terminalY = 0;
     terminalSetColour(vgaCharacterColour(VGAWhite, VGABlack));
     terminalBuffer = VGAMemory;
+    terminalDisableCursor();
 }
 
 void terminalClear() {
