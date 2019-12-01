@@ -9,6 +9,13 @@
 
 static const size_t VGAWidth = 80;
 static const size_t VGAHeight = 25;
+static const uint16_t VGACommandPort = 0x3D4;
+static const uint16_t VGADataPort = 0x3D5;
+static const uint16_t VGACursorStartCommand = 0x0A;
+static const uint16_t VGACursorEndCommand = 0x0B;
+static const uint16_t VGACursorHighCommand = 0x0E;
+static const uint16_t VGACursorLowCommand = 0x0F;
+static const uint16_t VGACursorDisableData = 0x20;
 static uint16_t* const VGAMemory = (uint16_t*) 0x000B8000;
 
 static size_t terminalX;
@@ -69,8 +76,29 @@ void terminalPutChar(char c) {
 void terminalWrite(const char* data, size_t size) {
     for (size_t i = 0; i < size; i++)
         terminalPutChar(data[i]);
+    terminalMoveCursor(terminalX, terminalY);
 }
 
 void terminalWriteString(const char* data) {
     terminalWrite(data, strlen(data));
+}
+
+void terminalEnableCursor(uint8_t startLine, uint8_t endLine) {
+    outb(VGACommandPort, VGACursorStartCommand);
+    outb(VGADataPort, (inb(VGADataPort) & 0xC0) | startLine);
+    outb(VGACommandPort, VGACursorEndCommand);
+    outb(VGADataPort, (inb(VGADataPort) & 0xE0) | endLine);
+}
+
+void terminalDisableCursor() {
+    outb(VGACommandPort, VGACursorStartCommand);
+    outb(VGADataPort, VGACursorDisableData);
+}
+
+void terminalMoveCursor(size_t x, size_t y) {
+    uint16_t newPos = y * VGAWidth + x;
+    outb(VGACommandPort, VGACursorLowCommand);
+    outb(VGADataPort, newPos & 0xFF);
+    outb(VGACommandPort, VGACursorHighCommand);
+    outb(VGADataPort, (newPos >> 8) & 0xFF);
 }
