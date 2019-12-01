@@ -48,7 +48,7 @@ section .rodata
 
     .desc:
         db      gdt.end - gdt
-        dq      gdt
+        dd      gdt
 
 ; Data, uninitialized
 section .bss
@@ -67,12 +67,15 @@ section .text
 
     _start:
         cli
-        mov     esp, stackTop
+        mov     esp, stackTop ; set up stack
+        push    eax ; first things first, push eax and ebx before they get
+        push    ebx ; clobbered
         xor     ax, ax ; zero ax
         mov     ds, ax ; move 0 to data segment
         lgdt    [gdt.desc] ; load GDT
         call    _init
         call    terminalInitialize ; initialize terminal so we can panic
+        ; nothing before this point can take arguments
         call    kernelMain
         ; If kernelMain ever returns, spin forever
         cli
