@@ -10,8 +10,8 @@ const uint16_t PICMasterDataPort = 0x0021;
 const uint16_t PICSubservientCommandPort = 0x00A0;
 const uint16_t PICSubservientDataPort = 0x00A1;
 // Commands
-const uint16_t PICReadIRQRegisterCommand = 0x0A;
-const uint16_t PICReadInServiceRegisterCommand = 0x0B;
+const uint16_t PICReadIRRCommand = 0x0A;
+const uint16_t PICReadISRCommand = 0x0B;
 const uint16_t PICEndOfInterruptCommand = 0x20;
 // Data
 const uint16_t PICDisableData = 0xFF;
@@ -67,14 +67,14 @@ void picEndOfInterrupt(bool toSubserv) {
 }
 
 uint16_t picGetIRQRegister() {
-    outb(PICMasterCommandPort, PICReadIRQRegisterCommand);
-    outb(PICSubservientCommandPort, PICReadIRQRegisterCommand);
+    outb(PICMasterCommandPort, PICReadIRRCommand);
+    outb(PICSubservientCommandPort, PICReadIRRCommand);
     // We are indeed reading the command port. PCs sure are weird
     return (inb(PICSubservientCommandPort) << 8) | inb(PICMasterCommandPort);
 }
 
 uint16_t picGetInServiceRegister() {
-    outb(PICMasterCommandPort, PICReadInServiceRegisterCommand);
-    outb(PICSubservientCommandPort, PICReadInServiceRegisterCommand);
+    outb(PICMasterCommandPort, PICReadISRCommand);
+    outb(PICSubservientCommandPort, PICReadISRCommand);
     return (inb(PICSubservientCommandPort) << 8) | inb(PICMasterCommandPort);
 }

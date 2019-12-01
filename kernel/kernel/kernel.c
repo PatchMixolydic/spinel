@@ -23,6 +23,7 @@ void kernelMain(multiboot_info_t* mbd, unsigned int magicNum) {
 		uint64_t start = mmap->addr;
 		uint64_t end = mmap->addr + mmap->len;
 		bool valid = mmap->type == 1;
+		// TODO
 		// mmap->size fails to account for itself
 		mmap = (multiboot_memory_map_t*) ((unsigned int)mmap + mmap->size + sizeof(mmap->size));
 	}
