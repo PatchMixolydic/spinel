@@ -5,6 +5,7 @@
 
 #include <kernel/tty.h>
 
+#include "io.h"
 #include "vga.h"
 
 static const size_t VGAWidth = 80;

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <kernel/multiboot.h>
 #include <kernel/panic.h>
+#include <kernel/tty.h>
 
 void kernelMain(multiboot_info_t* mbd, unsigned int magicNum) {
 	terminalDisableCursor();
@@ -27,5 +28,6 @@ void kernelMain(multiboot_info_t* mbd, unsigned int magicNum) {
 		mmap = (multiboot_memory_map_t*) ((unsigned int)mmap + mmap->size + sizeof(mmap->size));
 	}
 
-	panic("nevermind");
+	// panic("nevermind");
+	while(1);
 }

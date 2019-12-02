@@ -62,7 +62,7 @@ section .text
     global _start:function (_start.end - _start)
     extern _init
     extern terminalInitialize
-    extern bootC
+    extern cBoot
     extern panic
     extern kernelMain
 
@@ -77,7 +77,7 @@ section .text
         lgdt    [gdt.desc] ; load GDT
         call    _init
         call    terminalInitialize ; initialize terminal so we can panic
-        call    bootC ; now, let's call some additional C boot code
+        call    cBoot ; now, let's call some additional C boot code
         call    kernelMain ; Finally, let's go to the kernel!
         ; If kernelMain ever returns, spin forever
         cli

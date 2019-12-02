@@ -6,6 +6,7 @@
 
 void terminalInitialize();
 void terminalClear();
+void terminalSetColour(uint8_t color);
 void terminalPutChar(char c);
 void terminalWrite(const char* data, size_t size);
 void terminalWriteString(const char* data);

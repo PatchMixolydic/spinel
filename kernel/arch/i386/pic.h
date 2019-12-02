@@ -1,5 +1,5 @@
-#ifndef _KERNEL_PIC_H
-#define _KERNEL_PIC_H
+#ifndef ARCH_I386_PIC_H
+#define ARCH_I386_PIC_H
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -12,5 +12,6 @@ void picDisable();
 void picEndOfInterrupt(bool toSubserv);
 uint16_t picGetIRQRegister();
 uint16_t picGetInServiceRegister();
+void picSetIRQMasked(uint8_t irq, bool masked);
 
-#endif // ndef _KERNEL_PIC_H
+#endif // ndef ARCH_I386_PIC_H

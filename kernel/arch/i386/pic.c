@@ -78,3 +78,20 @@ uint16_t picGetInServiceRegister() {
     outb(PICSubservientCommandPort, PICReadISRCommand);
     return (inb(PICSubservientCommandPort) << 8) | inb(PICMasterCommandPort);
 }
+
+void picSetIRQMasked(uint8_t irq, bool masked) {
+    uint16_t port;
+    if (irq < 8) {
+        port = PICMasterDataPort;
+    } else {
+        port = PICSubservientDataPort;
+        irq -= 8;
+    }
+    uint8_t mask;
+    if (masked) {
+        mask = inb(port) | (1 << irq); // add this irq to mask
+    } else {
+        mask = inb(port) & ~(1 << irq); // remove this irq from mask
+    }
+    outb(port, mask);
+}
