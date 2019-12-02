@@ -14,6 +14,7 @@ extern void disableInterrupts();
 extern void exceptionHandler();
 extern void doubleFault();
 extern void generalProtectionFault();
+extern void int80();
 extern void irq0();
 extern void irq1();
 extern void irq2();

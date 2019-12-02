@@ -13,5 +13,6 @@ void cBoot() {
     picInitialize(PICMasterOffset, PICSubservientOffset);
     initIDT();
     enableInterrupts();
-    picSetIRQMasked(1, false);
+    __asm__ ("int $49");
+    //picSetIRQMasked(1, false);
 }

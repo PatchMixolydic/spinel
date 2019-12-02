@@ -43,6 +43,7 @@ void initIDT() {
         uint32_t handler = (uint32_t)irqPointer[irq]; // pointer to irq handler
         loadIDTEntry(interrupt, handler, 0x08, 0x8E);
     }
+    loadIDTEntry(80, (uint32_t)int80, 0x08, 0x8E);
 
     IDTRegister reg;
     reg.length = sizeof(IDTEntry) * 256 - 1;

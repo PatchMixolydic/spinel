@@ -4,3 +4,4 @@ sysroot
 .idea
 *.o
 *.d
+bochs*.txt

@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <kernel/panic.h>
 #include "io.h"
 #include "pic.h"
@@ -12,6 +13,10 @@ void cDoubleFault() {
 
 void cGeneralProtectionFault() {
     panic("General protection fault!");
+}
+
+void cInt80() {
+    printf("Int 80!\n");
 }
 
 void cIRQ0() {

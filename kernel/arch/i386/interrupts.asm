@@ -22,6 +22,7 @@ section .text
     global exceptionHandler:function (exceptionHandler.end - exceptionHandler)
     global doubleFault:function (doubleFault.end - doubleFault)
     global generalProtectionFault:function (generalProtectionFault.end - generalProtectionFault)
+    global int80:function (int80.end - int80)
     global irq0:function (irq0.end - irq0)
     global irq1:function (irq1.end - irq1)
     global irq2:function (irq2.end - irq2)
@@ -41,6 +42,7 @@ section .text
     extern cException
     extern cDoubleFault
     extern cGeneralProtectionFault
+    extern cInt80
     extern cIRQ0
     extern cIRQ1
     extern cIRQ2
@@ -78,6 +80,15 @@ section .text
         pushad
         cld
         call cGeneralProtectionFault
+        popad
+        iretd
+    .end:
+
+    int80:
+        pushad
+        cld
+        ;call cInt80
+        nop
         popad
         iretd
     .end:
