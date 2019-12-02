@@ -1,8 +1,17 @@
+#include <kernel/panic.h>
 #include "io.h"
 #include "pic.h"
 
 void cException() {
-    panic("NO!");
+    panic("Exception!");
+}
+
+void cDoubleFault() {
+    panic("Double fault!");
+}
+
+void cGeneralProtectionFault() {
+    panic("General protection fault!");
 }
 
 void cIRQ0() {
@@ -10,8 +19,8 @@ void cIRQ0() {
 }
 
 void cIRQ1() {
-    uint16_t asdf = inb(60);
-    panic("SHIT");
+    uint16_t asdf = inb(0x60);
+    panic("Keyboard");
     picEndOfInterrupt(1);
 }
 

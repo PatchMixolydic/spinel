@@ -17,29 +17,35 @@ void (*irqPointer[16]) = { // array of function pointers
     irq12, irq13, irq14, irq15
 };
 
+void loadIDTEntry(int interrupt, uint16_t offset, uint16_t region, uint8_t typeAndAttributes) {
+    idt[interrupt].offsetLow = offset & 0xFFFF;
+    idt[interrupt].gdtRegion = region;
+    idt[interrupt].unused = 0;
+    idt[interrupt].typeAndAttributes = typeAndAttributes;
+    idt[interrupt].offsetHigh = (offset >> 16) & 0xFFFF;
+}
+
 void initIDT() {
-    for (int exception = 0; exception < 32; exception++) { // for each exception
+    for (int exception = 0; exception < 256; exception++) { // for each exception
         uint32_t handler = (uint32_t)exceptionHandler;
-        idt[exception].offsetLow = handler & 0xFFFF;
-        idt[exception].gdtRegion = 0x08;
-        idt[exception].unused = 0;
-        idt[exception].typeAndAttributes = 0x8E; // 0b1000_1110
-        idt[exception].offsetHigh = (handler & 0xFFFF0000) >> 16;
+        loadIDTEntry(exception, handler, 0x08, 0x8E);
     }
+
+    uint32_t handler = (uint32_t)doubleFault;
+    loadIDTEntry(8, handler, 0x08, 0x8E);
+
+    handler = (uint32_t)doubleFault;
+    loadIDTEntry(13, handler, 0x08, 0x8E);
 
     for (int irq = 0; irq < 16; irq++) { // for each IRQ
         // Due to the way IRQs are set up, each IRQ's handler is 32 + irq
         int interrupt = irq + 32;
         uint32_t handler = (uint32_t)irqPointer[irq]; // pointer to irq handler
-        idt[interrupt].offsetLow = handler & 0xFFFF;
-        idt[interrupt].gdtRegion = 0x08;
-        idt[interrupt].unused = 0;
-        idt[interrupt].typeAndAttributes = 0x8E; // 0b1000_1110
-        idt[interrupt].offsetHigh = (handler & 0xFFFF0000) >> 16;
+        loadIDTEntry(interrupt, handler, 0x08, 0x8E);
     }
 
     IDTRegister reg;
-    reg.length = sizeof(idt);
-    reg.idtPointer = (uint32_t)idt; // idt is an array, hence it is a pointer
-    loadIDT(&reg);
+    reg.length = sizeof(IDTEntry) * 256 - 1;
+    reg.idtPointer = (uint32_t)&idt;
+    loadIDT(reg);
 }

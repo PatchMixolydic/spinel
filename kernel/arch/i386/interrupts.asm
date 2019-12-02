@@ -1,5 +1,4 @@
 section .text
-align 4
     global loadIDT:function (loadIDT.end - loadIDT)
     global enableInterrupts:function (enableInterrupts.end - enableInterrupts)
     global disableInterrupts:function (disableInterrupts.end - disableInterrupts)
@@ -21,6 +20,8 @@ align 4
     .end:
 
     global exceptionHandler:function (exceptionHandler.end - exceptionHandler)
+    global doubleFault:function (doubleFault.end - doubleFault)
+    global generalProtectionFault:function (generalProtectionFault.end - generalProtectionFault)
     global irq0:function (irq0.end - irq0)
     global irq1:function (irq1.end - irq1)
     global irq2:function (irq2.end - irq2)
@@ -38,6 +39,8 @@ align 4
     global irq14:function (irq14.end - irq14)
     global irq15:function (irq15.end - irq15)
     extern cException
+    extern cDoubleFault
+    extern cGeneralProtectionFault
     extern cIRQ0
     extern cIRQ1
     extern cIRQ2
@@ -60,7 +63,23 @@ align 4
         cld
         call cException
         popad
-        iret
+        iretd
+    .end:
+
+    doubleFault:
+        pushad
+        cld
+        call cDoubleFault
+        popad
+        iretd
+    .end:
+
+    generalProtectionFault:
+        pushad
+        cld
+        call cGeneralProtectionFault
+        popad
+        iretd
     .end:
 
     irq0:
@@ -68,7 +87,7 @@ align 4
         cld
         call cIRQ0
         popad
-        iret
+        iretd
     .end:
 
     irq1:
@@ -76,7 +95,7 @@ align 4
         cld
         call cIRQ1
         popad
-        iret
+        iretd
     .end:
 
     irq2:
@@ -84,7 +103,7 @@ align 4
         cld
         call cIRQ2
         popad
-        iret
+        iretd
     .end:
 
     irq3:
@@ -92,7 +111,7 @@ align 4
         cld
         call cIRQ3
         popad
-        iret
+        iretd
     .end:
 
     irq4:
@@ -100,7 +119,7 @@ align 4
         cld
         call cIRQ4
         popad
-        iret
+        iretd
     .end:
 
     irq5:
@@ -108,7 +127,7 @@ align 4
         cld
         call cIRQ5
         popad
-        iret
+        iretd
     .end:
 
     irq6:
@@ -116,7 +135,7 @@ align 4
         cld
         call cIRQ6
         popad
-        iret
+        iretd
     .end:
 
     irq7:
@@ -124,7 +143,7 @@ align 4
         cld
         call cIRQ7
         popad
-        iret
+        iretd
     .end:
 
     irq8:
@@ -132,7 +151,7 @@ align 4
         cld
         call cIRQ8
         popad
-        iret
+        iretd
     .end:
 
     irq9:
@@ -140,7 +159,7 @@ align 4
         cld
         call cIRQ9
         popad
-        iret
+        iretd
     .end:
 
     irq10:
@@ -148,7 +167,7 @@ align 4
         cld
         call cIRQ10
         popad
-        iret
+        iretd
     .end:
 
     irq11:
@@ -156,7 +175,7 @@ align 4
         cld
         call cIRQ11
         popad
-        iret
+        iretd
     .end:
 
     irq12:
@@ -164,7 +183,7 @@ align 4
         cld
         call cIRQ12
         popad
-        iret
+        iretd
     .end:
 
     irq13:
@@ -172,7 +191,7 @@ align 4
         cld
         call cIRQ13
         popad
-        iret
+        iretd
     .end:
 
     irq14:
@@ -180,7 +199,7 @@ align 4
         cld
         call cIRQ14
         popad
-        iret
+        iretd
     .end:
 
     irq15:
@@ -188,5 +207,5 @@ align 4
         cld
         call cIRQ15
         popad
-        iret
+        iretd
     .end:

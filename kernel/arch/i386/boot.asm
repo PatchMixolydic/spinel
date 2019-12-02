@@ -47,7 +47,7 @@ section .rodata
     .end:
 
     .desc:
-        db      gdt.end - gdt
+        dw      gdt.end - gdt - 1
         dd      gdt
 
 ; Data, uninitialized
@@ -75,6 +75,15 @@ section .text
         xor     ax, ax ; zero ax
         mov     ds, ax ; move 0 to data segment
         lgdt    [gdt.desc] ; load GDT
+        ; reloading cs requires this... x86 is ostensibly cisc
+        jmp     gdt.kernelCode - gdt:.loadCS
+    .loadCS:
+        mov     ax, gdt.kernelData - gdt
+        mov     ds, ax
+        mov     es, ax
+        mov     fs, ax
+        mov     gs, ax
+        mov     ss, ax
         call    _init
         call    terminalInitialize ; initialize terminal so we can panic
         call    cBoot ; now, let's call some additional C boot code

@@ -29,5 +29,5 @@ void kernelMain(multiboot_info_t* mbd, unsigned int magicNum) {
 	}
 
 	// panic("nevermind");
-	while(1);
+	while(1) __asm__("hlt\n\t");
 }
