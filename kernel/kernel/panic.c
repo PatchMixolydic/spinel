@@ -3,7 +3,7 @@
 #include <kernel/panic.h>
 
 void panic(const char why[]) {
-	printf("panic: %s", why);
 	disableInterrupts();
+	printf("panic: %s", why);
 	while (1);
 }
