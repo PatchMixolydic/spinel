@@ -43,7 +43,7 @@ void cIRQ0() {
 
 void cIRQ1() {
     uint16_t asdf = inb(0x60);
-    panic("Keyboard");
+    printf("Keyboard\n");
     picEndOfInterrupt(1);
 }
 

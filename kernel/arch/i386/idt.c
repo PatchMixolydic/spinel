@@ -62,9 +62,22 @@ void initIDT() {
     loadIDTEntry(29, (uintptr_t)isr29, 0x08, 0x8E);
     loadIDTEntry(30, (uintptr_t)isr30, 0x08, 0x8E);
     loadIDTEntry(31, (uintptr_t)isr31, 0x08, 0x8E);
-    for (int i = 32; i < 48; i++) {
-        loadIDTEntry(i, (uintptr_t)irqPointer[i], 0x08, 0x8E);
-    }
+    loadIDTEntry(32, (uintptr_t)irq0, 0x08, 0x8E);
+    loadIDTEntry(33, (uintptr_t)irq1, 0x08, 0x8E);
+    loadIDTEntry(34, (uintptr_t)irq2, 0x08, 0x8E);
+    loadIDTEntry(35, (uintptr_t)irq3, 0x08, 0x8E);
+    loadIDTEntry(36, (uintptr_t)irq4, 0x08, 0x8E);
+    loadIDTEntry(37, (uintptr_t)irq5, 0x08, 0x8E);
+    loadIDTEntry(38, (uintptr_t)irq6, 0x08, 0x8E);
+    loadIDTEntry(39, (uintptr_t)irq7, 0x08, 0x8E);
+    loadIDTEntry(40, (uintptr_t)irq8, 0x08, 0x8E);
+    loadIDTEntry(41, (uintptr_t)irq9, 0x08, 0x8E);
+    loadIDTEntry(42, (uintptr_t)irq10, 0x08, 0x8E);
+    loadIDTEntry(43, (uintptr_t)irq11, 0x08, 0x8E);
+    loadIDTEntry(44, (uintptr_t)irq12, 0x08, 0x8E);
+    loadIDTEntry(45, (uintptr_t)irq13, 0x08, 0x8E);
+    loadIDTEntry(46, (uintptr_t)irq14, 0x08, 0x8E);
+    loadIDTEntry(47, (uintptr_t)irq15, 0x08, 0x8E);
     loadIDTEntry(80, (uintptr_t)isr80, 0x08, 0x8E);
 
     IDTRegister reg;
