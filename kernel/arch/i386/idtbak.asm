@@ -17,6 +17,7 @@ extern irq12
 extern irq13
 extern irq14
 extern irq15
+extern int80
 
 section .rodata
     interruptHandlers:
@@ -68,23 +69,57 @@ section .rodata
         dd      irq13
         dd      irq14
         dd      irq15
+        dd      exceptionHandler
+        dd      exceptionHandler
+        dd      exceptionHandler
+        dd      exceptionHandler
+        dd      exceptionHandler
+        dd      exceptionHandler
+        dd      exceptionHandler
+        dd      exceptionHandler
+        dd      exceptionHandler
+        dd      exceptionHandler
+        dd      exceptionHandler
+        dd      exceptionHandler
+        dd      exceptionHandler
+        dd      exceptionHandler
+        dd      exceptionHandler
+        dd      exceptionHandler
+        dd      exceptionHandler
+        dd      exceptionHandler
+        dd      exceptionHandler
+        dd      exceptionHandler
+        dd      exceptionHandler
+        dd      exceptionHandler
+        dd      exceptionHandler
+        dd      exceptionHandler
+        dd      exceptionHandler
+        dd      exceptionHandler
+        dd      exceptionHandler
+        dd      exceptionHandler
+        dd      exceptionHandler
+        dd      exceptionHandler
+        dd      exceptionHandler
+        dd      exceptionHandler
+        dd      int80
     .end:
 
     idtrInfo:
-        dw      (idt.end - idt) - 1 ; size
-        dd      idt ; address
+        dw      (idtBuffer.end - idtBuffer) - 1 ; size
+        dd      idtBuffer ; address
 
 section .bss
-    idt:
+    idtBuffer:
         ; since addition is commutative, this should all add up to the correct
         ; number of bytes:
-        resw    (interruptHandlers.end - interruptHandlers) / 4 ; offsetLow
-        resw    (interruptHandlers.end - interruptHandlers) / 4 ; GDT index
-        resb    (interruptHandlers.end - interruptHandlers) / 4 ; unused (x86)/ist(amd64)
-        resb    (interruptHandlers.end - interruptHandlers) / 4 ; type and attributes
-        resw    (interruptHandlers.end - interruptHandlers) / 4 ; offsetHigh(x86)/offsetMid(amd64)
-        ;resd    (interruptHandlers.end - interruptHandlers) / 4 ; offsetHigh(amd64)
-        ;resd    (interruptHandlers.end - interruptHandlers) / 4 ; unused (amd64)
+        resq    256
+        ; resw    (interruptHandlers.end - interruptHandlers) / 4 ; offsetLow
+        ; resw    (interruptHandlers.end - interruptHandlers) / 4 ; GDT index
+        ; resb    (interruptHandlers.end - interruptHandlers) / 4 ; unused (x86)/ist(amd64)
+        ; resb    (interruptHandlers.end - interruptHandlers) / 4 ; type and attributes
+        ; resw    (interruptHandlers.end - interruptHandlers) / 4 ; offsetHigh(x86)/offsetMid(amd64)
+        ; resd    (interruptHandlers.end - interruptHandlers) / 4 ; offsetHigh(amd64)
+        ; resd    (interruptHandlers.end - interruptHandlers) / 4 ; unused (amd64)
     .end:
 
 
@@ -93,7 +128,7 @@ section .text
 
     initIDT:
         xor     ecx, ecx ; ecx to 0
-        mov     edx, idt ; offset into the idt
+        mov     edx, idtBuffer ; offset into the idt
     .loop:
         ; set up eax
         mov     eax, 4 ; 4 bytes per interrupt handler
@@ -109,8 +144,8 @@ section .text
         ; finished
         inc     ecx ; increment ecx
         adc     edx, 8 ; 16 on amd64, go to next idt entry
-        cmp     ecx, (idt.end - idt) / 8 ; length of idt (changes to 16 on amd64)
-        jb      .loop ; if ecx is less than length of idt, go again
+        cmp     edx, (idtBuffer.end - idtBuffer)
+        jb      .loop ; if edx is less than length of idt, go again
 
         ;finally, load the idt
         lidt    [idtrInfo]

@@ -8,7 +8,7 @@ typedef struct {
     uint32_t idtPointer;
 } __attribute__((packed)) IDTRegister;
 
-extern void loadIDT(IDTRegister reg);
+extern void loadIDT(IDTRegister* reg);
 extern void enableInterrupts();
 extern void disableInterrupts();
 extern void exceptionHandler();

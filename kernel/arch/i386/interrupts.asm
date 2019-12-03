@@ -87,10 +87,9 @@ section .text
     int80:
         pushad
         cld
-        ;call cInt80
-        nop
+        call cInt80
         popad
-        iretd
+        iret
     .end:
 
     irq0:
