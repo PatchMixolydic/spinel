@@ -3,20 +3,38 @@
 #include "io.h"
 #include "pic.h"
 
-void cException() {
+const char ExceptionDescriptions[][32] = {
+    "Division by zero",
+    "Debug",
+    "Non-maskable interrupt",
+    "Breakpoint",
+    "Overflow",
+    "Bound range exceeded",
+    "Invalid opcode",
+    "Device not available",
+    "Double fault! :<",
+    "Coprocessor segment overrun",
+    "Invalid task state segment",
+    "Segment not present",
+    "Stack/segment fault",
+    "General protection fault!",
+    "Page fault",
+    "Reserved",
+    "x87 FPU exception",
+    "Alignment check",
+    "Machine check",
+    "SIMD floating point exception",
+    "Virtualization exception",
+    "Reserved",
+    "Security exception",
+    "Reserved",
+};
+
+void interruptHandler(uint8_t interrupt) {
+    if (interrupt < 32) { // intel exception
+        panic(ExceptionDescriptions[interrupt]);
+    }
     panic("Exception!");
-}
-
-void cDoubleFault() {
-    panic("Double fault!");
-}
-
-void cGeneralProtectionFault() {
-    panic("General protection fault!");
-}
-
-void cInt80() {
-    printf("Int 80!\n");
 }
 
 void cIRQ0() {
