@@ -1,8 +1,12 @@
 #include <limits.h>
 #include <stdarg.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+
+static const unsigned int BufferSize = 80;
 
 static bool print(const char* data, size_t length) {
 	const unsigned char* bytes = (const unsigned char*) data;
@@ -13,6 +17,9 @@ static bool print(const char* data, size_t length) {
 	}
 	return true;
 }
+
+// nab __itoa for our own nefarious purposes
+extern char* __itoa(int value, char buf[], size_t bufSizeOrZero, int base, bool isUnsigned, bool uppercase);
 
 int printf(const char* restrict format, ...) {
 	va_list parameters;
@@ -43,9 +50,11 @@ int printf(const char* restrict format, ...) {
 			continue;
 		}
 
-		const char* originalFormat = format++;
+		format++;
+		unsigned int formatSize = 1;
 
 		switch (*format) {
+			// char
 			case 'c': {
 				format++;
 				char c = (char) va_arg(parameters, int); // char promotes to int
@@ -60,6 +69,7 @@ int printf(const char* restrict format, ...) {
 				break;
 			}
 
+			// string
 			case 's': {
 				format++;
 				const char* str = va_arg(parameters, const char*);
@@ -75,18 +85,136 @@ int printf(const char* restrict format, ...) {
 				break;
 			}
 
-			default: {
-				format = originalFormat;
-				size_t len = strlen(format);
-				if (maxRemaining < len) {
+			// signed integer
+			case 'i': // same thing for printf
+			case 'd': {
+				format++;
+				int number = va_arg(parameters, int);
+				char buf[BufferSize];
+				nitoa(number, buf, BufferSize, 10);
+				int trueLen = strlen(buf);
+				if (maxRemaining < trueLen) {
 					// TODO: Set errno to EOVERFLOW.
 					return -1;
 				}
-				if (!print(format, len)) {
+				if (!print(buf, trueLen)) {
 					return -1;
 				}
-				written += len;
-				format += len;
+				written += trueLen;
+				break;
+			}
+
+			// unsigned integer
+			case 'u': {
+				format++;
+				int number = va_arg(parameters, int);
+				char buf[BufferSize];
+				nuitoa(number, buf, BufferSize, 10);
+				int trueLen = strlen(buf);
+				if (maxRemaining < trueLen) {
+					// TODO: Set errno to EOVERFLOW.
+					return -1;
+				}
+				if (!print(buf, trueLen)) {
+					return -1;
+				}
+				written += trueLen;
+				break;
+			}
+
+			// octal number
+			case 'o': {
+				format++;
+				int number = va_arg(parameters, int);
+				char buf[BufferSize];
+				nuitoa(number, buf, BufferSize, 8);
+				int trueLen = strlen(buf);
+				if (maxRemaining < trueLen) {
+					// TODO: Set errno to EOVERFLOW.
+					return -1;
+				}
+				if (!print(buf, trueLen)) {
+					return -1;
+				}
+				written += trueLen;
+				break;
+			}
+
+			// hexidecimal number
+			case 'x': // lowercase letters
+			case 'X': { // uppercase letters
+				bool upper = *format == 'X';
+				format++;
+				int number = va_arg(parameters, int);
+				char buf[BufferSize];
+				__itoa(number, buf, BufferSize, 16, true, upper);
+				int trueLen = strlen(buf);
+				if (maxRemaining < trueLen) {
+					// TODO: Set errno to EOVERFLOW.
+					return -1;
+				}
+				if (!print(buf, trueLen)) {
+					return -1;
+				}
+				written += trueLen;
+				break;
+			}
+
+			// void pointer
+			case 'p': {
+				format++;
+				uintptr_t pointer = (uintptr_t)va_arg(parameters, void*);
+				char buf[BufferSize];
+				nuitoa(pointer, buf, BufferSize, 16);
+				int trueLen = strlen(buf);
+				if (maxRemaining < trueLen) {
+					// TODO: Set errno to EOVERFLOW.
+					return -1;
+				}
+				if (!print(buf, trueLen)) {
+					return -1;
+				}
+				written += trueLen;
+				break;
+			}
+
+			// Nothing, but outputs written to the associated int pointer parameter
+			// This can apparently be exploited...
+			case 'n': {
+				#ifdef __is_libk
+					// Negative.
+					format -= formatSize;
+					formatSize++; // account for this token
+					if (maxRemaining < formatSize) {
+						// TODO: Set errno to EOVERFLOW.
+						return -1;
+					}
+					if (!print(format, formatSize)) {
+						return -1;
+					}
+					written += formatSize;
+					format += formatSize;
+				#else
+					format++;
+					int* res = va_arg(parameters, int*);
+					*res = written;
+				#endif
+				break;
+			}
+
+			// unknown
+			default: {
+				format -= formatSize;
+				formatSize++; // account for this token
+				if (maxRemaining < formatSize) {
+					// TODO: Set errno to EOVERFLOW.
+					return -1;
+				}
+				if (!print(format, formatSize)) {
+					return -1;
+				}
+				written += formatSize;
+				format += formatSize;
 				break;
 			}
 		}

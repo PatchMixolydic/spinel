@@ -4,7 +4,7 @@
 
 __attribute__((__noreturn__))
 void abort() {
-	#if defined(__is_libk)
+	#ifdef __is_libk
 		panic("abort()");
 	#else
 		// TODO: Abnormally terminate the process as if by SIGABRT.
