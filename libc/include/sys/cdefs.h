@@ -1,5 +1,5 @@
-#ifndef _SYS_CDEFS_H
-#define _SYS_CDEFS_H 1
+#ifndef SYS_CDEFS_H
+#define SYS_CDEFS_H
 
 #define __spinel_libc 1
 
