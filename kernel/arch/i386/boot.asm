@@ -73,7 +73,7 @@ section .text
         push    ebx ; clobbered
         ; eax = magic number, ebx = multiboot info
         lgdt    [gdt.desc] ; load GDT
-        ; reloading cs requires this... x86 is ostensibly cisc
+        ; reloading cs requires this:
         jmp     (gdt.kernelCode - gdt):.loadCS
     .loadCS:
         mov     ax, gdt.kernelData - gdt
