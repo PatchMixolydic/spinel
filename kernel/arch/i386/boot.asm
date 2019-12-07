@@ -44,8 +44,6 @@ section .rodata
         db      0b1111_0010 ; Present, privilege 3, data, expand down, writable, nonconforming
         db      0b1100_1111 ; 4kiB granularity, 32 bit, limit
         db      0 ; Base
-    .nullfsafsafasasf:
-        dq      0
     .end:
 
     .desc:
