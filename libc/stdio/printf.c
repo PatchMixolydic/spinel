@@ -180,27 +180,14 @@ int printf(const char* restrict format, ...) {
 
 			// Nothing, but outputs written to the associated int pointer parameter
 			// This can apparently be exploited...
-			case 'n': {
-				#ifdef __is_libk
-					// Negative.
-					format -= formatSize;
-					formatSize++; // account for this token
-					if (maxRemaining < formatSize) {
-						// TODO: Set errno to EOVERFLOW.
-						return -1;
-					}
-					if (!print(format, formatSize)) {
-						return -1;
-					}
-					written += formatSize;
-					format += formatSize;
-				#else
+			#ifndef __is_libk
+				case 'n': {
 					format++;
 					int* res = va_arg(parameters, int*);
 					*res = written;
-				#endif
-				break;
-			}
+					break;
+				}
+			#endif
 
 			// unknown
 			default: {
