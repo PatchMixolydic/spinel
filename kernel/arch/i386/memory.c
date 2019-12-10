@@ -20,19 +20,20 @@ void initMemoryManager(multiboot_memory_map_t* memoryMap, size_t memoryMapLength
         (uintptr_t)memoryMap + memoryMapLength
     );
 	while (memoryMap < memoryMapEnd) {
-		uintptr_t start = memoryMap->addr;
-		uintptr_t end = memoryMap->addr + memoryMap->len - 1;
+		uint64_t start = memoryMap->addr;
+		uint64_t end = memoryMap->addr + memoryMap->len - 1;
 		bool valid = memoryMap->type == 1;
         if (valid) {
             availableMemory += memoryMap->len;
         }
-        printf("Memory region 0x%X - 0x%X is%s available.\n", start, end, valid ? "" : "n't");
+        // TODO: no long specifiers... convert to uint in the meantime
+        printf("Memory region 0x%X - 0x%X is%s available.\n", (unsigned int)start, (unsigned int)end, valid ? "" : "n't");
 		// memoryMap->size fails to account for itself
 		memoryMap = (multiboot_memory_map_t*)(
             (uintptr_t)memoryMap + memoryMap->size + sizeof(memoryMap->size)
         );
 	}
-    printf("%d MiB memory available.\n", availableMemory / 1024 / 1024);
+    printf("%d MiB memory available.\n", availableMemory / 1024 / 1024 + 1);
 }
 
 void* allocatePageFrame() {
