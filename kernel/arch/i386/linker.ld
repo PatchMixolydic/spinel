@@ -4,7 +4,7 @@ ENTRY(_start)
 SECTIONS {
 	/* Load kernel at 1 MiB */
 	. = 1M;
-	kernelBegin = .;
+	__KernelStart = .;
 
 	/* Multiboot header and code */
 	.text BLOCK(4K) : ALIGN(4K) {
@@ -29,5 +29,5 @@ SECTIONS {
 	}
 
 	/* Mark the end of memory for use in the memory manager */
-	kernelEnd = .;
+	__KernelEnd = .;
 }
