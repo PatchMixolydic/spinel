@@ -8,5 +8,6 @@ extern const size_t PageSize;
 
 void initMemoryManager(multiboot_memory_map_t* memoryMap, size_t memoryMapLength);
 void* allocatePageFrame();
+void freePageFrame(void* frame);
 
 #endif // ndef _KERNEL_MEMORY_H

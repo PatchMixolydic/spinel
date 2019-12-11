@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <kernel/memory.h>
+#include <kernel/panic.h>
 
 const size_t PageSize = 4096;
 
@@ -12,9 +13,9 @@ extern const uint8_t __KernelEnd[];
 
 typedef multiboot_memory_map_t memMap;
 
-uint32_t* pageMap; // Contains info about which pages are allocated
+uint32_t* pageMap; // Contains info about which pages are free (1) or not (0)
 uint32_t* availMap; // Contains info about which pages are available
-uint32_t* earliestAllocatedPage; // Points to last used page map entry
+size_t firstFreePageIdx = 0; // index of the uint32_t with the first free page
 size_t kernelReservedSize = 0;
 size_t availableMemory = 0;
 size_t bitmapSize = 0; // size in bytes, not length, for page and avail map
@@ -40,8 +41,12 @@ static inline size_t getBitmapIndex(uint64_t addr) {
     return addr / PageSize / 32; // Page index of addr divided into groups of 32
 }
 
-static inline uint8_t getBitmapBit(uint64_t addr) {
-    return addr % 32; // pageMap[0] bit 0 = 0, bit 1 = 4096...
+static inline size_t getBitmapBit(uint64_t addr) {
+    return (addr / PageSize) % 32; // pageMap[0] bit 0 = 0, bit 1 = 4096...
+}
+
+static inline uintptr_t getAddr(size_t idx, size_t bit) {
+    return (idx * 32 + bit) * PageSize;
 }
 
 static inline void setPageAvailable(uint64_t addr, bool valid) {
@@ -107,8 +112,60 @@ void initMemoryManager(memMap* memoryMapPtr, size_t memoryMapLength) {
             (unsigned int)start, (unsigned int)end - 1, valid ? "" : "n't"
         );
 	}
+    setPageFree((uintptr_t)NULL, false); // Zero page --  can't touch this
+    setPageAvailable((uintptr_t)NULL, false);
 }
 
 void* allocatePageFrame() {
-    return NULL;
+    size_t searchStartLoc = firstFreePageIdx;
+    uintptr_t res = (uintptr_t)NULL;
+    do {
+        // pageMap[x] & availMap[x] shows if there's any pages which are free
+        // and available
+        if (
+            pageMap[firstFreePageIdx] == 0 ||
+            (pageMap[firstFreePageIdx] & availMap[firstFreePageIdx]) == 0
+        ) {
+            // Hey, that's not free!
+            firstFreePageIdx = (firstFreePageIdx + 1) % bitmapSize;
+            continue;
+        }
+        // Okay, there's a free page. We just need its bit.
+        size_t bit;
+        for (bit = 0; bit < 32; bit++) {
+            uint32_t freeAndAvail = pageMap[firstFreePageIdx] & availMap[firstFreePageIdx];
+            if (freeAndAvail & (1 << bit)) {
+                // Cooool, this is free!
+                break;
+            }
+        }
+        if (bit == 32) {
+            printf("Index %d doesn't have any free pages!\n", firstFreePageIdx);
+            printf("Page map: 0x%X\n", pageMap[firstFreePageIdx]);
+            printf("Available map: 0x%X\n", availMap[firstFreePageIdx]);
+            panic("Sanity check failed for allocatePageFrame");
+        }
+        res = getAddr(firstFreePageIdx, bit);
+        setPageFree(res, false);
+        break;
+    } while (firstFreePageIdx != searchStartLoc);
+    if (res == (uintptr_t)NULL) {
+        // oops, we couldn't find a page. this should swap later
+        // for now, panic
+        panic("Out of memory");
+    }
+    return (void*)res;
+}
+
+void freePageFrame(void* frame) {
+    uintptr_t addr = (uintptr_t)frame;
+    if (!getPageAvailable(addr)) {
+        // nice try
+        printf("Tried to free reserved page frame 0x%p\n", frame);
+        return;
+    }
+    setPageFree(addr, true);
+    if (getBitmapIndex(addr) < firstFreePageIdx) {
+        firstFreePageIdx = getBitmapIndex(addr);
+    }
 }
