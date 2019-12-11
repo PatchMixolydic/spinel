@@ -11,7 +11,6 @@
 void kernelMain() {
 	terminalDisableCursor();
 	printf("The system is coming up.\n");
-	while(1) allocatePageFrame();
 
 	// panic("nevermind");
 	while(1) __asm__("hlt");

@@ -22,7 +22,7 @@ void cBoot(multiboot_info_t* mbd, unsigned int magicNum) {
 
 	// We have a valid memory map -- use it
     multiboot_memory_map_t* mmap = (multiboot_memory_map_t*)mbd->mmap_addr;
-    initMemoryManager(mmap, mbd->mmap_length);
+    initPageFrameAllocator(mmap, mbd->mmap_length);
 
     picInitialize(PICMasterOffset, PICSubservientOffset);
     initIDT();

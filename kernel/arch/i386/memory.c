@@ -15,7 +15,7 @@ typedef multiboot_memory_map_t memMap;
 
 uint32_t* pageMap; // Contains info about which pages are free (1) or not (0)
 uint32_t* availMap; // Contains info about which pages are available
-size_t firstFreePageIdx = 0; // index of the uint32_t with the first free page
+size_t nextFreePageIdx = 0; // index of the uint32_t with the next free page
 size_t kernelReservedSize = 0;
 size_t availableMemory = 0;
 size_t bitmapSize = 0; // size in bytes, not length, for page and avail map
@@ -73,7 +73,7 @@ static inline bool getPageFree(uint64_t addr) {
     return (pageMap[getBitmapIndex(addr)] & (1 << getBitmapBit(addr))) != 0;
 }
 
-void initMemoryManager(memMap* memoryMapPtr, size_t memoryMapLength) {
+void initPageFrameAllocator(memMap* memoryMapPtr, size_t memoryMapLength) {
     kernelReservedSize = __KernelEnd - __KernelStart;
     printf("Kernel size is %d KiB.\n", kernelReservedSize / 1024);
 
@@ -84,6 +84,7 @@ void initMemoryManager(memMap* memoryMapPtr, size_t memoryMapLength) {
         availableMemory += ptr->len;
 	}
     printf("%d MiB memory available.\n", availableMemory / 1024 / 1024 + 1);
+
     // Ok, we know how much memory there is. Now our bitmaps need to be set up.
     bitmapSize = availableMemory / PageSize;
     pageMap = __KernelEnd; // The page map is located at the end of the kernel
@@ -91,6 +92,7 @@ void initMemoryManager(memMap* memoryMapPtr, size_t memoryMapLength) {
     availMap = __KernelEnd + bitmapSize; // After the page map is the availMap
     memset(availMap, 0, bitmapSize); // empty that, too
     kernelReservedSize += bitmapSize * 2; // Grow reserved size
+
 	for (memMap* ptr = memoryMapPtr; ptr < memoryMapEnd; ptr = nextMapEntry(ptr)) {
 		uint64_t start = ptr->addr;
 		uint64_t end = ptr->addr + ptr->len;
@@ -117,38 +119,38 @@ void initMemoryManager(memMap* memoryMapPtr, size_t memoryMapLength) {
 }
 
 void* allocatePageFrame() {
-    size_t searchStartLoc = firstFreePageIdx;
+    size_t searchStartLoc = nextFreePageIdx;
     uintptr_t res = (uintptr_t)NULL;
     do {
         // pageMap[x] & availMap[x] shows if there's any pages which are free
         // and available
         if (
-            pageMap[firstFreePageIdx] == 0 ||
-            (pageMap[firstFreePageIdx] & availMap[firstFreePageIdx]) == 0
+            pageMap[nextFreePageIdx] == 0 ||
+            (pageMap[nextFreePageIdx] & availMap[nextFreePageIdx]) == 0
         ) {
             // Hey, that's not free!
-            firstFreePageIdx = (firstFreePageIdx + 1) % bitmapSize;
+            nextFreePageIdx = (nextFreePageIdx + 1) % bitmapSize;
             continue;
         }
         // Okay, there's a free page. We just need its bit.
         size_t bit;
         for (bit = 0; bit < 32; bit++) {
-            uint32_t freeAndAvail = pageMap[firstFreePageIdx] & availMap[firstFreePageIdx];
+            uint32_t freeAndAvail = pageMap[nextFreePageIdx] & availMap[nextFreePageIdx];
             if (freeAndAvail & (1 << bit)) {
                 // Cooool, this is free!
                 break;
             }
         }
         if (bit == 32) {
-            printf("Index %d doesn't have any free pages!\n", firstFreePageIdx);
-            printf("Page map: 0x%X\n", pageMap[firstFreePageIdx]);
-            printf("Available map: 0x%X\n", availMap[firstFreePageIdx]);
+            printf("Index %d doesn't have any free pages!\n", nextFreePageIdx);
+            printf("Page map: 0x%X\n", pageMap[nextFreePageIdx]);
+            printf("Available map: 0x%X\n", availMap[nextFreePageIdx]);
             panic("Sanity check failed for allocatePageFrame");
         }
-        res = getAddr(firstFreePageIdx, bit);
+        res = getAddr(nextFreePageIdx, bit);
         setPageFree(res, false);
         break;
-    } while (firstFreePageIdx != searchStartLoc);
+    } while (nextFreePageIdx != searchStartLoc);
     if (res == (uintptr_t)NULL) {
         // oops, we couldn't find a page. this should swap later
         // for now, panic
@@ -165,7 +167,7 @@ void freePageFrame(void* frame) {
         return;
     }
     setPageFree(addr, true);
-    if (getBitmapIndex(addr) < firstFreePageIdx) {
-        firstFreePageIdx = getBitmapIndex(addr);
+    if ((pageMap[nextFreePageIdx] & availMap[nextFreePageIdx]) == 0) {
+        nextFreePageIdx = getBitmapIndex(addr);
     }
 }
