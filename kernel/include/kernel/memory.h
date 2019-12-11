@@ -4,7 +4,7 @@
 #include <kernel/multiboot.h>
 #include <stddef.h>
 
-extern const unsigned int PageSize;
+extern const size_t PageSize;
 
 void initMemoryManager(multiboot_memory_map_t* memoryMap, size_t memoryMapLength);
 void* allocatePageFrame();
