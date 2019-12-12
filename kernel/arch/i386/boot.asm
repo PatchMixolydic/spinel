@@ -76,13 +76,11 @@ align 4096
             dd      (i * 0x1000) | PresentFlag | ReadWriteFlag
             %assign i i+1
         %endrep
-        ;resb    4096
     kernelPageDirectory:
-        ;resb    4096
         dd      kernelPageTable - KernelOffset + 0x03
-        times 767 dd kernelPageTable - KernelOffset + 0x03
+        times 767 dd 0
         dd      kernelPageTable - KernelOffset + 0x03
-        times 254 dd kernelPageTable - KernelOffset + 0x03
+        times 254 dd 0
         dd      kernelPageDirectory - KernelOffset + 0x03
 
 ; Code
