@@ -62,14 +62,11 @@ section .text
         ret
     .end:
 
-    isrNoError 0
-    isrNoError 1
-    isrNoError 2
-    isrNoError 3
-    isrNoError 4
-    isrNoError 5
-    isrNoError 6
-    isrNoError 7
+    %assign i 0
+    %rep    8
+        isrNoError i
+        %assign i i+1
+    %endrep
     isrError 8
     isrNoError 9
     isrError 10
@@ -80,34 +77,16 @@ section .text
     isrNoError 15
     isrNoError 16
     isrError 17
-    isrNoError 18
-    isrNoError 19
-    isrNoError 20
-    isrNoError 21
-    isrNoError 22
-    isrNoError 23
-    isrNoError 24
-    isrNoError 25
-    isrNoError 26
-    isrNoError 27
-    isrNoError 28
-    isrNoError 29
+    %assign i 18
+    %rep    12
+        isrNoError i
+        %assign i i+1
+    %endrep
     isrError 30
     isrNoError 31
-    irq 0
-    irq 1
-    irq 2
-    irq 3
-    irq 4
-    irq 5
-    irq 6
-    irq 7
-    irq 8
-    irq 9
-    irq 10
-    irq 11
-    irq 12
-    irq 13
-    irq 14
-    irq 15
+    %assign i 0
+    %rep    16
+        irq i
+        %assign i i+1
+    %endrep
     isrNoError 80
