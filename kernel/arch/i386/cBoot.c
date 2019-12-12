@@ -3,6 +3,7 @@
 #include <kernel/panic.h>
 #include "idt.h"
 #include "interrupts.h"
+#include "paging.h"
 #include "pic.h"
 
 void cBoot(multiboot_info_t* mbd, unsigned int magicNum) {
@@ -23,6 +24,8 @@ void cBoot(multiboot_info_t* mbd, unsigned int magicNum) {
 	// We have a valid memory map -- use it
     multiboot_memory_map_t* mmap = (multiboot_memory_map_t*)mbd->mmap_addr;
     initPageFrameAllocator(mmap, mbd->mmap_length);
+    // We're done with the multiboot struct -- time to cut the identity mapping
+    improveKernelPageStructs();
 
     picInitialize(PICMasterOffset, PICSubservientOffset);
     initIDT();

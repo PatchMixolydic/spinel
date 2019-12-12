@@ -5,6 +5,7 @@ section .text
     global setCR3:function
     global getCR3:function
     global enablePaging:function
+    global invalidatePage:function
 
     setCR3:
         mov     eax, [esp + 4]
@@ -19,4 +20,9 @@ section .text
         mov     eax, cr0
         or      eax, CR0PagingFlag
         mov     cr0, eax
+        ret
+
+    invalidatePage:
+        mov     eax, [esp + 4]
+        invlpg  [eax]
         ret

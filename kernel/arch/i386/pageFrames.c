@@ -29,7 +29,7 @@ static inline memMap* nextMapEntry(memMap* ptr) {
 
 // Gets the page address this address is in
 static inline uint64_t pageAlign(uint64_t addr) {
-    return addr & 0xFFFFFFFFFFFFF000;
+    return addr & ~0x0FFF;
 }
 
 // Gets the address of the first page after addr, or addr if it's a page addr

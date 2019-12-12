@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 #include <kernel/memory.h>
 #include "paging.h"
 
@@ -14,16 +15,50 @@ static const uintptr_t DirtyFlag = 1 << 6;
 static const uintptr_t LargePageFlag = 1 << 7;
 static const uintptr_t GlobalFlag = 1 << 8;
 
+// from linker script
+extern const uint8_t __TextStart[];
+extern const uint8_t __TextEnd[];
+extern const uint8_t __RODataStart[];
+extern const uint8_t __RODataEnd[];
+
+extern uintptr_t kernelPageTable[];
+extern uintptr_t kernelPageDirectory[];
+
 static inline size_t getTableSize() {
     return PageSize / sizeof(uintptr_t);
 }
 
+static inline uintptr_t toPhysical(uintptr_t addr){
+    return addr - KernelOffset;
+}
+
+static inline size_t physAddrToTableIdx(uintptr_t addr) {
+    return ((addr) / PageSize) % getTableSize();
+}
+
+void improveKernelPageStructs() {
+    kernelPageDirectory[0] = 0; // remove identity mapping
+    for (uintptr_t page = __TextStart; page < __TextEnd; page += PageSize) {
+        // Remove read/write status
+        kernelPageTable[physAddrToTableIdx(toPhysical(page))] &= ~ReadWriteFlag;
+    }
+    for (uintptr_t page = __RODataStart; page < __RODataEnd; page += PageSize) {
+        kernelPageTable[physAddrToTableIdx(toPhysical(page))] &= ~ReadWriteFlag;
+    }
+    // Due to identity mapping being stripped and text and rodata being set
+    // to readonly, we need to invalidate all pages in our table
+    for (
+        void* page = kernelPageTable;
+        page < kernelPageTable + (getTableSize() * PageSize);
+        page += PageSize
+    ) {
+        invalidatePage(page);
+    }
+}
+
 uintptr_t* createPageStructure() {
     uintptr_t* res = (uintptr_t*)allocatePageFrame();
-    
-    for (int i = 0; i < getTableSize(); i++) {
-        res[i] = (uintptr_t)NULL | ReadWriteFlag;
-    }
+    memset(res, 0, getTableSize());
     return res;
 }
 

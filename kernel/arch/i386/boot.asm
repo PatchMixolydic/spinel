@@ -70,6 +70,9 @@ align 16
 
 section .data
 align 4096
+    extern kernelPageTable
+    extern kernelPageDirectory
+
     kernelPageTable:
         %assign i 0
         %rep    1024
@@ -85,7 +88,7 @@ align 4096
 
 ; Code
 section .text
-    global _start:function (_start.end - _start)
+    global _start:function
     extern _init
     extern setCR3
     extern enablePaging
@@ -109,9 +112,8 @@ section .text
         lea     ecx, [.pagingDone]
         jmp     ecx
     .pagingDone:
+        ; We can't cut the identity mapping yet because of the multiboot struct
         mov     esp, stackTop ; set up stack
-        push    edi ; first things first, push edi and ebx before they get
-        push    ebx ; clobbered
         lgdt    [gdt.desc] ; load GDT
         ; reloading cs requires this:
         jmp     (gdt.kernelCode - gdt):.loadCS
@@ -124,6 +126,8 @@ section .text
         mov     ss, ax
         call    _init
         call    terminalInitialize ; initialize terminal so we can panic
+        push    edi
+        push    ebx
         call    cBoot ; now, let's call some additional C boot code
         call    kernelMain ; Finally, let's go to the kernel!
         ; If kernelMain ever returns, spin forever
@@ -131,4 +135,3 @@ section .text
     .hang:
         hlt
         jmp     .hang
-    .end:
