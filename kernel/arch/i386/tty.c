@@ -34,6 +34,7 @@ void terminalInitialize() {
 }
 
 void terminalClear() {
+    terminalMoveCursor(0, 0);
     for (size_t y = 0; y < VGAHeight; y++) {
         for (size_t x = 0; x < VGAWidth; x++) {
             const size_t index = y * VGAWidth + x;
@@ -101,6 +102,8 @@ void terminalDisableCursor() {
 
 void terminalMoveCursor(size_t x, size_t y) {
     uint16_t newPos = y * VGAWidth + x;
+    terminalX = x;
+    terminalY = y;
     outb(VGACommandPort, VGACursorLowCommand);
     outb(VGADataPort, newPos & 0xFF);
     outb(VGACommandPort, VGACursorHighCommand);
