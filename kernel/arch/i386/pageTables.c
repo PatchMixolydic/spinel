@@ -28,10 +28,6 @@ static inline size_t getTableSize() {
     return PageSize / sizeof(uintptr_t);
 }
 
-static inline uintptr_t toPhysical(uintptr_t addr){
-    return addr - KernelOffset;
-}
-
 static inline size_t physAddrToTableIdx(uintptr_t addr) {
     return ((addr) / PageSize) % getTableSize();
 }
@@ -40,10 +36,10 @@ void improveKernelPageStructs() {
     kernelPageDirectory[0] = 0; // remove identity mapping
     for (uintptr_t page = __TextStart; page < __TextEnd; page += PageSize) {
         // Remove read/write status
-        kernelPageTable[physAddrToTableIdx(toPhysical(page))] &= ~ReadWriteFlag;
+        kernelPageTable[physAddrToTableIdx(getPhysicalAddr(page))] &= ~ReadWriteFlag;
     }
     for (uintptr_t page = __RODataStart; page < __RODataEnd; page += PageSize) {
-        kernelPageTable[physAddrToTableIdx(toPhysical(page))] &= ~ReadWriteFlag;
+        kernelPageTable[physAddrToTableIdx(getPhysicalAddr(page))] &= ~ReadWriteFlag;
     }
     // Due to identity mapping being stripped and text and rodata being set
     // to readonly, we need to invalidate all pages in our table

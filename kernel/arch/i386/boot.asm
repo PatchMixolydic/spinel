@@ -68,6 +68,7 @@ align 16
         resb    16384
     stackTop:
 
+; Data, initialized
 section .data
 align 4096
     extern kernelPageTable
