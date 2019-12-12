@@ -4,6 +4,17 @@ MultibootMagic equ 0x1BADB002
 MultibootFlags equ MultibootModuleAlign | MultibootMemoryInfo
 MultibootChecksum equ -(MultibootMagic + MultibootFlags)
 
+KernelOffset equ 0xC0000000
+PresentFlag equ 1
+ReadWriteFlag equ 1 << 1
+UserModeFlag equ 1 << 2
+WriteThroughFlag equ 1 << 3
+CacheDisableFlag equ 1 << 4
+AccessedFlag equ 1 << 5
+DirtyFlag equ 1 << 6
+LargePageFlag equ 1 << 7
+GlobalFlag equ 1 << 8
+
 ; Multiboot header
 section .multiboot
 align 4
@@ -57,10 +68,29 @@ align 16
         resb    16384
     stackTop:
 
+section .data
+align 4096
+    kernelPageTable:
+        %assign i 0
+        %rep    1024
+            dd      (i * 0x1000) | PresentFlag | ReadWriteFlag
+            %assign i i+1
+        %endrep
+        ;resb    4096
+    kernelPageDirectory:
+        ;resb    4096
+        dd      kernelPageTable - KernelOffset + 0x03
+        times 767 dd kernelPageTable - KernelOffset + 0x03
+        dd      kernelPageTable - KernelOffset + 0x03
+        times 254 dd kernelPageTable - KernelOffset + 0x03
+        dd      kernelPageDirectory - KernelOffset + 0x03
+
 ; Code
 section .text
     global _start:function (_start.end - _start)
     extern _init
+    extern setCR3
+    extern enablePaging
     extern terminalInitialize
     extern cBoot
     extern panic
@@ -68,10 +98,22 @@ section .text
 
     _start:
         cli
-        mov     esp, stackTop ; set up stack
-        push    eax ; first things first, push eax and ebx before they get
-        push    ebx ; clobbered
+        ; First: set up paging
+        mov     esp, stackTop - KernelOffset ; set up temp stack
         ; eax = magic number, ebx = multiboot info
+        ; unfortunately, eax is volatile. edi isn't, so let's use that
+        mov     edi, eax
+        ; load the page directory
+        push    kernelPageDirectory - KernelOffset
+        call    setCR3
+        call    enablePaging
+        ; let's go to our paged code
+        lea     ecx, [.pagingDone]
+        jmp     ecx
+    .pagingDone:
+        mov     esp, stackTop ; set up stack
+        push    edi ; first things first, push edi and ebx before they get
+        push    ebx ; clobbered
         lgdt    [gdt.desc] ; load GDT
         ; reloading cs requires this:
         jmp     (gdt.kernelCode - gdt):.loadCS

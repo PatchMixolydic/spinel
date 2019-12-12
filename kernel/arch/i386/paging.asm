@@ -1,0 +1,22 @@
+CR0PagingFlag equ 1 << 31
+KernelOffset equ 0xC0000000
+
+section .text
+    global setCR3:function
+    global getCR3:function
+    global enablePaging:function
+
+    setCR3:
+        mov     eax, [esp + 4]
+        mov     cr3, eax
+        ret
+
+    getCR3:
+        mov     eax, cr3
+        ret
+
+    enablePaging:
+        mov     eax, cr0
+        or      eax, CR0PagingFlag
+        mov     cr0, eax
+        ret

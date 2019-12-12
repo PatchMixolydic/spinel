@@ -6,6 +6,7 @@
 #include <kernel/tty.h>
 
 #include "io.h"
+#include "paging.h"
 #include "vga.h"
 
 static const size_t VGAWidth = 80;
@@ -17,7 +18,7 @@ static const uint16_t VGACursorEndCommand = 0x0B;
 static const uint16_t VGACursorHighCommand = 0x0E;
 static const uint16_t VGACursorLowCommand = 0x0F;
 static const uint16_t VGACursorDisableData = 0x20;
-static uint16_t* const VGAMemory = (uint16_t*) 0x000B8000;
+static uint16_t* const VGAMemory = (uint16_t*)(KernelOffset + 0x000B8000);
 
 static size_t terminalX;
 static size_t terminalY;
@@ -76,8 +77,9 @@ void terminalPutChar(char c) {
 }
 
 void terminalWrite(const char* data, size_t size) {
-    for (size_t i = 0; i < size; i++)
+    for (size_t i = 0; i < size; i++) {
         terminalPutChar(data[i]);
+    }
     terminalMoveCursor(terminalX, terminalY);
 }
 

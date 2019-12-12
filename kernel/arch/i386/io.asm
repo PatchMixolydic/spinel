@@ -1,4 +1,4 @@
-section text:
+section .text
     global inb:function (inb.end - inb)
     global outb:function (outb.end - outb)
 
