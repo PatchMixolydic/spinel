@@ -5,7 +5,7 @@ export MAKE="${MAKE:-make} -j17"
 export HOST=${HOST:-$(./default-host.sh)}
 
 export AR=${HOST}-ar
-export AS=nasm
+export NASM=nasm
 export CC=${HOST}-gcc
 
 export PREFIX=/usr

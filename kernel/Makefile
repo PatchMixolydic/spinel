@@ -64,7 +64,7 @@ $(ARCHDIR)/crtbegin.o $(ARCHDIR)/crtend.o:
 	$(CC) -MD -c $< -o $@ -std=gnu11 $(CFLAGS) $(CPPFLAGS)
 
 .asm.o:
-	$(AS) -f $(KERNEL_ARCH_EXEC_FORMAT) -o $@ $<
+	$(NASM) -f $(KERNEL_ARCH_EXEC_FORMAT) -o $@ $<
 
 clean:
 	rm -f spinel.elf
