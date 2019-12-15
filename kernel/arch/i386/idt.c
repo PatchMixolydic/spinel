@@ -12,10 +12,6 @@ typedef struct {
 } __attribute__((packed)) IDTEntry;
 
 IDTEntry idtBuffer[256];
-void (*irqPointer[16]) = { // array of function pointers
-    irq0, irq1, irq2, irq3, irq4, irq5, irq6, irq7, irq8, irq9, irq10, irq11,
-    irq12, irq13, irq14, irq15
-};
 
 void loadIDTEntry(int interrupt, uintptr_t offset, uint16_t selector, uint8_t typeAndAttributes) {
     idtBuffer[interrupt].offsetLow = offset & 0xFFFF;

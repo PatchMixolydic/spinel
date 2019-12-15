@@ -4,6 +4,7 @@
 #include <string.h>
 #include <kernel/memory.h>
 #include <kernel/panic.h>
+#include "paging.h"
 
 const size_t PageSize = 4096;
 
@@ -25,16 +26,6 @@ static inline memMap* nextMapEntry(memMap* ptr) {
     return (memMap*)(
         (uintptr_t)ptr + ptr->size + sizeof(ptr->size)
     );
-}
-
-// Gets the page address this address is in
-static inline uint64_t pageAlign(uint64_t addr) {
-    return addr & ~0x0FFF;
-}
-
-// Gets the address of the first page after addr, or addr if it's a page addr
-static inline uint64_t nearestPage(uint64_t addr) {
-    return (addr & 0x0FFF) == 0 ? addr : (pageAlign(addr) + PageSize);
 }
 
 static inline size_t getBitmapIndex(uint64_t addr) {
@@ -97,7 +88,7 @@ void initPageFrameAllocator(memMap* memoryMapPtr, size_t memoryMapLength) {
 		uint64_t start = ptr->addr;
 		uint64_t end = ptr->addr + ptr->len;
 		bool valid = ptr->type == 1;
-        for (uint64_t addr = nearestPage(start); addr < end; addr += PageSize) {
+        for (uint64_t addr = NearestPage(start); addr < end; addr += PageSize) {
             // If this is the kernel or the bitmap...
             if (__KernelStart <= addr && addr < __KernelEnd + kernelReservedSize) {
                 setPageFree(addr, false); // These don't get to be freed or swapped out.
@@ -151,9 +142,9 @@ void* allocatePageFrame() {
         setPageFree(res, false);
         break;
     } while (nextFreePageIdx != searchStartLoc);
-    if (res == (uintptr_t)NULL) {
-        // oops, we couldn't find a page. this should swap later
-        // for now, panic
+    if (res == 0) {
+        // Oops! We don't have enough memory! We should try swapping later
+        // For now, panic
         panic("Out of memory");
     }
     return (void*)res;

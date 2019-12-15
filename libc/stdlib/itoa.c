@@ -24,7 +24,7 @@ char* __itoa(int value, char buf[], size_t bufSizeOrZero, int base, bool isUnsig
     unsigned int valueAsUnsigned = value;
     const char* const Digits = uppercase ? DigitsUpper : DigitsLower;
 
-    if (base > MaxBase || base < MinBase) {
+    if ((base > MaxBase || base < MinBase) && bufSizeOrZero > strlen(BadBaseMessage)) {
         // TODO: strcpy
         memcpy(buf, BadBaseMessage, strlen(BadBaseMessage));
         return buf;

@@ -1,12 +1,14 @@
 #include <stdio.h>
 #include <kernel/memory.h>
 #include <kernel/panic.h>
+#include <kernel/tty.h>
 #include "idt.h"
 #include "interrupts.h"
 #include "paging.h"
 #include "pic.h"
 
 void cBoot(multiboot_info_t* mbd, unsigned int magicNum) {
+    terminalInitialize();
     printf("Spinel booting for i386.\n");
 
     for (int i = 0; i <= 15; i++) {
@@ -25,10 +27,11 @@ void cBoot(multiboot_info_t* mbd, unsigned int magicNum) {
     multiboot_memory_map_t* mmap = (multiboot_memory_map_t*)mbd->mmap_addr;
     initPageFrameAllocator(mmap, mbd->mmap_length);
     // We're done with the multiboot struct -- time to cut the identity mapping
-    improveKernelPageStructs();
 
     picInitialize(PICMasterOffset, PICSubservientOffset);
     initIDT();
     enableInterrupts();
     picSetIRQMasked(1, false);
+    improveKernelPageStructs();
+    allocateMemory(16);
 }

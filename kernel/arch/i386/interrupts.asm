@@ -1,35 +1,25 @@
 %macro isrNoError 1
     ; args: number
-    global isr%1:function (isr%1.end - isr%1)
+    global isr%1:function
     isr%1:
+        push    dword 0 ; no error code
         pushad
-        cld
-        push    byte %1
-        call    interruptHandler
-        add     esp, 4 ; remove interrupt number
-        popad
-        iretd
-    .end:
+        mov     ecx, %1
+        jmp     isrCommon
 %endmacro
 
 %macro isrError 1
     ; args: number
-    global isr%1:function (isr%1.end - isr%1)
+    global isr%1:function
     isr%1:
         pushad
-        cld
-        push    byte %1
-        call    interruptHandler
-        add     esp, 4 ; remove interrupt number
-        popad
-        add     esp, 4 ; remove error code
-        iretd
-    .end:
+        mov     ecx, %1
+        jmp     isrCommon
 %endmacro
 
 %macro irq 1
     ; args: number
-    global irq%1:function (irq%1.end - irq%1)
+    global irq%1:function
     extern cIRQ%1
     irq%1:
         pushad
@@ -41,26 +31,32 @@
 %endmacro
 
 section .text
-    global loadIDT:function (loadIDT.end - loadIDT)
-    global enableInterrupts:function (enableInterrupts.end - enableInterrupts)
-    global disableInterrupts:function (disableInterrupts.end - disableInterrupts)
+    global loadIDT:function
+    global enableInterrupts:function
+    global disableInterrupts:function
     extern interruptHandler
 
     loadIDT:
         mov     edx, [esp + 4]
         lidt    [edx]
         ret
-    .end:
 
     enableInterrupts:
         sti
         ret
-    .end:
 
     disableInterrupts:
         cli
         ret
-    .end:
+
+    isrCommon:
+        cld
+        push    ecx ; set to the interrupt number in macros
+        call    interruptHandler
+        add     esp, 4 ; remove interrupt number
+        popad
+        add     esp, 4 ; remove error code
+        iretd
 
     %assign i 0
     %rep    8

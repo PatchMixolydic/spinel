@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <kernel/panic.h>
+#include "cpu.h"
 #include "io.h"
+#include "paging.h"
 #include "pic.h"
 
 const char ExceptionDescriptions[][32] = {
@@ -30,11 +32,28 @@ const char ExceptionDescriptions[][32] = {
     "Reserved",
 };
 
-void interruptHandler(uint8_t interrupt) {
-    if (interrupt < 32) { // intel exception
-        panic(ExceptionDescriptions[interrupt]);
+typedef enum {
+    DivisionByZero, Debug, NMI, Breakpoint, Overflow, BoundRangeExceeded,
+    InvalidOpcode, DeviceNotAvailable, DoubleFault, CoprocessorSegmentOverrun,
+    InvalidTSS, SegmentNotPresent, StackSegmentFault, GeneralProtectionFault,
+    PageFault, Reserved0, FPUException, AlignmentCheck, MachineCheck,
+    SIMDFloatException, VirtualizationException, Reserved1, SecurityException,
+    Reserved2
+} IntelExceptions;
+
+void interruptHandler(uint32_t interrupt, Registers registers, uint32_t errorCode) {
+    switch (interrupt) {
+        case PageFault:
+            handlePageFault(registers, errorCode);
+            break;
+        default:
+            printf("Error code 0x%X\n", errorCode);
+            if (interrupt < 32) { // intel exception
+                panic(ExceptionDescriptions[interrupt]);
+            }
+            panic("Exception!");
+            break;
     }
-    panic("Exception!");
 }
 
 void cIRQ0() {

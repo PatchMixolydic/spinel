@@ -4,6 +4,7 @@ KernelOffset equ 0xC0000000
 section .text
     global setCR3:function
     global getCR3:function
+    global getCR2:function
     global enablePaging:function
     global invalidatePage:function
 
@@ -14,6 +15,10 @@ section .text
 
     getCR3:
         mov     eax, cr3
+        ret
+
+    getCR2:
+        mov     eax, cr2
         ret
 
     enablePaging:

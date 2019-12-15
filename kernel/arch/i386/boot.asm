@@ -93,7 +93,6 @@ section .text
     extern _init
     extern setCR3
     extern enablePaging
-    extern terminalInitialize
     extern cBoot
     extern panic
     extern kernelMain
@@ -126,7 +125,6 @@ section .text
         mov     gs, ax
         mov     ss, ax
         call    _init
-        call    terminalInitialize ; initialize terminal so we can panic
         push    edi
         push    ebx
         call    cBoot ; now, let's call some additional C boot code
