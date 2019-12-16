@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <kernel/memory.h>
-#include "cpu.h"
+#include "../cpu.h"
 #include "paging.h"
 
 // 0: Page table

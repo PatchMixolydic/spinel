@@ -6,7 +6,7 @@
 #include <kernel/tty.h>
 
 #include "io.h"
-#include "paging.h"
+#include "memory/paging.h"
 #include "vga.h"
 
 static const size_t VGAWidth = 80;

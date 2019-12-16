@@ -2,7 +2,7 @@
 #include <kernel/panic.h>
 #include "cpu.h"
 #include "io.h"
-#include "paging.h"
+#include "memory/paging.h"
 #include "pic.h"
 
 const char ExceptionDescriptions[][32] = {

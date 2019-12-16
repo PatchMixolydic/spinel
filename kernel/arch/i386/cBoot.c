@@ -4,7 +4,7 @@
 #include <kernel/tty.h>
 #include "idt.h"
 #include "interrupts.h"
-#include "paging.h"
+#include "memory/paging.h"
 #include "pic.h"
 
 void cBoot(multiboot_info_t* mbd, unsigned int magicNum) {

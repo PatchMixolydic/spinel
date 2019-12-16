@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "paging.h"
+#include "memory/paging.h"
 
 typedef struct {
     uint16_t limitLow;

@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <kernel/memory.h>
-#include "cpu.h"
+#include "../cpu.h"
 
 // This isn't C++, so this is what we get for generics
 #define PageAlign(addr) (addr & ~0x0FFF)
