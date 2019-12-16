@@ -44,7 +44,7 @@ typedef enum {
 void interruptHandler(uint32_t interrupt, Registers regs, unsigned int errorCode, int eip, int cs, int eflags) {
     switch (interrupt) {
         case PageFault:
-            handlePageFault(regs, errorCode, eip, eflags);
+            handlePageFault(regs, errorCode);
             break;
         default:
             printf("Error code 0x%X\n", errorCode);

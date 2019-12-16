@@ -14,9 +14,7 @@
 #define NextPage(addr) (PageAlign(addr) + PageSize)
 
 static const uintptr_t KernelOffset = 0xC0000000;
-static const uintptr_t KernelTempPageLoc = 0xF0000000;
-static const uintptr_t KernelPageDirOffset = 0xFFFFF000;
-static const uintptr_t KernelPageTabOffset = 0xFFF00000;
+static const uintptr_t KernelPageMapOffset = 0xFFC00000;
 
 typedef enum {
     PagePresentFlag = 1,
@@ -39,12 +37,9 @@ extern void invalidatePage(void* page);
 // Makes .text and .rodata read-only alongside cutting the identity mapping
 void improveKernelPageStructs();
 // Create page table/directory/directory pointer table/level 1 million table
-uintptr_t* createPageMap();
-void deletePageMap(uintptr_t* pageMap);
-bool mapPhysicalAddress(uintptr_t physical, uintptr_t virtual, uintptr_t flags);
-bool mapPage(uintptr_t virtual, uintptr_t flags);
+void mapPageAt(uintptr_t physical, uintptr_t virtual, uintptr_t flags);
 void unmapPage(uintptr_t virtual);
-void handlePageFault(Registers regs, unsigned int errorCode, unsigned int eip, unsigned int eflags);
+void handlePageFault(Registers regs, unsigned int errorCode);
 
 static inline uintptr_t getPhysicalAddr(uintptr_t addr){
     return addr - KernelOffset;

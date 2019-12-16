@@ -6,8 +6,7 @@
 
 extern const size_t PageSize;
 
-void initPageFrameAllocator(multiboot_memory_map_t* memoryMap, size_t memoryMapLength);
-void* allocatePageFrame();
-void freePageFrame(void* frame);
+void* kernelMalloc(size_t amount);
+void kernelFree(void* memory);
 
 #endif // ndef _KERNEL_MEMORY_H

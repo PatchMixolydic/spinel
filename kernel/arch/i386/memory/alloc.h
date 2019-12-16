@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-void* allocateMemory(size_t amount);
+#define KernelHeap 0xD0000000
+#define KernelHeapHardLimit 0xE0000000
 
 #endif // ndef ARCH_I386_ALLOC_H
