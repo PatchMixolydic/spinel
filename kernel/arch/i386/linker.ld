@@ -6,7 +6,7 @@ ENTRY(_start)
 SECTIONS {
 	/* Locate kernel at 0xC0000000 + 1 Mib, load at 1 MiB */
 	. = 1M + __KernelOffset;
-	__KernelStart = . - __KernelOffset;
+	__KernelStart = .;
 
 	/* Multiboot header and code */
 	.text BLOCK(4K) : AT(ADDR(.text) - __KernelOffset) {
@@ -35,5 +35,5 @@ SECTIONS {
 	}
 
 	/* Mark the end of memory for use in the memory manager */
-	__KernelEnd = . - __KernelOffset;
+	__KernelEnd = .;
 }

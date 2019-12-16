@@ -39,12 +39,12 @@ extern void invalidatePage(void* page);
 // Makes .text and .rodata read-only alongside cutting the identity mapping
 void improveKernelPageStructs();
 // Create page table/directory/directory pointer table/level 1 million table
-uintptr_t* createPageStructure();
-void deletePageStructure(uintptr_t* pageStruct);
+uintptr_t* createPageMap();
+void deletePageMap(uintptr_t* pageMap);
 bool mapPhysicalAddress(uintptr_t physical, uintptr_t virtual, uintptr_t flags);
 bool mapPage(uintptr_t virtual, uintptr_t flags);
 void unmapPage(uintptr_t virtual);
-void handlePageFault(Registers registers, uint32_t errorCode);
+void handlePageFault(Registers regs, unsigned int errorCode, unsigned int eip, unsigned int eflags);
 
 static inline uintptr_t getPhysicalAddr(uintptr_t addr){
     return addr - KernelOffset;

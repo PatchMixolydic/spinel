@@ -12,7 +12,7 @@
 // 2: Page directory pointer table
 // 3: Page map level 4 table
 // 4: Page map level 5 table
-static const unsigned int MaxPageStructLevel = 1;
+static const unsigned int MaxPageMapLevel = 1;
 static const uint32_t PageFaultPresentFlag = 1;
 static const uint32_t PageFaultWriteFlag = 1 << 1;
 static const uint32_t PageFaultUserModeFlag = 1 << 2;
@@ -28,7 +28,7 @@ extern const uint8_t __RODataEnd[];
 extern uintptr_t kernelPageTable[];
 extern uintptr_t kernelPageDirectory[];
 
-uintptr_t* currentTopPageStruct = kernelPageDirectory;
+uintptr_t* currentTopPageMap = kernelPageDirectory;
 
 static inline size_t getTableSize() {
     return PageSize / sizeof(uintptr_t);
@@ -47,7 +47,7 @@ static inline uintptr_t* getPageTableEntry(uintptr_t page) {
 }
 
 static inline uintptr_t* getPageDirectoryEntry(uintptr_t page) {
-    return (uintptr_t*)(KernelPageDirOffset + addrToStructIdx(page, 1) * sizeof(uintptr_t));
+    return (uintptr_t*)(KernelPageTabOffset + (sizeof(uintptr_t) * addrToStructIdx(page, 1)));
 }
 
 void improveKernelPageStructs() {
@@ -62,17 +62,6 @@ void improveKernelPageStructs() {
         pageEntry = getPageTableEntry(page);
         *pageEntry &= ~PageReadWriteFlag;
     }
-    // We need somewhere to stage pages to zero them...
-    uintptr_t stagePageTab = allocatePageFrame();
-    uintptr_t* pageDirEntry = getPageDirectoryEntry(KernelTempPageLoc);
-    *pageDirEntry = stagePageTab | PageReadWriteFlag | PagePresentFlag;
-    unmapPage(KernelTempPageLoc); // erase anything that might already be here
-    // map the page table
-    mapPhysicalAddress(stagePageTab, KernelTempPageLoc, PageReadWriteFlag | PagePresentFlag);
-    // clear it (except for this page entry -- that'd get wacky)
-    memset(KernelTempPageLoc + sizeof(uintptr_t), 0, PageSize - sizeof(uintptr_t));
-    unmapPage(KernelTempPageLoc);
-    invalidatePage(KernelTempPageLoc);
     // Due to identity mapping being stripped and text and rodata being set
     // to readonly, we need to invalidate all pages in our table
     for (
@@ -84,19 +73,15 @@ void improveKernelPageStructs() {
     }
 }
 
-uintptr_t* createPageStructure() {
-    uintptr_t* res = (uintptr_t*)allocatePageFrame();
-    mapPhysicalAddress((uintptr_t)res, KernelTempPageLoc, PageReadWriteFlag | PagePresentFlag);
-    memset(KernelTempPageLoc, 0, PageSize);
-    unmapPage(KernelTempPageLoc);
-    return res;
+uintptr_t* createPageMap() {
+    return NULL;
 }
 
-void deletePageStructure(uintptr_t* pageStruct) {
-    if (getCR3() == pageStruct) {
-        printf("Freeing page structure in CR3 -- something bad is about to happen!\n");
+void freePageMap(uintptr_t* pageMap) {
+    if (getCR3() == pageMap) {
+        printf("Freeing page map in CR3 -- something bad is about to happen!\n");
     }
-    freePageFrame(pageStruct);
+    freePageFrame(pageMap);
 }
 
 bool mapPhysicalAddress(uintptr_t physical, uintptr_t virtual, uintptr_t flags) {
@@ -104,9 +89,8 @@ bool mapPhysicalAddress(uintptr_t physical, uintptr_t virtual, uintptr_t flags) 
     uintptr_t* pageTabEntry = getPageTableEntry(virtual);
     if ((*pageDirEntry & PagePresentFlag) == 0) {
         // Hey, our page table doesn't exist yet!
-        uintptr_t newEntry = (uintptr_t)createPageStructure() | PageReadWriteFlag | PagePresentFlag;
+        uintptr_t newEntry = (uintptr_t)createPageMap() | PageReadWriteFlag | PagePresentFlag;
         *pageDirEntry = newEntry;
-        invalidatePage(virtual);
     } else if (*pageTabEntry & PagePresentFlag) {
         // Hey, this is already present! You can't have this!
         return false;
@@ -118,7 +102,7 @@ bool mapPhysicalAddress(uintptr_t physical, uintptr_t virtual, uintptr_t flags) 
 }
 
 bool mapPage(uintptr_t virtual, uintptr_t flags) {
-    void* frame = allocatePageFrame();
+    void* frame = allocatePageFrame(); // temp
     return mapPhysicalAddress((uintptr_t)frame, virtual, flags);
 }
 
@@ -128,8 +112,12 @@ void unmapPage(uintptr_t virtual) {
     invalidatePage(virtual);
 }
 
-void handlePageFault(Registers registers, uint32_t errorCode) {
+void handlePageFault(Registers regs, unsigned int errorCode, unsigned int eip, unsigned int eflags) {
     printf("Page fault\n");
     printf("Error code 0x%X\n", errorCode);
-    printf("CR2 0x%X\n", getCR2());
+    printf("EAX\t0x%X\t\tEBX\t0x%X\t\tECX\t0x%X\t\tEDX\t0x%X\n", regs.eax, regs.ebx, regs.ecx, regs.edx);
+    printf("ESP\t0x%X\t\tEBP\t0x%X\t\tESI\t0x%X\t\tEDI\t0x%X\n", regs.esp, regs.ebp, regs.esi, regs.edi);
+    printf("EIP\t0x%X\t\tEFLAGS\t0x%X\n", eip, eflags);
+    printf("CR2\t0x%X\n", getCR2());
+    panic("abc");
 }

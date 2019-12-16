@@ -40,8 +40,8 @@ static inline uintptr_t getAddr(size_t idx, size_t bit) {
     return (idx * 32 + bit) * PageSize;
 }
 
-static inline void setPageAvailable(uint64_t addr, bool valid) {
-    if (valid) {
+static inline void setPageAvailable(uint64_t addr, bool available) {
+    if (available) {
         availMap[getBitmapIndex(addr)] |= 1 << getBitmapBit(addr);
     } else {
         availMap[getBitmapIndex(addr)] &= ~(1 << getBitmapBit(addr));
@@ -90,7 +90,7 @@ void initPageFrameAllocator(memMap* memoryMapPtr, size_t memoryMapLength) {
 		bool valid = ptr->type == 1;
         for (uint64_t addr = NearestPage(start); addr < end; addr += PageSize) {
             // If this is the kernel or the bitmap...
-            if (__KernelStart <= addr && addr < __KernelEnd + kernelReservedSize) {
+            if (__KernelStart <= addr && addr < __KernelStart + kernelReservedSize) {
                 setPageFree(addr, false); // These don't get to be freed or swapped out.
                 setPageAvailable(addr, false);
             } else {
@@ -112,6 +112,7 @@ void initPageFrameAllocator(memMap* memoryMapPtr, size_t memoryMapLength) {
 void* allocatePageFrame() {
     size_t searchStartLoc = nextFreePageIdx;
     uintptr_t res = (uintptr_t)NULL;
+    printf("allocatePageFrame\n");
     do {
         // pageMap[x] & availMap[x] shows if there's any pages which are free
         // and available
@@ -147,6 +148,7 @@ void* allocatePageFrame() {
         // For now, panic
         panic("Out of memory");
     }
+    printf("I just allocated 0x%X\n", res);
     return (void*)res;
 }
 

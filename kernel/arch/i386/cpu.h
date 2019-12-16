@@ -4,8 +4,8 @@
 #include <stdint.h>
 
 typedef struct {
-    uint32_t edi, esi, ebp, esp;
-    uint32_t ebx, edx, ecx, eax;
+    unsigned int edi, esi, ebp, esp;
+    unsigned int ebx, edx, ecx, eax;
 } Registers;
 
 #endif // ndef ARCH_I386_CPU_H

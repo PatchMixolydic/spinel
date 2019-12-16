@@ -41,13 +41,16 @@ typedef enum {
     Reserved2
 } IntelExceptions;
 
-void interruptHandler(uint32_t interrupt, Registers registers, uint32_t errorCode) {
+void interruptHandler(uint32_t interrupt, Registers regs, unsigned int errorCode, int eip, int cs, int eflags) {
     switch (interrupt) {
         case PageFault:
-            handlePageFault(registers, errorCode);
+            handlePageFault(regs, errorCode, eip, eflags);
             break;
         default:
             printf("Error code 0x%X\n", errorCode);
+            printf("EAX\t0x%X\t\tEBX\t0x%X\t\tECX\t0x%X\t\tEDX\t0x%X\n", regs.eax, regs.ebx, regs.ecx, regs.edx);
+            printf("ESP\t0x%X\t\tEBP\t0x%X\t\tESI\t0x%X\t\tEDI\t0x%X\n", regs.esp, regs.ebp, regs.esi, regs.edi);
+            printf("EIP\t0x%X\t\tEFLAGS\t0x%X\n", eip, eflags);
             if (interrupt < 32) { // intel exception
                 panic(ExceptionDescriptions[interrupt]);
             }

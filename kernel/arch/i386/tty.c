@@ -53,12 +53,14 @@ void terminalPutAt(unsigned char c, uint8_t color, size_t x, size_t y) {
 }
 
 void terminalPutChar(char c) {
-    if (c != '\n') {
-	    terminalPutAt(c, terminalColour, terminalX, terminalY);
-        terminalX++;
-    } else {
+    if (c == '\n') {
         terminalX = 0;
         terminalY++;
+    } else if (c == '\t') {
+        terminalX = (terminalX / 4 + 1) * 4;
+    } else {
+	    terminalPutAt(c, terminalColour, terminalX, terminalY);
+        terminalX++;
     }
 	if (terminalX >= VGAWidth) {
 		terminalX = 0;
