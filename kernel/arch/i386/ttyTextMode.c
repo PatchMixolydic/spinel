@@ -67,11 +67,8 @@ void terminalInitialize() {
 
 void terminalClear() {
     terminalMoveCursor(0, 0);
-    for (size_t y = 0; y < VGAHeight; y++) {
-        for (size_t x = 0; x < VGAWidth; x++) {
-            const size_t index = y * VGAWidth + x;
-            terminalBuffer[index] = vgaCharacter(' ', terminalColour);
-        }
+    for (size_t i = 0; i < VGAWidth * VGAHeight; i++) {
+        terminalBuffer[i] = vgaCharacter(' ', terminalColour);
     }
 }
 
@@ -126,14 +123,25 @@ static unsigned int stringToInt(const char* start, size_t size) {
 
 static void ansiGraphicRendition(int code) {
     if (code == 0) {
+        // Reset
         setTerminalColour(vgaCharacterColour(VGAWhite, VGABlack));
     } else if (30 <= code && code <= 37) {
+        // Foreground colour
         setFGColour(ANSICodeToColour[code - 30]);
+    } else if (code == 39) {
+        // Default foreground colour
+        setFGColour(VGAWhite);
     } else if (90 <= code && code <= 97) {
+        // Foreground colour, bright
         setFGColour(ANSICodeToColour[code - 90 + 8]);
     } else if (40 <= code && code <= 47) {
+        // Background colour
         setBGColour(ANSICodeToColour[code - 40]);
+    } else if (code == 49) {
+        // Default background colour
+        setBGColour(VGABlack);
     } else if (100 <= code && code <= 107) {
+        // Background colour, bright
         setBGColour(ANSICodeToColour[code - 100 + 8]);
     }
 }
@@ -158,11 +166,10 @@ static int processANSIEscape(const char* data, size_t size) {
                     if (cmdIdx == 1) {
                         // \x1b[m
                         ansiGraphicRendition(0);
-                        charsToAdvance = 2;
+                        charsToAdvance++;
                         break;
                     } else {
                         unsigned int lastSep = 0;
-                        //charsToAdvance++;
                         for (int i = 1; i <= cmdIdx; i++) {
                             if (data[i] == ';' || i == cmdIdx) {
                                 // separator
@@ -177,11 +184,183 @@ static int processANSIEscape(const char* data, size_t size) {
                     }
                     break;
                 }
+
+                case 'A': {
+                    // Cursor up
+                    charsToAdvance++;
+                    size_t amt = 1;
+                    if (cmdIdx != 1) {
+                        amt = stringToInt(data + 1, cmdIdx - 1);
+                        charsToAdvance += cmdIdx - 1;
+                    }
+                    terminalY = amt > terminalY ? 0 : terminalY - amt;
+                    break;
+                }
+
+                case 'B': {
+                    // Cursor down
+                    charsToAdvance++;
+                    size_t amt = 1;
+                    if (cmdIdx != 1) {
+                        amt = stringToInt(data + 1, cmdIdx - 1);
+                        charsToAdvance += cmdIdx - 1;
+                    }
+                    terminalY = (terminalY + amt >= VGAHeight) ? VGAHeight - 1 : terminalY + amt;
+                    break;
+                }
+
+                case 'C': {
+                    // Cursor forward
+                    charsToAdvance++;
+                    size_t amt = 1;
+                    if (cmdIdx != 1) {
+                        amt = stringToInt(data + 1, cmdIdx - 1);
+                        charsToAdvance += cmdIdx - 1;
+                    }
+                    terminalX = (terminalX + amt >= VGAWidth) ? VGAWidth - 1 : terminalX + amt;
+                    break;
+                }
+
+                case 'D': {
+                    // Cursor backwards
+                    charsToAdvance++;
+                    size_t amt = 1;
+                    if (cmdIdx != 1) {
+                        amt = stringToInt(data + 1, cmdIdx - 1);
+                        charsToAdvance += cmdIdx - 1;
+                    }
+                    terminalX = amt > terminalX ? 0 : terminalX - amt;
+                    break;
+                }
+
+                case 'E': {
+                    // Cursor next line
+                    charsToAdvance++;
+                    size_t amt = 1;
+                    if (cmdIdx != 1) {
+                        amt = stringToInt(data + 1, cmdIdx - 1);
+                        charsToAdvance += cmdIdx - 1;
+                    }
+                    terminalY = (terminalY + amt >= VGAHeight) ? VGAHeight - 1 : terminalY + amt;
+                    terminalX = 0;
+                    break;
+                }
+
+                case 'F': {
+                    // Cursor previous line
+                    charsToAdvance++;
+                    size_t amt = 1;
+                    if (cmdIdx != 1) {
+                        amt = stringToInt(data + 1, cmdIdx - 1);
+                        charsToAdvance += cmdIdx - 1;
+                    }
+                    terminalY = amt > terminalY ? 0 : terminalY - amt;
+                    terminalX = 0;
+                    break;
+                }
+
+                case 'G': {
+                    // Cursor absolute horizontal
+                    charsToAdvance++;
+                    size_t pos = 0;
+                    if (cmdIdx != 1) {
+                        pos = stringToInt(data + 1, cmdIdx - 1);
+                        charsToAdvance += cmdIdx - 1;
+                    }
+                    if (pos >= VGAWidth) {
+                        terminalX = VGAWidth - 1;
+                    } else {
+                        terminalX = pos;
+                    }
+                    break;
+                }
+
+                case 'J': {
+                    // Erase display
+                    charsToAdvance++;
+                    size_t mode = 0;
+                    if (cmdIdx != 1) {
+                        mode = stringToInt(data + 1, cmdIdx - 1);
+                        charsToAdvance += cmdIdx - 1;
+                    }
+                    switch (mode) {
+                        case 0: {
+                            // Cursor to end
+                            size_t idx = terminalY * VGAWidth + terminalX;
+                            for (; idx < VGAHeight * VGAWidth; idx++) {
+                                terminalBuffer[idx] = vgaCharacter(' ', terminalColour);
+                            }
+                            break;
+                        }
+                        case 1: {
+                            // Start to cursor
+                            size_t end = terminalY * VGAWidth + terminalX;
+                            for (int i = 0; i <= end; i++) {
+                                terminalBuffer[i] = vgaCharacter(' ', terminalColour);
+                            }
+                            break;
+                        }
+                        case 2:
+                        case 3: {
+                            // Clear screen
+                            // 3 is meant to delete scrollback
+                            terminalClear();
+                            break;
+                        }
+                        default: {
+                            break;
+                        }
+                    }
+                    break;
+                }
+
+                case 'K': {
+                    // Erase line
+                    charsToAdvance++;
+                    size_t mode = 0;
+                    if (cmdIdx != 1) {
+                        mode = stringToInt(data + 1, cmdIdx - 1);
+                        charsToAdvance += cmdIdx - 1;
+                    }
+                    switch (mode) {
+                        case 0: {
+                            // Cursor to end
+                            size_t idx = terminalY * VGAWidth + terminalX;
+                            for (; idx < (terminalY + 1) * VGAWidth; idx++) {
+                                terminalBuffer[idx] = vgaCharacter(' ', terminalColour);
+                            }
+                            break;
+                        }
+                        case 1: {
+                            // Start to cursor
+                            size_t end = terminalY * VGAWidth + terminalX;
+                            for (int i = terminalY * VGAWidth; i <= end; i++) {
+                                terminalBuffer[i] = vgaCharacter(' ', terminalColour);
+                            }
+                            break;
+                        }
+                        case 2: {
+                            // Clear entire line
+                            size_t end = (terminalY + 1) * VGAWidth;
+                            for (int i = terminalY * VGAWidth; i <= end; i++) {
+                                terminalBuffer[i] = vgaCharacter(' ', terminalColour);
+                            }
+                            break;
+                        }
+                        default: {
+                            break;
+                        }
+                    }
+                    break;
+                }
+
                 default: {
+                    charsToAdvance += cmdIdx;
                     break;
                 }
             }
-        }
+        } // case '['
+
         default: {
             break;
         }
