@@ -5,7 +5,7 @@
 __attribute__((__noreturn__))
 void abort() {
 	#ifdef __is_libk
-		panic("abort()");
+		panic("abort() was called");
 	#else
 		// TODO: Abnormally terminate the process as if by SIGABRT.
 		printf("abort()\n");

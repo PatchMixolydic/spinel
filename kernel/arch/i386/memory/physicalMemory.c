@@ -133,10 +133,12 @@ void* allocatePageFrame() {
             }
         }
         if (bit == 32) {
-            printf("Index %d doesn't have any free pages!\n", nextFreePageIdx);
-            printf("Page map: 0x%X\n", pageMap[nextFreePageIdx]);
-            printf("Available map: 0x%X\n", availMap[nextFreePageIdx]);
-            panic("Sanity check failed for allocatePageFrame");
+            panic(
+                "Index %d has no free pages.\n"
+                "Sanity check failed for allocatePageFrame.\n"
+                "Page map entry: 0x%X\t\tAvailable map entry: 0x%X",
+                nextFreePageIdx, pageMap[nextFreePageIdx], availMap[nextFreePageIdx]
+            );
         }
         res = getAddr(nextFreePageIdx, bit);
         setPageFree(res, false);

@@ -16,8 +16,7 @@ void cBoot(multiboot_info_t* mbd, unsigned int magicNum) {
     }
 
 	if (magicNum != MULTIBOOT_BOOTLOADER_MAGIC) {
-        printf("Magic number 0x%X?!\n", magicNum);
-		panic("Invalid bootloader magic number"); // TODO: vararg panic
+		panic("Invalid bootloader magic number 0x%X", magicNum);
 	}
 	if ((mbd->flags & MULTIBOOT_INFO_MEM_MAP) == 0) { // memory map not provided
 		panic("Bootloader did not provide memory map");

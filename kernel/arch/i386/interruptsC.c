@@ -5,6 +5,11 @@
 #include "memory/paging.h"
 #include "pic.h"
 
+// Used to align the register printout
+#define AnsiToCol2 "\x1B[16G"
+#define AnsiToCol3 "\x1B[32G"
+#define AnsiToCol4 "\x1B[48G"
+
 const char ExceptionDescriptions[][32] = {
     "Division by zero",
     "Debug",
@@ -43,19 +48,36 @@ typedef enum {
 
 void interruptHandler(uint32_t interrupt, Registers regs, unsigned int errorCode, int eip, int cs, int eflags) {
     switch (interrupt) {
-        case PageFault:
+        case PageFault: {
             handlePageFault(regs, errorCode);
             break;
-        default:
-            printf("Error code 0x%X\n", errorCode);
-            printf("EAX\t0x%X\t\tEBX\t0x%X\t\tECX\t0x%X\t\tEDX\t0x%X\n", regs.eax, regs.ebx, regs.ecx, regs.edx);
-            printf("ESP\t0x%X\t\tEBP\t0x%X\t\tESI\t0x%X\t\tEDI\t0x%X\n", regs.esp, regs.ebp, regs.esi, regs.edi);
-            printf("EIP\t0x%X\t\tEFLAGS\t0x%X\n", eip, eflags);
+        }
+
+        default: {
+            char* exceptionDesc = "Unknown interrupt";
             if (interrupt < 32) { // intel exception
-                panic(ExceptionDescriptions[interrupt]);
+                exceptionDesc = ExceptionDescriptions[interrupt];
             }
-            panic("Exception!");
+            panic(
+                "%s (0x%X)\n"
+                "Error code 0x%X\n"
+                "EAX 0x%X" AnsiToCol2
+                "EBX 0x%X" AnsiToCol3
+                "ECX 0x%X" AnsiToCol4
+                "EDX 0x%X\n"
+                "ESP 0x%X" AnsiToCol2
+                "EBP 0x%X" AnsiToCol3
+                "ESI 0x%X" AnsiToCol4
+                "EDI 0x%X\n"
+                "EIP 0x%X" AnsiToCol2
+                "EFLAGS 0x%X\n",
+                exceptionDesc, interrupt, errorCode,
+                regs.eax, regs.ebx, regs.ecx, regs.edx,
+                regs.esp, regs.ebp, regs.esi, regs.edi,
+                eip, eflags
+            );
             break;
+        }
     }
 }
 

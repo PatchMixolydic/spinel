@@ -50,7 +50,7 @@ static inline uintptr_t* getPageMapEntry(uintptr_t page, size_t level) {
         case 1:
             return KernelPageMapOffset + (1023 * sizeof(uintptr_t) * TableSize) + (addrToMapIdx(page, 1) * sizeof(uintptr_t));
         default:
-            panic("FIXME");
+            panic("FIXME: getPageMapEntry for a level %d pagemap!", level);
     }
 }
 
@@ -101,5 +101,5 @@ void unmapPage(uintptr_t virtual) {
 }
 
 void handlePageFault(Registers regs, unsigned int errorCode) {
-    panic("Page fault\nCR2\t0x%x", getCR2());
+    panic("Page fault\nCR2 0x%x\nError code 0x%X", getCR2(), errorCode);
 }
