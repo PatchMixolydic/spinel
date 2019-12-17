@@ -22,45 +22,6 @@ align 4
     dd MultibootFlags
     dd MultibootChecksum
 
-; Read only data
-section .rodata
-    gdt:
-    .null:
-        dq      0
-    .kernelCode:
-        dw      0xFFFF ; Limit
-        dw      0 ; Base
-        db      0 ; Base
-        db      0b1001_1010 ; Present, privilege 0, code, readable, nonconforming
-        db      0b1100_1111 ; 4kiB granularity, 32 bit, limit
-        db      0 ; Base
-    .kernelData:
-        dw      0xFFFF ; Limit
-        dw      0 ; Base
-        db      0 ; Base
-        db      0b1001_0010 ; Present, privilege 0, data, expand down, writable, nonconforming
-        db      0b1100_1111 ; 4kiB granularity, 32 bit, limit
-        db      0 ; Base
-    .userCode:
-        dw      0xFFFF ; Limit
-        dw      0 ; Base
-        db      0 ; Base
-        db      0b1111_1010 ; Present, privilege 3, code, readable, nonconforming
-        db      0b1100_1111 ; 4kiB granularity, 32 bit, limit
-        db      0 ; Base
-    .userData:
-        dw      0xFFFF ; Limit
-        dw      0 ; Base
-        db      0 ; Base
-        db      0b1111_0010 ; Present, privilege 3, data, expand down, writable, nonconforming
-        db      0b1100_1111 ; 4kiB granularity, 32 bit, limit
-        db      0 ; Base
-    .end:
-
-    .desc:
-        dw      gdt.end - gdt - 1
-        dd      gdt
-
 ; Data, uninitialized
 section .bss
 align 16
@@ -73,7 +34,6 @@ section .data
 align 4096
     extern kernelPageTable
     extern kernelPageDirectory
-
     kernelPageTable:
         %assign i 0
         %rep    1024
@@ -114,16 +74,6 @@ section .text
     .pagingDone:
         ; We can't cut the identity mapping yet because of the multiboot struct
         mov     esp, stackTop ; set up stack
-        lgdt    [gdt.desc] ; load GDT
-        ; reloading cs requires this:
-        jmp     (gdt.kernelCode - gdt):.loadCS
-    .loadCS:
-        mov     ax, gdt.kernelData - gdt
-        mov     ds, ax
-        mov     es, ax
-        mov     fs, ax
-        mov     gs, ax
-        mov     ss, ax
         call    _init
         push    edi
         push    ebx

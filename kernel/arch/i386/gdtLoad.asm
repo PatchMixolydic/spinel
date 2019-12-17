@@ -1,10 +1,5 @@
 section .text
-    global haltCPU:function
-    global getESP:function
-
-    haltCPU:
-        hlt
-        ret
+    global loadGDT:function
 
     loadGDT:
         mov     eax, [esp + 4]
@@ -20,6 +15,3 @@ section .text
         mov     ss, ax
         ret
 
-    getESP:
-        mov     eax, esp
-        ret

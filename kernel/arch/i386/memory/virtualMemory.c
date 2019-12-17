@@ -69,13 +69,11 @@ void improveKernelPageStructs() {
 
     // Due to identity mapping being stripped and text and rodata being set
     // to readonly, we need to invalidate all pages in our table
-    for (
-        void* page = kernelPageTable;
-        page < kernelPageTable + (TableSize * PageSize);
-        page += PageSize
-    ) {
-        invalidatePage(page);
-    }
+    // Eventually, we will have to invalidate more tables as the rest of the
+    // kernel will get mapped in
+    // This is probably faster in the long run... Even if it isn't, we only
+    // do this once, so it should be negligible...
+    setCR3(getCR3());
 }
 
 void mapPageAt(uintptr_t physical, uintptr_t virtual, uintptr_t flags) {

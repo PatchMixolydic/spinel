@@ -2,6 +2,7 @@
 #include <kernel/memory.h>
 #include <kernel/panic.h>
 #include <kernel/tty.h>
+#include "gdt.h"
 #include "idt.h"
 #include "interrupts.h"
 #include "memory/paging.h"
@@ -10,10 +11,7 @@
 void cBoot(multiboot_info_t* mbd, unsigned int magicNum) {
     terminalInitialize();
     printf("Spinel booting for i386.\n");
-
-    for (int i = 0; i <= 15; i++) {
-        picSetIRQMasked(i, true); // mask all irqs for now
-    }
+    initGDT();
 
 	if (magicNum != MULTIBOOT_BOOTLOADER_MAGIC) {
 		panic("Invalid bootloader magic number 0x%X", magicNum);
@@ -26,12 +24,16 @@ void cBoot(multiboot_info_t* mbd, unsigned int magicNum) {
     multiboot_memory_map_t* mmap = (multiboot_memory_map_t*)mbd->mmap_addr;
     initPageFrameAllocator(mmap, mbd->mmap_length);
     // We're done with the multiboot struct -- time to cut the identity mapping
+    improveKernelPageStructs();
+
+    for (int i = 0; i <= 15; i++) {
+        picSetIRQMasked(i, true); // mask all irqs for now
+    }
 
     picInitialize(PICMasterOffset, PICSubservientOffset);
     initIDT();
     enableInterrupts();
     picSetIRQMasked(1, false);
-    improveKernelPageStructs();
     int* myMemory = kernelMalloc(sizeof(int));
     printf("I got 0x%X as my address!\n", myMemory);
     *myMemory = 0xCAFE;

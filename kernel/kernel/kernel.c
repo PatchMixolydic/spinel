@@ -12,6 +12,7 @@
 void kernelMain() {
 	terminalDisableCursor();
 	printf("The system is coming up.\n");
+	printf("Press left CTRL to panic.\n");
 
 	while (true) {
 		haltCPU();

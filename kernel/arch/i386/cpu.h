@@ -8,4 +8,6 @@ typedef struct {
     unsigned int ebx, edx, ecx, eax;
 } Registers;
 
+extern uintptr_t getESP();
+
 #endif // ndef ARCH_I386_CPU_H

@@ -87,7 +87,12 @@ void cIRQ0() {
 
 void cIRQ1() {
     uint8_t asdf = inb(0x60);
-    printf("Keyboard 0x%X\n", asdf);
+    if (asdf == 0x1D) {
+        // left ctrl
+        panic("Keyboard 0x%X\n", asdf);
+    } else {
+        printf("Keyboard 0x%X\n", asdf);
+    }
     picEndOfInterrupt(1);
 }
 
