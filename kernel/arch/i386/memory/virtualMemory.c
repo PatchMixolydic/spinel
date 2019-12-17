@@ -101,6 +101,5 @@ void unmapPage(uintptr_t virtual) {
 }
 
 void handlePageFault(Registers regs, unsigned int errorCode) {
-    printf("CR2\t0x%X\n", getCR2());
-    panic("Page fault");
+    panic("Page fault\nCR2\t0x%x", getCR2());
 }
