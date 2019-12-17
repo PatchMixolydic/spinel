@@ -34,6 +34,7 @@ ctype/isalpha.o \
 stdio/printf.o \
 stdio/putchar.o \
 stdio/puts.o \
+stdio/vprintf.o \
 stdlib/abort.o \
 stdlib/itoa.o \
 string/memcmp.o \
