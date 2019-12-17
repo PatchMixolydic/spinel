@@ -6,15 +6,23 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef __is_libk
+#include <kernel/tty.h>
+#endif
+
 static const unsigned int BufferSize = 80;
 
 static bool print(const char* data, size_t length) {
-	const unsigned char* bytes = (const unsigned char*) data;
-	for (size_t i = 0; i < length; i++) {
-		if (putchar(bytes[i]) == EOF) {
-			return false;
+	#ifdef __is_libk
+		terminalWrite(data, length);
+	#else
+		const unsigned char* bytes = (const unsigned char*) data;
+		for (size_t i = 0; i < length; i++) {
+			if (putchar(bytes[i]) == EOF) {
+				return false;
+			}
 		}
-	}
+	#endif // def __is_libk
 	return true;
 }
 

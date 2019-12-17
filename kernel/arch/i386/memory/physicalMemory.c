@@ -112,7 +112,6 @@ void initPageFrameAllocator(memMap* memoryMapPtr, size_t memoryMapLength) {
 void* allocatePageFrame() {
     size_t searchStartLoc = nextFreePageIdx;
     uintptr_t res = (uintptr_t)NULL;
-    printf("allocatePageFrame\n");
     do {
         // pageMap[x] & availMap[x] shows if there's any pages which are free
         // and available
@@ -148,7 +147,6 @@ void* allocatePageFrame() {
         // For now, panic
         panic("Out of memory");
     }
-    printf("I just allocated 0x%X\n", res);
     return (void*)res;
 }
 
