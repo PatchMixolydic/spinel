@@ -99,5 +99,14 @@ void unmapPage(uintptr_t virtual) {
 }
 
 void handlePageFault(Registers regs, unsigned int errorCode) {
-    panic("Page fault\nCR2 0x%x\nError code 0x%X", getCR2(), errorCode);
+    panic(
+        "Page fault\nCR2 0x%x\t\tError code 0x%X\n%s%s%s%s%s%s",
+        getCR2(), errorCode,
+        errorCode ? "Flags: " : "",
+        errorCode & PageFaultPresentFlag ? "present " : "",
+        errorCode & PageFaultWriteFlag ? "write " : "",
+        errorCode & PageFaultUserModeFlag ? "userMode " : "",
+        errorCode & PageFaultReservedWriteFlag ? "reservedWrite " : "",
+        errorCode & PageFaultInstrFetchFlag ? "instructionFetch" : ""
+    );
 }

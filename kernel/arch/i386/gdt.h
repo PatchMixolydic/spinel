@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+// nb. This is also the home of TSS
+
 typedef struct {
     uint16_t sizeMinusOne;
     uint32_t offset;

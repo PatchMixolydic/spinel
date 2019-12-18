@@ -34,6 +34,7 @@ void cBoot(multiboot_info_t* mbd, unsigned int magicNum) {
     initIDT();
     enableInterrupts();
     picSetIRQMasked(1, false);
+    //enterUserMode();
     int* myMemory = kernelMalloc(sizeof(int));
     printf("I got 0x%X as my address!\n", myMemory);
     *myMemory = 0xCAFE;
