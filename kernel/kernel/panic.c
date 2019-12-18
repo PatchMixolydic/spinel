@@ -14,3 +14,11 @@ void panic(const char why[], ...) {
 		haltCPU();
 	}
 }
+
+#ifndef NDEBUG
+void _kassert(bool expr, const char strExpr[], const char file[], int line) {
+	if (!expr) {
+		panic("Assertion failed at %s:%d\n       %s", file, line, strExpr);
+	}
+}
+#endif
