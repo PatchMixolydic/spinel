@@ -38,9 +38,7 @@ stdio/vprintf.o \
 stdlib/abort.o \
 stdlib/itoa.o \
 string/memcmp.o \
-string/memcpy.o \
 string/memmove.o \
-string/memset.o \
 string/strlen.o \
 
 HOSTEDOBJS=\
@@ -69,14 +67,14 @@ libk.a: $(LIBK_OBJS)
 .c.o:
 	$(CC) -MD -c $< -o $@ -std=gnu11 $(CFLAGS) $(CPPFLAGS)
 
-.c.S:
-	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
+.asm.o:
+	$(NASM) -f elf32 -o $@ $<
 
 .c.libk.o:
 	$(CC) -MD -c $< -o $@ -std=gnu11 $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
 
-.S.libk.o:
-	$(CC) -MD -c $< -o $@ $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
+.asm.libk.o:
+	$(NASM) -f elf32 -o $@ $<
 
 clean:
 	rm -f $(BINARIES) *.a

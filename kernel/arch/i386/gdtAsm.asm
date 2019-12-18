@@ -1,6 +1,5 @@
 section .text
     global loadGDT:function
-    global enterUserMode:function
 
     loadGDT:
         mov     eax, [esp + 4]
