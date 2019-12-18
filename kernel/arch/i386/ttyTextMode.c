@@ -36,6 +36,7 @@ static size_t terminalX;
 static size_t terminalY;
 static uint8_t terminalColour;
 static uint16_t* terminalBuffer;
+static bool intenseText = false;
 
 static inline void setTerminalColour(uint8_t colour) {
     terminalColour = colour;
@@ -124,10 +125,15 @@ static unsigned int stringToInt(const char* start, size_t size) {
 static void ansiGraphicRendition(int code) {
     if (code == 0) {
         // Reset
+        intenseText = false;
         setTerminalColour(vgaCharacterColour(VGAWhite, VGABlack));
+    } else if (code == 1) {
+        // I couldn't understand how you could be so booo~ld
+        intenseText = true;
     } else if (30 <= code && code <= 37) {
         // Foreground colour
-        setFGColour(ANSICodeToColour[code - 30]);
+        int colourCode = code - 30 + (intenseText ? 8 : 0);
+        setFGColour(ANSICodeToColour[colourCode]);
     } else if (code == 39) {
         // Default foreground colour
         setFGColour(VGAWhite);
@@ -136,7 +142,8 @@ static void ansiGraphicRendition(int code) {
         setFGColour(ANSICodeToColour[code - 90 + 8]);
     } else if (40 <= code && code <= 47) {
         // Background colour
-        setBGColour(ANSICodeToColour[code - 40]);
+        int colourCode = code - 40 + (intenseText ? 8 : 0);
+        setBGColour(ANSICodeToColour[colourCode]);
     } else if (code == 49) {
         // Default background colour
         setBGColour(VGABlack);
