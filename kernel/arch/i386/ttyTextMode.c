@@ -395,23 +395,23 @@ void terminalWriteString(const char* data) {
 }
 
 void terminalEnableCursor(uint8_t startLine, uint8_t endLine) {
-    outb(VGACommandPort, VGACursorStartCommand);
-    outb(VGADataPort, (inb(VGADataPort) & 0xC0) | startLine);
-    outb(VGACommandPort, VGACursorEndCommand);
-    outb(VGADataPort, (inb(VGADataPort) & 0xE0) | endLine);
+    outByte(VGACommandPort, VGACursorStartCommand);
+    outByte(VGADataPort, (inByte(VGADataPort) & 0xC0) | startLine);
+    outByte(VGACommandPort, VGACursorEndCommand);
+    outByte(VGADataPort, (inByte(VGADataPort) & 0xE0) | endLine);
 }
 
 void terminalDisableCursor() {
-    outb(VGACommandPort, VGACursorStartCommand);
-    outb(VGADataPort, VGACursorDisableData);
+    outByte(VGACommandPort, VGACursorStartCommand);
+    outByte(VGADataPort, VGACursorDisableData);
 }
 
 void terminalMoveCursor(size_t x, size_t y) {
     uint16_t newPos = y * VGAWidth + x;
     terminalX = x;
     terminalY = y;
-    outb(VGACommandPort, VGACursorLowCommand);
-    outb(VGADataPort, newPos & 0xFF);
-    outb(VGACommandPort, VGACursorHighCommand);
-    outb(VGADataPort, (newPos >> 8) & 0xFF);
+    outByte(VGACommandPort, VGACursorLowCommand);
+    outByte(VGADataPort, newPos & 0xFF);
+    outByte(VGACommandPort, VGACursorHighCommand);
+    outByte(VGADataPort, (newPos >> 8) & 0xFF);
 }

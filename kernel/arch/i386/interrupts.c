@@ -86,7 +86,7 @@ void cIRQ0() {
 }
 
 void cIRQ1() {
-    uint8_t asdf = inb(0x60);
+    uint8_t asdf = inByte(0x60);
     if (asdf == 0x1D) {
         // left ctrl
         panic("Keyboard 0x%X\n", asdf);

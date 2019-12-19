@@ -33,50 +33,50 @@ const uint8_t ICW4FullyNestedFlag = 0x10;
  * @param subservOffset The offset between IRQ and interrupt for the subservient PIC
  */
 void picInitialize(int masterOffset, int subservOffset) {
-    uint8_t masterMask = inb(PICMasterDataPort); // Get old interrupt mask
-    uint8_t subservMask = inb(PICSubservientDataPort);
+    uint8_t masterMask = inByte(PICMasterDataPort); // Get old interrupt mask
+    uint8_t subservMask = inByte(PICSubservientDataPort);
 
     // ICW1
-    outb(PICMasterCommandPort, ICW1InitializeFlag | ICW1ICW4NeededFlag);
-    outb(PICSubservientCommandPort, ICW1InitializeFlag | ICW1ICW4NeededFlag);
+    outByte(PICMasterCommandPort, ICW1InitializeFlag | ICW1ICW4NeededFlag);
+    outByte(PICSubservientCommandPort, ICW1InitializeFlag | ICW1ICW4NeededFlag);
     // ICW2
-    outb(PICMasterDataPort, masterOffset);
-    outb(PICSubservientDataPort, subservOffset);
+    outByte(PICMasterDataPort, masterOffset);
+    outByte(PICSubservientDataPort, subservOffset);
     // ICW3
-    outb(PICMasterDataPort, 4); // Subservient on IRQ2 (0b0100)
-    outb(PICSubservientDataPort, 2); // Master on IRQ2 (0b0010)
+    outByte(PICMasterDataPort, 4); // Subservient on IRQ2 (0b0100)
+    outByte(PICSubservientDataPort, 2); // Master on IRQ2 (0b0010)
     // ICW4
-    outb(PICMasterDataPort, ICW4x86ModeFlag);
-    outb(PICSubservientDataPort, ICW4x86ModeFlag);
+    outByte(PICMasterDataPort, ICW4x86ModeFlag);
+    outByte(PICSubservientDataPort, ICW4x86ModeFlag);
     // Restore masks
-    outb(PICMasterDataPort, masterMask);
-    outb(PICSubservientDataPort, subservMask);
+    outByte(PICMasterDataPort, masterMask);
+    outByte(PICSubservientDataPort, subservMask);
 }
 
 void picDisable() {
-    outb(PICSubservientDataPort, PICDisableData);
-    outb(PICMasterDataPort, PICDisableData);
+    outByte(PICSubservientDataPort, PICDisableData);
+    outByte(PICMasterDataPort, PICDisableData);
 }
 
 void picEndOfInterrupt(bool toSubserv) {
     if (toSubserv) {
-        outb(PICSubservientCommandPort, PICEndOfInterruptCommand);
+        outByte(PICSubservientCommandPort, PICEndOfInterruptCommand);
     }
     // Must always send this to the master
-    outb(PICMasterCommandPort, PICEndOfInterruptCommand);
+    outByte(PICMasterCommandPort, PICEndOfInterruptCommand);
 }
 
 uint16_t picGetIRQRegister() {
-    outb(PICMasterCommandPort, PICReadIRRCommand);
-    outb(PICSubservientCommandPort, PICReadIRRCommand);
+    outByte(PICMasterCommandPort, PICReadIRRCommand);
+    outByte(PICSubservientCommandPort, PICReadIRRCommand);
     // We are indeed reading the command port. IBM PCs sure are weird
-    return (inb(PICSubservientCommandPort) << 8) | inb(PICMasterCommandPort);
+    return (inByte(PICSubservientCommandPort) << 8) | inByte(PICMasterCommandPort);
 }
 
 uint16_t picGetInServiceRegister() {
-    outb(PICMasterCommandPort, PICReadISRCommand);
-    outb(PICSubservientCommandPort, PICReadISRCommand);
-    return (inb(PICSubservientCommandPort) << 8) | inb(PICMasterCommandPort);
+    outByte(PICMasterCommandPort, PICReadISRCommand);
+    outByte(PICSubservientCommandPort, PICReadISRCommand);
+    return (inByte(PICSubservientCommandPort) << 8) | inByte(PICMasterCommandPort);
 }
 
 void picSetIRQMasked(uint8_t irq, bool masked) {
@@ -89,9 +89,9 @@ void picSetIRQMasked(uint8_t irq, bool masked) {
     }
     uint8_t mask;
     if (masked) {
-        mask = inb(port) | (1 << irq); // add this irq to mask
+        mask = inByte(port) | (1 << irq); // add this irq to mask
     } else {
-        mask = inb(port) & ~(1 << irq); // remove this irq from mask
+        mask = inByte(port) & ~(1 << irq); // remove this irq from mask
     }
-    outb(port, mask);
+    outByte(port, mask);
 }
