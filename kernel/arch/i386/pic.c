@@ -95,3 +95,9 @@ void picSetIRQMasked(uint8_t irq, bool masked) {
     }
     outByte(port, mask);
 }
+
+void picSetAllMasked(bool masked) {
+    uint8_t mask = masked ? 0xFF : 0;
+    outByte(PICMasterDataPort, mask);
+    outByte(PICSubservientDataPort, mask);
+}

@@ -13,5 +13,6 @@ void picEndOfInterrupt(bool toSubserv);
 uint16_t picGetIRQRegister();
 uint16_t picGetInServiceRegister();
 void picSetIRQMasked(uint8_t irq, bool masked);
+void picSetAllMasked(bool masked);
 
 #endif // ndef ARCH_I386_PIC_H

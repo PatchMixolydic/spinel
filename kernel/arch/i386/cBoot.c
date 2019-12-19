@@ -26,10 +26,7 @@ void cBoot(multiboot_info_t* mbd, unsigned int magicNum) {
     // We're done with the multiboot struct -- time to cut the identity mapping
     improveKernelPageStructs();
 
-    for (int i = 0; i <= 15; i++) {
-        picSetIRQMasked(i, true); // mask all irqs for now
-    }
-
+    picSetAllMasked(true);
     picInitialize(PICMasterOffset, PICSubservientOffset);
     initIDT();
     enableInterrupts();
