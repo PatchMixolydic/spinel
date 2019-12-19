@@ -10,6 +10,6 @@ typedef enum {
     PITHardwareStrobe
 } PITMode;
 
-void setupTimer(int channel, PITMode mode, int frequency);
+void setupPIC(int channel, PITMode mode, int frequency);
 
 #endif // ndef ARCH_I386_PIT_H

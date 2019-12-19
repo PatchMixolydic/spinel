@@ -24,11 +24,15 @@ static inline uint16_t getReloadValue(int frequency) {
     return res;
 }
 
-void setupTimer(int channel, PITMode mode, int frequency) {
+void setupPIC(int channel, PITMode mode, int frequency) {
     uint16_t reloadVal = getReloadValue(frequency);
     uint8_t command = channel << 6 | PITAccessLowHighByte | mode << 1;
     uint8_t dataPort = PITChannel0DataPort + channel;
     outByte(PITCommandRegister, command);
     outByte(dataPort, reloadVal); // send low byte
     outByte(dataPort, reloadVal >> 8); // send high byte
+}
+
+void setupTimer(int frequency, bool oneShot) {
+    setupPIC(0, oneShot ? PITHardwareOneShot : PITSquareWave, frequency);
 }
