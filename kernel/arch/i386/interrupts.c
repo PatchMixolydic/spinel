@@ -82,7 +82,6 @@ void interruptHandler(uint32_t interrupt, Registers regs, unsigned int errorCode
 }
 
 void cIRQ0() {
-    printf("Tick!\n");
     picEndOfInterrupt(0);
 }
 
