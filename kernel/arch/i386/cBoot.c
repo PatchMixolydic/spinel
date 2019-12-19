@@ -30,6 +30,7 @@ void cBoot(multiboot_info_t* mbd, unsigned int magicNum) {
     picInitialize(PICMasterOffset, PICSubservientOffset);
     initIDT();
     enableInterrupts();
+    picSetIRQMasked(0, false);
     picSetIRQMasked(1, false);
     //enterUserMode();
     int* myMemory = kernelMalloc(sizeof(int));
