@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdint.h>
 #include "pit.h"
 #include "io.h"

@@ -43,10 +43,16 @@ section .text
 
     enableInterrupts:
         sti
+        in      eax, 0x70
+        or      eax, 0x80 ; turn on NMI
+        out     0x70, eax
         ret
 
     disableInterrupts:
         cli
+        in      eax, 0x70
+        and     eax, 0x7F ; turn off NMI
+        out     0x70, eax
         ret
 
     isrCommon:
