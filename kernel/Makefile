@@ -29,8 +29,11 @@ LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
 
 KERNEL_OBJS=\
 $(KERNEL_ARCH_OBJS) \
-kernel/panic.o \
+dataStructures/doublyLinkedList.o \
 kernel/kernel.o \
+kernel/panic.o \
+kernel/process.o \
+kernel/scheduler.o \
 
 OBJS=\
 $(ARCHDIR)/crti.o \

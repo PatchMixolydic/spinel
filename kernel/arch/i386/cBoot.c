@@ -10,6 +10,7 @@
 
 void cBoot(multiboot_info_t* mbd, unsigned int magicNum) {
     terminalInitialize();
+	terminalDisableCursor();
     printf("Spinel booting for i386.\n");
     initGDT();
 
@@ -32,13 +33,4 @@ void cBoot(multiboot_info_t* mbd, unsigned int magicNum) {
     enableInterrupts();
     picSetIRQMasked(0, false);
     picSetIRQMasked(1, false);
-    //enterUserMode();
-    int* myMemory = kernelMalloc(sizeof(int));
-    printf("I got 0x%X as my address!\n", myMemory);
-    *myMemory = 0xCAFE;
-    printf("I put \x1b[93m0x%X\x1b[0m in my address!\n", *myMemory);
-    int* myOtherMemory = kernelMalloc(sizeof(int));
-    printf("I got 0x%X as my other address!\n", myOtherMemory);
-    printf("0x%X is in my other address!\n", *myOtherMemory);
-    printf("0x%X is in my address!\n", *myMemory);
 }

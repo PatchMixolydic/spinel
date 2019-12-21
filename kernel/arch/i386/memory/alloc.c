@@ -29,3 +29,7 @@ void* kernelMalloc(size_t amount) {
     memset(res, 0, amount);
     return res;
 }
+
+void kernelFree(void* memory) {
+    // TODO: do something!
+}

@@ -16,6 +16,8 @@ const int PITBCDMode = 1;
 
 const int PITMasterClock = 1193182;
 
+static bool enabled = false;
+
 static inline uint16_t getReloadValue(int frequency) {
     // TODO: round math.h
     uint16_t res = PITMasterClock / frequency;
@@ -36,4 +38,24 @@ void setupPIC(int channel, PITMode mode, int frequency) {
 
 void setupTimer(int frequency, bool oneShot) {
     setupPIC(0, oneShot ? PITHardwareOneShot : PITSquareWave, frequency);
+}
+
+void enableTimer() {
+    enabled = true;
+}
+
+void disableTimer() {
+    enabled = true;
+}
+
+bool isTimerEnabled() {
+    return enabled;
+}
+
+void resetTickCount() {
+    tickCount = 0;
+}
+
+TickCount getTickCount() {
+    return tickCount;
 }

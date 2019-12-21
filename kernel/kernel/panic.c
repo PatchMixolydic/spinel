@@ -5,7 +5,6 @@
 
 void panic(const char why[], ...) {
 	disableInterrupts();
-	//printf("\x1B[44;97m\x1B[2J");
 	printf("panic: ");
 	va_list parameters;
 	va_start(parameters, why);

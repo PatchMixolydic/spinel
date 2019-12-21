@@ -36,10 +36,13 @@ extern void invalidatePage(void* page);
 
 // Makes .text and .rodata read-only alongside cutting the identity mapping
 void improveKernelPageStructs();
-// Create page table/directory/directory pointer table/level 1 million table
+// Create page directory/directory pointer table/level 1 million table
+// Clones kernel mappings into it and maps the page directory somewhere.
+// Returns physical address to new page directory to be shunted into CR3.
+uintptr_t newTopPageMap(uintptr_t flags);
 void mapPageAt(uintptr_t physical, uintptr_t virtual, uintptr_t flags);
 void unmapPage(uintptr_t virtual);
-void handlePageFault(Registers regs, unsigned int errorCode);
+void handlePageFault(ExceptionRegisters regs, unsigned int errorCode);
 
 static inline uintptr_t getPhysicalAddr(uintptr_t addr){
     return addr - KernelOffset;

@@ -1,9 +1,12 @@
 #include <stdio.h>
 #include <kernel/panic.h>
+#include <kernel/process.h>
+#include <kernel/scheduler.h>
 #include "cpu.h"
 #include "io.h"
 #include "memory/paging.h"
 #include "pic.h"
+#include "pit.h"
 
 // Used to align the register printout
 #define AnsiToCol2 "\x1B[16G"
@@ -46,7 +49,7 @@ typedef enum {
     Reserved2
 } IntelExceptions;
 
-void interruptHandler(uint32_t interrupt, Registers regs, unsigned int errorCode, int eip, int cs, int eflags) {
+void interruptHandler(uint32_t interrupt, ExceptionRegisters regs, unsigned int errorCode, int eip, int cs, int eflags) {
     switch (interrupt) {
         case PageFault: {
             handlePageFault(regs, errorCode);
@@ -81,7 +84,15 @@ void interruptHandler(uint32_t interrupt, Registers regs, unsigned int errorCode
     }
 }
 
-void cIRQ0() {
+void cIRQ0(ExceptionRegisters regs, uintptr_t eip, int cs, int eflags) {
+    if (isTimerEnabled()) {
+        tickCount++;
+        if (tickCount % 10 == 0) {
+            // 1ms passed
+            Process* currentProcess = getCurrentProcess();
+            schedulerCheckIn();
+        }
+    }
     picEndOfInterrupt(0);
 }
 

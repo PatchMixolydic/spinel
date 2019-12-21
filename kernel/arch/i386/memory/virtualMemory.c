@@ -76,6 +76,18 @@ void improveKernelPageStructs() {
     setCR3(getCR3());
 }
 
+uintptr_t newTopPageMap(uintptr_t flags) {
+    extern void* kernelActualEndOfHeap; // TODO: not this!
+    uintptr_t frame = (uintptr_t)allocatePageFrame();
+    mapPageAt(frame, kernelActualEndOfHeap, flags);
+    uintptr_t* pageDirLocation = getPageMapEntry(0, 1);
+    memcpy(kernelActualEndOfHeap, pageDirLocation, PageSize); // Copy over the page directory
+    // Erase everything below the kernel offset
+    memset(kernelActualEndOfHeap, 0, addrToMapIdx(KernelOffset, 1) * sizeof(uintptr_t));
+    unmapPage((uintptr_t)kernelActualEndOfHeap);
+    return frame;
+}
+
 void mapPageAt(uintptr_t physical, uintptr_t virtual, uintptr_t flags) {
     uintptr_t* pageTabEntry = getPageMapEntry(virtual, 0);
     uintptr_t* pageDirEntry = getPageMapEntry(virtual, 1);
@@ -98,15 +110,16 @@ void unmapPage(uintptr_t virtual) {
     invalidatePage(virtual);
 }
 
-void handlePageFault(Registers regs, unsigned int errorCode) {
+void handlePageFault(ExceptionRegisters regs, unsigned int errorCode) {
     panic(
-        "Page fault\nCR2 0x%x\t\tError code 0x%X\n%s%s%s%s%s%s",
+        "Page fault\nCR2 0x%X\t\tError code 0x%X\n%s%s%s%s%s%s\nPage table entry 0x%X",
         getCR2(), errorCode,
         errorCode ? "Flags: " : "",
         errorCode & PageFaultPresentFlag ? "present " : "",
         errorCode & PageFaultWriteFlag ? "write " : "",
         errorCode & PageFaultUserModeFlag ? "userMode " : "",
         errorCode & PageFaultReservedWriteFlag ? "reservedWrite " : "",
-        errorCode & PageFaultInstrFetchFlag ? "instructionFetch" : ""
+        errorCode & PageFaultInstrFetchFlag ? "instructionFetch" : "",
+        *getPageMapEntry(getCR2(), 0)
     );
 }
