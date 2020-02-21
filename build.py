@@ -23,7 +23,6 @@ import buildConfig
 
 TripletTemplate = "{}-elf"
 DefaultCrossCompilerTemplate = "{triplet}-gcc"
-TargetEnv = "SPINEL_TARGET"
 ValidActions = ["build", "clean"]
 
 triplet = None
