@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.com/Sparkpin/spinel.svg?branch=enhancement%2Frestart)](https://travis-ci.com/Sparkpin/spinel)
 # Spinel
 
 *"I'm so excited to meet you!"*
