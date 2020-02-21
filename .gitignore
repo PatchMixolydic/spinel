@@ -1,7 +1,9 @@
-*.iso
-isodir
 sysroot
 .idea
+__pycache__
 *.o
 *.d
+*.iso
+*.pyc
 bochs*.txt
+
