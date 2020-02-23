@@ -36,9 +36,8 @@ script:
   - ./build.py
 
 deploy:
-  provider: releases
-  api_key: $GITHUB_TOKEN
-  file: $HOME/cross.tar.gz
-  skip_cleanup: true
-  draft: true
-
+  provider: s3
+  access_key_id: $AMAZON_KEY
+  secret_access_key: $AMAZON_SECRET_KEY
+  bucket: spinel-x-comp
+  edge: true # opt in to dpl v2
