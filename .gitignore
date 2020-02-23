@@ -1,6 +1,7 @@
-sysroot
 .idea
 __pycache__
+build
+sysroot
 *.o
 *.d
 *.iso
