@@ -5,7 +5,7 @@ compiler: gcc
 
 before_install:
   - sudo apt update
-  - sudo apt -y install build-essential bison flex libgmp3-dev libmpc-dev libmpfr-dev texinfo libcloog-isl-dev libisl-0.18-dev wget
+  - sudo apt -y install build-essential bison flex libgmp3-dev libmpc-dev libmpfr-dev texinfo libcloog-isl-dev libisl-0.18-dev wget python3.8
 
 install:
   - cd ${TRAVIS_BUILD_DIR}
