@@ -51,10 +51,7 @@ align 4096
 section .text
     global _start:function
     extern _init
-    extern setCR3
-    extern enablePaging
-    extern cBoot
-    extern panic
+    extern archBoot
     extern kernelMain
 
     _start:
@@ -64,10 +61,13 @@ section .text
         ; eax = magic number, ebx = multiboot info
         ; unfortunately, eax is volatile. edi isn't, so let's use that
         mov     edi, eax
-        ; load the page directory
-        push    kernelPageDirectory - KernelOffset
-        ;call    setCR3
-        ;call    enablePaging
+        ; load the page directory... no mov cr3, immediate here
+        mov     eax, kernelPageDirectory - KernelOffset
+        mov     cr3, eax
+        ; Now enable paging
+        mov     eax, cr0
+        or      eax, 1 << 31
+        mov     cr0, eax
         ; let's go to our paged code
         lea     ecx, [.pagingDone]
         jmp     ecx
@@ -77,8 +77,8 @@ section .text
         call    _init
         push    edi
         push    ebx
-        ;call    cBoot ; now, let's call some additional C boot code
-        ;call    kernelMain ; Finally, let's go to the kernel!
+        call    archBoot ; go to C land to continue booting
+        call    kernelMain ; Finally, let's go to the actual kernel!
         ; If kernelMain ever returns, spin forever
         cli
     .hang:
