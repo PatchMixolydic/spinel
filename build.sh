@@ -30,7 +30,8 @@ build() {
 
 iso() {
     build
-    TMPDIR=$(mktemp -d -t spinelTmp_ 2>/dev/null) || TMPDIR=/tmp/spineliso$$ && mkdir $TMPDIR
+    TMPDIR=$(mktemp -d -t spinelTmp_ 2>/dev/null) || TMPDIR=/tmp/spineliso$$ \
+        && mkdir $TMPDIR
     trap "rm -rf $TMPDIR" 1 5 15
     echo "TMPDIR is $TMPDIR"
     mkdir -p $TMPDIR/boot/grub
@@ -46,7 +47,8 @@ EOF
 
 qemu() {
     iso
-    qemu-system-$(./tripletToArch.sh $HOST) -cdrom build/spinel.iso -s -m 512 -soundhw pcspk
+    qemu-system-$(./tripletToArch.sh $HOST) -cdrom build/spinel.iso -s -m 512 \
+        -soundhw pcspk
 }
 
 if [ "$1" = "clean" ] || [ "$1" = "headers" ] || [ "$1" = "build" ] || \
