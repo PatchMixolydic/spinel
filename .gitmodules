@@ -1,4 +1,0 @@
-[submodule "thirdparty/newlib-spinel"]
-	path = thirdparty/newlib-spinel
-	url = git@github.com:Sparkpin/newlib-spinel.git
-	branch = master
