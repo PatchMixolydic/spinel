@@ -15,8 +15,9 @@ clean() {
 
 headers() {
     mkdir -p "$SYSROOT"
+    ORIGDIR=`pwd`
     for PROJECT in $SYSTEM_HEADER_PROJECTS; do
-        (cd $PROJECT && DESTDIR="$SYSROOT" $MAKE install-headers)
+        (cd $PROJECT && DESTDIR="$SYSROOT" $MAKE install-headers; cd $ORIGDIR)
     done
 }
 

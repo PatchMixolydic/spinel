@@ -2,6 +2,3 @@
 	path = thirdparty/newlib-spinel
 	url = git@github.com:Sparkpin/newlib-spinel.git
 	branch = master
-[submodule "thirdparty/newlib"]
-	path = thirdparty/newlib
-	url = git@github.com:Sparkpin/newlib-spinel.git
