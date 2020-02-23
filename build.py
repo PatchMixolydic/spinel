@@ -144,10 +144,10 @@ if __name__ == "__main__":
     if args.action == "build":
         print("Building newlib")
         buildConfigure(
-            "newlib-cygwin",
+            "thirdparty/newlib-cygwin",
             ["--target", triplet] + args.configureArgs
         )
     elif args.action == "clean":
-        clean("newlib-cygwin")
+        clean("thirdparty/newlib-cygwin")
 
     print("Done")

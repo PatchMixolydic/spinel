@@ -1,3 +1,4 @@
-[submodule "newlib-cygwin"]
-	path = newlib-cygwin
+[submodule "thirdparty/newlib-cygwin"]
+	path = thirdparty/newlib-cygwin
 	url = git://sourceware.org/git/newlib-cygwin.git
+	branch = master
