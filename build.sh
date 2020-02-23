@@ -33,7 +33,6 @@ iso() {
     TMPDIR=$(mktemp -d -t spinelTmp_ 2>/dev/null) || TMPDIR=/tmp/spineliso$$ \
         && mkdir $TMPDIR
     trap "rm -rf $TMPDIR" 1 5 15
-    echo "TMPDIR is $TMPDIR"
     mkdir -p $TMPDIR/boot/grub
     cp -R sysroot/* $TMPDIR
     cat > $TMPDIR/boot/grub/grub.cfg << EOF

@@ -32,8 +32,8 @@ align 16
 ; Data, initialized
 section .data
 align 4096
-    extern kernelPageTable
-    extern kernelPageDirectory
+    global kernelPageTable
+    global kernelPageDirectory
     kernelPageTable:
         %assign i 0
         %rep    1024
