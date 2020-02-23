@@ -28,7 +28,17 @@ install:
   - make install-gcc -j3
   - make install-target-libgcc -j3
   - $HOME/opt/cross/bin/$TARGET-gcc --version
+  - cd $HOME
+  - tar -cf cross.tar.gz opt
 
 script:
   - cd ${TRAVIS_BUILD_DIR}
   - ./build.py
+
+deploy:
+  provider: releases
+  api_key: $GITHUB_TOKEN
+  file: $HOME/cross.tar.gz
+  skip_cleanup: true
+  draft: true
+
