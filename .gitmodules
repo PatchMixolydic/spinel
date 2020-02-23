@@ -1,4 +1,7 @@
-[submodule "thirdparty/newlib-cygwin"]
-	path = thirdparty/newlib-cygwin
-	url = git://sourceware.org/git/newlib-cygwin.git
+[submodule "thirdparty/newlib-spinel"]
+	path = thirdparty/newlib-spinel
+	url = git@github.com:Sparkpin/newlib-spinel.git
 	branch = master
+[submodule "thirdparty/newlib"]
+	path = thirdparty/newlib
+	url = git@github.com:Sparkpin/newlib-spinel.git
