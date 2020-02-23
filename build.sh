@@ -63,8 +63,8 @@ else
     0 0 0 "clean" "Delete all build files" \
     "headers" "Copy headers to sysroot" \
     "build" "Perform a full build" \
-    "iso" "Create a bootable ISO (after building Spinel)" \
-    "qemu" "Boot Spinel in QEMU (after building Spinel)" \
+    "iso" "Create a bootable ISO (first building Spinel)" \
+    "qemu" "Boot Spinel in QEMU (first building Spinel)" \
     2> $TMPFILE
 
     RETCODE=$?
