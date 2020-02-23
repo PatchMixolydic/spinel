@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "cpu.h"
+#include "../core/cpu.h"
 
 void archBoot() {
     // Temporary poc test

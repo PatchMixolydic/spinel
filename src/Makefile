@@ -32,20 +32,20 @@ $(KERNEL_ARCH_OBJS) \
 kernel/kernelMain.o \
 
 OBJS=\
-$(ARCHDIR)/crti.o \
-$(ARCHDIR)/crtbegin.o \
+$(ARCHDIR)/core/crti.o \
+$(ARCHDIR)/core/crtbegin.o \
 $(KERNEL_OBJS) \
-$(ARCHDIR)/crtend.o \
-$(ARCHDIR)/crtn.o \
+$(ARCHDIR)/core/crtend.o \
+$(ARCHDIR)/core/crtn.o \
 
 LINK_LIST=\
 $(LDFLAGS) \
-$(ARCHDIR)/crti.o \
-$(ARCHDIR)/crtbegin.o \
+$(ARCHDIR)/core/crti.o \
+$(ARCHDIR)/core/crtbegin.o \
 $(KERNEL_OBJS) \
 $(LIBS) \
-$(ARCHDIR)/crtend.o \
-$(ARCHDIR)/crtn.o \
+$(ARCHDIR)/core/crtend.o \
+$(ARCHDIR)/core/crtn.o \
 
 .PHONY: all clean install install-headers install-kernel
 .SUFFIXES: .o .c .asm
@@ -56,7 +56,7 @@ spinel.elf: $(OBJS) $(ARCHDIR)/linker.ld
 	$(CC) -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(LINK_LIST)
 	grub-file --is-x86-multiboot spinel.elf
 
-$(ARCHDIR)/crtbegin.o $(ARCHDIR)/crtend.o:
+$(ARCHDIR)/core/crtbegin.o $(ARCHDIR)/core/crtend.o:
 	OBJ=`$(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=$(@F)` && cp "$$OBJ" $@
 
 .c.o:
