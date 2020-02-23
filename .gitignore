@@ -2,9 +2,10 @@
 __pycache__
 build
 sysroot
-*.o
 *.d
+*.elf
 *.iso
+*.o
 *.pyc
 bochs*.txt
 
