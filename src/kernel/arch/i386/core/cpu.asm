@@ -2,10 +2,13 @@ section .text
     global haltCPU:function
     global inByte:function
     global outByte:function
-    global inShort:function
-    global outShort:function
     global inWord:function
     global outWord:function
+    global inDWord:function
+    global outDWord:function
+    global loadGDT:function
+    global loadIDT:function
+    global getESP:function
 
     haltCPU:
         hlt
@@ -15,37 +18,54 @@ section .text
         mov     dx, [esp + 4] ; address
         in      al, dx
         ret
-    .end:
 
     outByte:
-        mov     al, [esp + 8] ; data
+        mov     al, [esp + 4] ; data
         mov     dx, [esp + 4] ; address
         out     dx, al
         ret
-    .end:
-
-    inShort:
-        mov     dx, [esp + 4] ; address
-        in      ax, dx
-        ret
-    .end:
-
-    outShort:
-        mov     ax, [esp + 8] ; data
-        mov     dx, [esp + 4] ; address
-        out     dx, ax
-        ret
-    .end:
 
     inWord:
         mov     dx, [esp + 4] ; address
-        in      eax, dx
+        in      ax, dx
         ret
-    .end:
 
     outWord:
-        mov     eax, [esp + 8] ; data
+        mov     ax, [esp + 4] ; data
+        mov     dx, [esp + 4] ; address
+        out     dx, ax
+        ret
+
+    inDWord:
+        mov     dx, [esp + 4] ; address
+        in      eax, dx
+        ret
+
+    outDWord:
+        mov     eax, [esp + 4] ; data
         mov     dx, [esp + 4] ; address
         out     dx, eax
         ret
-    .end:
+
+    loadGDT:
+        mov     eax, [esp + 4]
+        lgdt    [eax] ; load GDT
+        ; reloading cs requires this:
+        jmp     0x8:.loadCS
+    .loadCS:
+        mov     ax, 0x10
+        mov     ds, ax
+        mov     es, ax
+        mov     fs, ax
+        mov     gs, ax
+        mov     ss, ax
+        ret
+
+    loadIDT:
+        mov     edx, [esp + 4]
+        lidt    [edx]
+        ret
+
+    getESP:
+        mov     eax, esp
+        ret

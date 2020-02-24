@@ -28,7 +28,6 @@ align 4
         ; Checksum
         dd      -(MultibootMagic + MultibootArch + (multiboot - .end))
         ; Tags
-
         dw      EndTag
         dw      0
         dd      8

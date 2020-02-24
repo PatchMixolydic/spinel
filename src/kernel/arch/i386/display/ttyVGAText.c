@@ -66,9 +66,8 @@ void disableCursor() {
     outByte(VGACursorDataPort, 0x20);
 }
 
-void moveCursor(unsigned int x, unsigned int y) {
-    uint16_t newPos = y * VGAWidth + x;
-
+void updateCursor() {
+    uint16_t newPos = terminalY * VGAWidth + terminalX;
     outByte(VGACursorCommandPort, 0x0F);
     outByte(VGACursorDataPort, (uint8_t)(newPos & 0xFF));
     outByte(VGACursorCommandPort, 0x0E);
@@ -100,5 +99,15 @@ void putString(char s[]) {
             putChar(s[i]);
         }
     }
-    moveCursor(terminalX, terminalY);
+    updateCursor();
+}
+
+void clearScreen() {
+    // TODO: memset
+    for (int i = 0; i < VGAWidth * VGAHeight; i++) {
+        textBuffer[i] = ' ';
+    }
+    terminalX = 0;
+    terminalY = 0;
+    updateCursor();
 }
