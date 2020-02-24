@@ -88,8 +88,8 @@ section .text
         mov     esp, stackTop ; set up stack
         mov     ebp, esp ; set up base pointer
         call    _init
-        push    edi
         push    ebx
+        push    edi
         call    archBoot ; go to C land to continue booting
         call    kernelMain ; Finally, let's go to the actual kernel!
         ; If kernelMain ever returns, spin forever

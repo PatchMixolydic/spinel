@@ -1,5 +1,5 @@
 #!/bin/sh
-SYSTEM_HEADER_PROJECTS="src"
+SYSTEM_HEADER_PROJECTS="src thirdparty/miscInc"
 PROJECTS="src"
 
 export MAKE="${MAKE:-make} -j`expr $(nproc) + 1`"
