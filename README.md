@@ -19,10 +19,7 @@ few reasons:
 * I know what I'm doing a bit better, so this might lead to cleaner code
 * I wanted to replace the memory management system, which might be quite messy with the
 old codebase
-* It gives me reason to replace the build system (I'm experimenting with Python right
-now)
-* I can use a third party libc instead of writing my own, at least to get started (I'm
-using newlib right now)
+* I can use a third party libc instead of writing my own, at least to get started
 * Spinel is no longer based on OSDev's "Meaty Skeleton" tutorial (which covers good
 practices for storing files, using a simple kernel that merely boots as an example).
 This allows me to replace the build system (as previously mentioned) and structure the
