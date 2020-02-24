@@ -54,7 +54,7 @@ all: spinel.elf
 
 spinel.elf: $(OBJS) $(ARCHDIR)/linker.ld
 	$(CC) -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(LINK_LIST)
-	grub-file --is-x86-multiboot spinel.elf
+	grub-file --is-x86-multiboot2 spinel.elf
 
 $(ARCHDIR)/core/crtbegin.o $(ARCHDIR)/core/crtend.o:
 	OBJ=`$(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=$(@F)` && cp "$$OBJ" $@

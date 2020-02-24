@@ -1,10 +1,9 @@
-MultibootModuleAlign equ 1 ; align modules on page boundaries
-MultibootMemoryInfo equ 1 << 1 ; provide a memory map
-MultibootMagic equ 0x1BADB002
-MultibootFlags equ MultibootModuleAlign | MultibootMemoryInfo
-MultibootChecksum equ -(MultibootMagic + MultibootFlags)
+MultibootMagic equ 0xE85250D6
+MultibootArch equ 0 ; i386 protected mode
 
 KernelOffset equ 0xC0000000
+
+; Paging flags
 PresentFlag equ 1
 ReadWriteFlag equ 1 << 1
 UserModeFlag equ 1 << 2
@@ -15,12 +14,25 @@ DirtyFlag equ 1 << 6
 LargePageFlag equ 1 << 7
 GlobalFlag equ 1 << 8
 
+; Tags
+EndTag equ 0
+
 ; Multiboot header
 section .multiboot
 align 4
-    dd MultibootMagic
-    dd MultibootFlags
-    dd MultibootChecksum
+    multiboot:
+        dd      MultibootMagic
+        dd      MultibootArch
+        ; Header length
+        dd      (multiboot - .end)
+        ; Checksum
+        dd      -(MultibootMagic + MultibootArch + (multiboot - .end))
+        ; Tags
+
+        dw      EndTag
+        dw      0
+        dd      8
+    .end:
 
 ; Data, uninitialized
 section .bss
@@ -74,6 +86,7 @@ section .text
     .pagingDone:
         ; We can't cut the identity mapping yet because of the multiboot struct
         mov     esp, stackTop ; set up stack
+        mov     ebp, esp ; set up base pointer
         call    _init
         push    edi
         push    ebx

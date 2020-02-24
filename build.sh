@@ -38,7 +38,7 @@ iso() {
     cp -R sysroot/* $TMPDIR
     cat > $TMPDIR/boot/grub/grub.cfg << EOF
 menuentry "spinel" {
-    multiboot /boot/spinel.elf
+    multiboot2 /boot/spinel.elf
 }
 EOF
     mkdir -p build
