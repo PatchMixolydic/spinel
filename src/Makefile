@@ -30,6 +30,7 @@ LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
 KERNEL_OBJS=\
 $(KERNEL_ARCH_OBJS) \
 kernel/kernelMain.o \
+misc/ansi.c \
 
 OBJS=\
 $(ARCHDIR)/core/crti.o \
