@@ -4,14 +4,14 @@
 // TODO: vararg panic when printf added
 void panic(char why[]);
 
-#ifndef DEBUG
-#define kassert(expr, msg) do {\
+#ifdef DEBUG
+#define kassert(expr) do {\
     if (!(expr)) {\
         panic("Assertion failed in " __FILE__ ": " #expr);\
     }\
 } while (0)
 #else
-#define kassert(expr, msg)
+#define kassert(expr)
 #endif
 
 #endif // ndef SPINEL_PANIC_H
