@@ -28,3 +28,23 @@ practices for storing files, using a simple kernel that merely boots as an examp
 This allows me to replace the build system (as previously mentioned) and structure the
 project as I see fit (which will probably be very similar anyway).
 
+You can see my current plans on the
+[projects page](https://github.com/Sparkpin/spinel/projects/1).
+
+## Building Spinel
+
+To build Spinel, you will need a cross compiler of some sort.
+[Here](https://wiki.osdev.org/GCC_Cross-Compiler) is a nice article on that. Currently,
+Spinel supports the i[3-7]86-elf targets. Eventually, it will get its own compiler
+target.
+
+Whenever you're ready, just run build.sh. It requires the aforementioned cross compiler,
+some variation of Make (GNU Make will work), and dialog. You can choose to build an ISO
+and launch QEMU from the build script. This will require QEMU, grub-mkrescue (probably
+via a GRUB package), and likely xorriso.
+
+## Using Spinel
+
+Spinel is not in a usable state at the moment. However, I hope to get to user mode as
+soon as I can. Realistically, Spinel will never be in a state that it could serve as
+one's daily driver operating system... but I can dream. :P
