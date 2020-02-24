@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <multiboot2.h>
+#include <spinel/panic.h>
 #include <spinel/tty.h>
 #include "../core/cpu.h"
 

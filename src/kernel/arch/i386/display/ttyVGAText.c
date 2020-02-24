@@ -1,5 +1,7 @@
 #include <stddef.h>
+#include <spinel/ansi.h>
 #include <spinel/tty.h>
+#include "../core/cpu.h"
 #include "../core/kernel.h"
 
 typedef uint16_t vgachar_t;
@@ -18,6 +20,8 @@ typedef enum {
 static const uint8_t VGABrightBit = 0x80; // 0b1000_0000
 static const unsigned int VGAWidth = 80;
 static const unsigned int VGAHeight = 25;
+static const uint16_t VGACursorCommandPort = 0x3D4;
+static const uint16_t VGACursorDataPort = 0x3D5;
 
 static vgachar_t* const textBuffer = (vgachar_t*)(KernelOffset + 0x000B8000);
 static unsigned int terminalX = 0, terminalY = 0;
@@ -50,6 +54,27 @@ static void newline() {
     }
 }
 
+void enableCursor() {
+    outByte(VGACursorCommandPort, 0x0A);
+    outByte(VGACursorDataPort, (inByte(VGACursorDataPort) & 0xC0) | 0xE);
+    outByte(VGACursorCommandPort, 0x0B);
+    outByte(VGACursorDataPort, (inByte(VGACursorDataPort) & 0xC0) | 0xF);
+}
+
+void disableCursor() {
+    outByte(VGACursorCommandPort, 0x0A);
+    outByte(VGACursorDataPort, 0x20);
+}
+
+void moveCursor(unsigned int x, unsigned int y) {
+    uint16_t newPos = y * VGAWidth + x;
+
+    outByte(VGACursorCommandPort, 0x0F);
+    outByte(VGACursorDataPort, (uint8_t)(newPos & 0xFF));
+    outByte(VGACursorCommandPort, 0x0E);
+    outByte(VGACursorDataPort, (uint8_t)(newPos >> 8));
+}
+
 // Put a character at the current position
 void putChar(char c) {
     switch (c) {
@@ -69,6 +94,11 @@ void putChar(char c) {
 
 void putString(char s[]) {
     for (int i = 0; s[i] != '\0'; i++) {
-        putChar(s[i]);
+        if (s[i] == '\x1B') {
+            i += parseANSIEscape(s + i);
+        } else {
+            putChar(s[i]);
+        }
     }
+    moveCursor(terminalX, terminalY);
 }
