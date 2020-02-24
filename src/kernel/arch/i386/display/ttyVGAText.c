@@ -38,12 +38,12 @@ static void newline() {
     if (terminalY >= VGAHeight) {
         // Scrolling time!
         // TODO: memcpy
-        for (int i = 0; i < VGAWidth * (VGAHeight - 1); i++) {
+        for (unsigned int i = 0; i < VGAWidth * (VGAHeight - 1); i++) {
             // Take the character from the next line
             textBuffer[i] = textBuffer[i + VGAWidth];
         }
         for (
-            int i = VGAWidth * (VGAHeight - 1);
+            unsigned int i = VGAWidth * (VGAHeight - 1);
             i < VGAWidth * VGAHeight;
             i++
         ) {
@@ -104,7 +104,7 @@ void putString(char s[]) {
 
 void clearScreen() {
     // TODO: memset
-    for (int i = 0; i < VGAWidth * VGAHeight; i++) {
+    for (unsigned int i = 0; i < VGAWidth * VGAHeight; i++) {
         textBuffer[i] = ' ';
     }
     terminalX = 0;

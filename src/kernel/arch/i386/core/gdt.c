@@ -34,7 +34,7 @@ typedef struct {
 
 typedef struct {
     uint16_t sizeMinusOne;
-    uint32_t offset;
+    uintptr_t offset;
 } __attribute__((packed)) GDTDescriptor;
 
 typedef struct {
@@ -67,11 +67,11 @@ static inline uint16_t gdtOffset(int entry) {
 void initGDT() {
     // Clear our data structures
     // TODO: memset
-    for (int i = 0; i < sizeof(GDTEntry) * 6; i++) {
+    for (size_t i = 0; i < sizeof(GDTEntry) * 6; i++) {
         // aaaaaaaaa! this will go away when we get memset
         *((uint8_t*)&gdt + i) = 0;
     }
-    for (int i = 0; i < sizeof(TaskStateSegment); i++) {
+    for (size_t i = 0; i < sizeof(TaskStateSegment); i++) {
         *((uint8_t*)&tss + i) = 0;
     }
 
@@ -114,6 +114,6 @@ void initGDT() {
 
     // Let's go
     gdtDesc.sizeMinusOne = sizeof(gdt) - 1;
-    gdtDesc.offset = gdt;
-    loadGDT(&gdtDesc);
+    gdtDesc.offset = (uintptr_t)gdt;
+    loadGDT((uintptr_t)&gdtDesc);
 }

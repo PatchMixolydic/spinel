@@ -1,6 +1,7 @@
+#include <spinel/cpu.h>
 #include <spinel/tty.h>
 
-void panic(const why[]) {
+void panic(char why[]) {
     disableCursor();
     putString("panic: ");
     putString(why);
