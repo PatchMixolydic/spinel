@@ -27,6 +27,10 @@ static vgachar_t* const textBuffer = (vgachar_t*)(KernelOffset + 0x000B8000);
 static unsigned int terminalX = 0, terminalY = 0;
 static uint8_t terminalColour = 0x0F;
 
+static inline void setTerminalColour(uint8_t fg, uint8_t bg) {
+    terminalColour = (fg << 4) | bg;
+}
+
 // Convert char to VGA char, using current colour
 static inline vgachar_t toVGAChar(char c) {
     return ((uint16_t)(terminalColour) << 8) | c;

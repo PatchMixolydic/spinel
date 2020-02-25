@@ -1,8 +1,6 @@
 #include <multiboot2.h>
 #include <stdint.h>
-#include <spinel/panic.h>
 #include <spinel/tty.h>
-#include "../core/cpu.h"
 #include "../core/gdt.h"
 #include "multibootProc.h"
 
