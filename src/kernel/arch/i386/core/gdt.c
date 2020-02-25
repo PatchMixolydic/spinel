@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "cpu.h"
+#include "gdt.h"
 
 static const uint8_t GDTPresent = 1 << 7;
 static const uint8_t GDTUserMode = 3 << 5;
@@ -14,15 +15,6 @@ static const uint8_t GDTPageGranularity = 1 << 7;
 static const uint8_t GDT32Bit = 1 << 6;
 static const uint8_t GDT64Bit = 1 << 5;
 
-typedef enum {
-    GDTNull = 0,
-    GDTKernelCode,
-    GDTKernelData,
-    GDTUserCode,
-    GDTUserData,
-    GDTTSS
-} GDTEntries;
-
 typedef struct {
     uint16_t limitLow;
     uint16_t baseLow;
@@ -30,12 +22,12 @@ typedef struct {
     uint8_t access;
     uint8_t flagsLimitHigh;
     uint8_t baseHigh;
-} __attribute__((packed)) GDTEntry;
+} __attribute__((packed)) GDTDescriptor;
 
 typedef struct {
     uint16_t sizeMinusOne;
     uintptr_t offset;
-} __attribute__((packed)) GDTDescriptor;
+} __attribute__((packed)) GDTPointer;
 
 typedef struct {
     uint16_t link, reserved0;
@@ -57,17 +49,17 @@ typedef struct {
 } __attribute__((packed)) TaskStateSegment;
 
 static TaskStateSegment tss;
-static GDTEntry gdt[6];
-static GDTDescriptor gdtDesc;
+static GDTDescriptor gdt[6];
+static GDTPointer gdtPointer;
 
-static inline uint16_t gdtOffset(int entry) {
-    return entry * 0x8;
+uint16_t getGDTOffset(GDTEntry entry) {
+    return (uint16_t)(entry * 0x8);
 }
 
 void initGDT(void) {
     // Clear our data structures
     // TODO: memset
-    for (size_t i = 0; i < sizeof(GDTEntry) * 6; i++) {
+    for (size_t i = 0; i < sizeof(GDTDescriptor) * 6; i++) {
         // aaaaaaaaa! this will go away when we get memset
         *((uint8_t*)&gdt + i) = 0;
     }
@@ -75,27 +67,27 @@ void initGDT(void) {
         *((uint8_t*)&tss + i) = 0;
     }
 
-    gdt[GDTKernelCode] = (GDTEntry){
+    gdt[GDTKernelCode] = (GDTDescriptor){
         0xFFFF, 0, 0, GDTPresent | GDTNotTSS | GDTExecutable | GDTReadWrite,
         GDTPageGranularity | GDT32Bit | 0xF, 0
     };
-    gdt[GDTKernelData] = (GDTEntry){
+    gdt[GDTKernelData] = (GDTDescriptor){
         0xFFFF, 0, 0, GDTPresent | GDTNotTSS | GDTReadWrite,
         GDTPageGranularity | GDT32Bit | 0xF, 0
     };
-    gdt[GDTUserCode] = (GDTEntry){
+    gdt[GDTUserCode] = (GDTDescriptor){
         0xFFFF, 0, 0,
         GDTPresent | GDTUserMode | GDTNotTSS | GDTExecutable | GDTReadWrite,
         GDTPageGranularity | GDT32Bit | 0xF, 0
     };
-    gdt[GDTUserData] = (GDTEntry){
+    gdt[GDTUserData] = (GDTDescriptor){
         0xFFFF, 0, 0,
         GDTPresent | GDTUserMode | GDTNotTSS | GDTReadWrite,
         GDTPageGranularity | GDT32Bit | 0xF, 0
     };
 
     // TSS descriptor
-    GDTEntry* tssEntry = &gdt[GDTTSS];
+    GDTDescriptor* tssEntry = &gdt[GDTTSS];
     size_t tssSize = sizeof(tss);
     uintptr_t tssAddr = (uintptr_t)&tss;
     tssEntry->baseLow = tssAddr & 0xFFFF;
@@ -108,12 +100,12 @@ void initGDT(void) {
     tssEntry->access = GDTPresent | GDTExecutable | GDTAccessed;
 
     // Initialize the TSS
-    tss.ss0 = gdtOffset(GDTKernelData);
+    tss.ss0 = getGDTOffset(GDTKernelData);
     tss.esp0 = getESP(); // Kernel stack to use -- this will get replaced upon context switch
     tss.iopb = tssSize; // Apparently this value works just fine
 
     // Let's go
-    gdtDesc.sizeMinusOne = sizeof(gdt) - 1;
-    gdtDesc.offset = (uintptr_t)gdt;
-    loadGDT((uintptr_t)&gdtDesc);
+    gdtPointer.sizeMinusOne = sizeof(gdt) - 1;
+    gdtPointer.offset = (uintptr_t)gdt;
+    loadGDT((uintptr_t)&gdtPointer);
 }

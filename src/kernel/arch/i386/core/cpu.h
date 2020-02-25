@@ -17,4 +17,7 @@ void loadIDT(uintptr_t loc);
 
 uintptr_t getESP(void);
 
+void enableInterrupts(void);
+void disableInterrupts(void);
+
 #endif // ndef CPU_H

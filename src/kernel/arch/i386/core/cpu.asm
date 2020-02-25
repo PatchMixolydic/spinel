@@ -9,6 +9,8 @@ section .text
     global loadGDT:function
     global loadIDT:function
     global getESP:function
+    global enableInterrupts:function
+    global disableInterrupts:function
 
     haltCPU:
         hlt
@@ -68,4 +70,18 @@ section .text
 
     getESP:
         mov     eax, esp
+        ret
+
+    enableInterrupts:
+        sti
+        in      eax, 0x70
+        or      eax, 0x80 ; turn on NMI
+        out     0x70, eax
+        ret
+
+    disableInterrupts:
+        cli
+        in      eax, 0x70
+        and     eax, 0x7F ; turn off NMI
+        out     0x70, eax
         ret
