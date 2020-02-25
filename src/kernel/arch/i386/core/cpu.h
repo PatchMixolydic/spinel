@@ -15,6 +15,6 @@ void outDWord(uintptr_t port, uint32_t data);
 void loadGDT(uintptr_t loc);
 void loadIDT(uintptr_t loc);
 
-uintptr_t getESP();
+uintptr_t getESP(void);
 
 #endif // ndef CPU_H

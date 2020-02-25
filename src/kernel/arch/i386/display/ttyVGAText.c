@@ -36,7 +36,7 @@ static inline vgachar_t toVGAChar(char c) {
     return ((uint16_t)(terminalColour) << 8) | c;
 }
 
-static void newline() {
+static void newline(void) {
     terminalX = 0;
     terminalY++;
     if (terminalY >= VGAHeight) {
@@ -58,19 +58,19 @@ static void newline() {
     }
 }
 
-void enableCursor() {
+void enableCursor(void) {
     outByte(VGACursorCommandPort, 0x0A);
     outByte(VGACursorDataPort, (inByte(VGACursorDataPort) & 0xC0) | 0xE);
     outByte(VGACursorCommandPort, 0x0B);
     outByte(VGACursorDataPort, (inByte(VGACursorDataPort) & 0xC0) | 0xF);
 }
 
-void disableCursor() {
+void disableCursor(void) {
     outByte(VGACursorCommandPort, 0x0A);
     outByte(VGACursorDataPort, 0x20);
 }
 
-void updateCursor() {
+void updateCursor(void) {
     uint16_t newPos = terminalY * VGAWidth + terminalX;
     outByte(VGACursorCommandPort, 0x0F);
     outByte(VGACursorDataPort, (uint8_t)(newPos & 0xFF));
@@ -106,7 +106,7 @@ void putString(char s[]) {
     updateCursor();
 }
 
-void clearScreen() {
+void clearScreen(void) {
     // TODO: memset
     for (unsigned int i = 0; i < VGAWidth * VGAHeight; i++) {
         textBuffer[i] = ' ';

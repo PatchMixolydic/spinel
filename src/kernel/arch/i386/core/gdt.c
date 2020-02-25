@@ -64,7 +64,7 @@ static inline uint16_t gdtOffset(int entry) {
     return entry * 0x8;
 }
 
-void initGDT() {
+void initGDT(void) {
     // Clear our data structures
     // TODO: memset
     for (size_t i = 0; i < sizeof(GDTEntry) * 6; i++) {

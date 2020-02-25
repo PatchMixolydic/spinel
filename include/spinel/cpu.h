@@ -3,6 +3,6 @@
 
 #include <stdint.h>
 
-void haltCPU();
+void haltCPU(void);
 
 #endif // ndef SPINEL_CPU_H
