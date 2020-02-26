@@ -29,14 +29,16 @@ extern void isr21(void); extern void isr22(void); extern void isr23(void);
 extern void isr24(void); extern void isr25(void); extern void isr26(void);
 extern void isr27(void); extern void isr28(void); extern void isr29(void);
 extern void isr30(void); extern void isr31(void);
-/*
-extern void irq0(void); extern void irq1(void); extern void irq2(void);
-extern void irq3(void); extern void irq4(void); extern void irq5(void);
-extern void irq6(void); extern void irq7(void); extern void irq8(void);
-extern void irq9(void); extern void irq10(void); extern void irq11(void);
-extern void irq12(void); extern void irq13(void); extern void irq14(void);
-extern void irq15(void);
-*/
+
+extern void irqISR0(void); extern void irqISR1(void);
+extern void irqISR2(void); extern void irqISR3(void);
+extern void irqISR4(void); extern void irqISR5(void);
+extern void irqISR6(void); extern void irqISR7(void);
+extern void irqISR8(void); extern void irqISR9(void);
+extern void irqISR10(void); extern void irqISR11(void);
+extern void irqISR12(void); extern void irqISR13(void);
+extern void irqISR14(void); extern void irqISR15(void);
+
 extern void isr80(void);
 
 #endif // ndef INTERRUPTS_H

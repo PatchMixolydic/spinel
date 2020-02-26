@@ -1,11 +1,5 @@
 section .text
     global haltCPU:function
-    global inByte:function
-    global outByte:function
-    global inWord:function
-    global outWord:function
-    global inDWord:function
-    global outDWord:function
     global loadGDT:function
     global loadIDT:function
     global getESP:function
@@ -14,39 +8,6 @@ section .text
 
     haltCPU:
         hlt
-        ret
-
-    inByte:
-        mov     dx, [esp + 4] ; address
-        in      al, dx
-        ret
-
-    outByte:
-        mov     al, [esp + 4] ; data
-        mov     dx, [esp + 4] ; address
-        out     dx, al
-        ret
-
-    inWord:
-        mov     dx, [esp + 4] ; address
-        in      ax, dx
-        ret
-
-    outWord:
-        mov     ax, [esp + 4] ; data
-        mov     dx, [esp + 4] ; address
-        out     dx, ax
-        ret
-
-    inDWord:
-        mov     dx, [esp + 4] ; address
-        in      eax, dx
-        ret
-
-    outDWord:
-        mov     eax, [esp + 4] ; data
-        mov     dx, [esp + 4] ; address
-        out     dx, eax
         ret
 
     loadGDT:

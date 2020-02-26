@@ -17,6 +17,18 @@
         jmp     isrCommon
 %endmacro
 
+%macro irq 1
+    ; args: number
+    global irqISR%1:function
+    extern irq%1
+    irqISR%1:
+        pushad
+        cld
+        call    irq%1
+        popad
+        iretd
+%endmacro
+
 section .text
     extern interruptHandler
 
@@ -51,4 +63,9 @@ section .text
     %endrep
     isrError    30
     isrNoError  31
+    %assign i 0
+    %rep    16
+        irq i
+        %assign i i+1
+    %endrep
     isrNoError  80

@@ -4,24 +4,36 @@
 #include "../core/gdt.h"
 #include "interrupts.h"
 
-#define RegisterInterrupt(num) do {\
+#define RegisterISR(num) do {\
     uintptr_t offset = (uintptr_t)isr##num;\
     idt[num] = (InterruptDesc){\
         (uint16_t)(offset & 0xFFFF),\
         getGDTOffset(GDTKernelCode),\
         0,\
         /* present, ring 0, interrupt gate*/\
-        0x8E, /* 0b0000_0000_1000_1110 */\
+        0x8E, /* 0b1000_1110 */\
         (uint16_t)(offset >> 16)\
     };\
 } while(0)
 
-#define RegisterTenInterrupts(tensPlace) do {\
-    RegisterInterrupt(tensPlace##0); RegisterInterrupt(tensPlace##1);\
-    RegisterInterrupt(tensPlace##2); RegisterInterrupt(tensPlace##3);\
-    RegisterInterrupt(tensPlace##4); RegisterInterrupt(tensPlace##5);\
-    RegisterInterrupt(tensPlace##6); RegisterInterrupt(tensPlace##7);\
-    RegisterInterrupt(tensPlace##8); RegisterInterrupt(tensPlace##9);\
+#define RegisterIRQ(num) do {\
+    uintptr_t offset = (uintptr_t)irqISR##num;\
+    idt[num + 32] = (InterruptDesc){\
+        (uint16_t)(offset & 0xFFFF),\
+        getGDTOffset(GDTKernelCode),\
+        0,\
+        /* present, ring 0, interrupt gate*/\
+        0x8E, /* 0b1000_1110 */\
+        (uint16_t)(offset >> 16)\
+    };\
+} while(0)
+
+#define RegisterTenISRs(tensPlace) do {\
+    RegisterISR(tensPlace##0); RegisterISR(tensPlace##1);\
+    RegisterISR(tensPlace##2); RegisterISR(tensPlace##3);\
+    RegisterISR(tensPlace##4); RegisterISR(tensPlace##5);\
+    RegisterISR(tensPlace##6); RegisterISR(tensPlace##7);\
+    RegisterISR(tensPlace##8); RegisterISR(tensPlace##9);\
 } while(0)
 
 typedef struct {
@@ -39,25 +51,32 @@ typedef struct {
 } __attribute__((__packed__)) IDTPointer;
 
 // There can be a maximum of 256 interrupts.
-const size_t IDTSize = (256 * sizeof(InterruptDesc));
 static InterruptDesc idt[256];
-static IDTPointer idtp = {IDTSize - 1, idt};
+static IDTPointer idtp = {sizeof(idt) - 1, idt};
 
 void initIDT(void) {
     // TODO: memset
     // Let's go ahead and clear the IDT lest anything strange happen
-    for (size_t i = 0; i < IDTSize; i++) {
+    for (size_t i = 0; i < sizeof(idt); i++) {
         ((uint8_t*)idt)[i] = 0;
     }
     // nb. C thinks anything starting with 0 is an octal constant
-    RegisterTenInterrupts(/*0*/);
-    RegisterTenInterrupts(1);
-    RegisterTenInterrupts(2);
-    RegisterInterrupt(30);
-    RegisterInterrupt(31);
-    RegisterInterrupt(80);
+    RegisterTenISRs(/*0*/);
+    RegisterTenISRs(1);
+    RegisterTenISRs(2);
+    RegisterISR(30);
+    RegisterISR(31);
+    RegisterISR(80);
+
+    RegisterIRQ(0); RegisterIRQ(1); RegisterIRQ(2);
+    RegisterIRQ(3); RegisterIRQ(4); RegisterIRQ(5);
+    RegisterIRQ(6); RegisterIRQ(7); RegisterIRQ(8);
+    RegisterIRQ(9); RegisterIRQ(10); RegisterIRQ(11);
+    RegisterIRQ(12); RegisterIRQ(13); RegisterIRQ(14);
+    RegisterIRQ(15);
+
     loadIDT((uintptr_t)&idtp);
 }
 
-#undef RegisterTenInterrupts
-#undef RegisterInterrupt
+#undef RegisterTenISRs
+#undef RegisterISR

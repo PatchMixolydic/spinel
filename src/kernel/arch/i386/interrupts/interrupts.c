@@ -1,4 +1,12 @@
+#include <spinel/panic.h>
+#include "../core/cpu.h"
+#include "../peripherals/pic.h"
 #include "interrupts.h"
+
+#define IRQPlaceholder(n) \
+void irq##n(void) {\
+    picEndOfInterrupt(n);\
+}\
 
 static const char ExceptionDescriptions[][32] = {
     "Division by zero",
@@ -46,3 +54,26 @@ void interruptHandler(InterruptInfo info) {
     }
     panic("Interrupt!");
 }
+
+IRQPlaceholder(0)
+
+void irq1(void) {
+    uint8_t asdf = inByte(0x60);
+    putChar('A');
+    picEndOfInterrupt(1);
+}
+
+IRQPlaceholder(2)
+IRQPlaceholder(3)
+IRQPlaceholder(4)
+IRQPlaceholder(5)
+IRQPlaceholder(6)
+IRQPlaceholder(7)
+IRQPlaceholder(8)
+IRQPlaceholder(9)
+IRQPlaceholder(10)
+IRQPlaceholder(11)
+IRQPlaceholder(12)
+IRQPlaceholder(13)
+IRQPlaceholder(14)
+IRQPlaceholder(15)
