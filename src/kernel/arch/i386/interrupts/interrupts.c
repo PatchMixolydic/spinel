@@ -70,7 +70,7 @@ IRQPlaceholder(0)
 
 void irq1(void) {
     uint8_t scancode = inByte(0x60);
-    kprintf("Got scan code 0x0x%X\n", scancode);
+    kprintf("Got scan code 0x%X\n", scancode);
     picEndOfInterrupt(1);
 }
 
