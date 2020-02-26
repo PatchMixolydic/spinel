@@ -6,7 +6,7 @@ void panic(const char why[], ...);
 #ifdef DEBUG
 #define kassert(expr) do {\
     if (!(expr)) {\
-        panic("Assertion failed in " __FILE__ ": " #expr);\
+        panic("Assertion failed at " __FILE__ ":%d: " #expr, __LINE__);\
     }\
 } while (0)
 #else
