@@ -48,7 +48,7 @@ EOF
 qemu() {
     iso
     qemu-system-$(./tripletToArch.sh $HOST) -cdrom build/spinel.iso -s -m 512 \
-        -soundhw pcspk
+        -soundhw pcspk -enable-kvm
 }
 
 if [ "$1" = "clean" ] || [ "$1" = "headers" ] || [ "$1" = "build" ] || \
