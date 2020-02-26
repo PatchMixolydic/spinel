@@ -1,3 +1,4 @@
+#include <spinel/kernelLog.h>
 #include <spinel/panic.h>
 #include "../core/cpu.h"
 #include "../peripherals/pic.h"
@@ -58,8 +59,8 @@ void interruptHandler(InterruptInfo info) {
 IRQPlaceholder(0)
 
 void irq1(void) {
-    uint8_t asdf = inByte(0x60);
-    putChar('A');
+    uint8_t scancode = inByte(0x60);
+    kprintf("Got scan code 0x%X\n", scancode);
     picEndOfInterrupt(1);
 }
 

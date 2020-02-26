@@ -95,8 +95,19 @@ void putChar(char c) {
     }
 }
 
-void putString(char s[]) {
+void putString(const char s[]) {
     for (int i = 0; s[i] != '\0'; i++) {
+        if (s[i] == '\x1B') {
+            i += parseANSIEscape(s + i);
+        } else {
+            putChar(s[i]);
+        }
+    }
+    updateCursor();
+}
+
+void putStringLen(const char s[], size_t length) {
+    for (int i = 0; i < length; i++) {
         if (s[i] == '\x1B') {
             i += parseANSIEscape(s + i);
         } else {

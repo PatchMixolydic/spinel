@@ -29,6 +29,7 @@ LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
 
 KERNEL_OBJS=\
 $(KERNEL_ARCH_OBJS) \
+kernel/core/kernelLog.o \
 kernel/core/kernelMain.o \
 kernel/core/panic.o \
 misc/ansi.o \

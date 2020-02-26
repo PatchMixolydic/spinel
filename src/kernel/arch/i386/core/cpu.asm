@@ -22,8 +22,8 @@ section .text
         ret
 
     outByte:
-        mov     al, [esp + 8] ; data
         mov     dx, [esp + 4] ; address
+        mov     al, [esp + 8] ; data
         out     dx, al
         ret
 
@@ -33,8 +33,8 @@ section .text
         ret
 
     outWord:
-        mov     ax, [esp + 8] ; data
         mov     dx, [esp + 4] ; address
+        mov     ax, [esp + 8] ; data
         out     dx, ax
         ret
 
@@ -44,8 +44,8 @@ section .text
         ret
 
     outDWord:
-        mov     eax, [esp + 8] ; data
         mov     dx, [esp + 4] ; address
+        mov     eax, [esp + 8] ; data
         out     dx, eax
         ret
 
