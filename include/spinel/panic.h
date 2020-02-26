@@ -1,8 +1,7 @@
 #ifndef SPINEL_PANIC_H
 #define SPINEL_PANIC_H
 
-// TODO: vararg panic when printf added
-void panic(char why[]);
+void panic(const char why[], ...);
 
 #ifdef DEBUG
 #define kassert(expr) do {\

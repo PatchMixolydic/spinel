@@ -80,11 +80,8 @@ static char* kitoa(int value, char buf[], size_t bufSize, int base, bool isUnsig
     return buf;
 }
 
-int kprintf(const char* format, ...) {
-    int written = 0;
-
-	va_list parameters;
-	va_start(parameters, format);
+int kvprintf(const char* format, va_list parameters) {
+	int written = 0;
 	while (*format != '\0') {
 		size_t maxRemaining = INT_MAX - written;
 
@@ -218,7 +215,6 @@ int kprintf(const char* format, ...) {
 				format -= formatSize;
 				formatSize++; // account for this token
 				if (maxRemaining < formatSize) {
-					// TODO: Set errno to EOVERFLOW.
 					return -1;
 				}
 				putStringLen(format, formatSize);
@@ -229,6 +225,13 @@ int kprintf(const char* format, ...) {
 		}
 	} // while (*format != '\0')
 
+	return written;
+}
+
+int kprintf(const char* format, ...) {
+	va_list parameters;
+	va_start(parameters, format);
+	int written = kvprintf(format, parameters);
 	va_end(parameters);
     return written;
 }

@@ -11,7 +11,7 @@ typedef struct {
     uint32_t interruptNum;
     uint32_t edi, esi, ebp, esp;
     uint32_t ebx, edx, ecx, eax;
-    uint32_t eip, cs, eflags;
+    uint32_t errorCode, eip, cs, eflags;
 } InterruptInfo;
 
 void interruptHandler(InterruptInfo info);

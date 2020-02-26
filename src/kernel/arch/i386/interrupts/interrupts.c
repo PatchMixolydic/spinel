@@ -48,19 +48,29 @@ typedef enum {
 } IntelExceptions;
 
 void interruptHandler(InterruptInfo info) {
-    // TODO: vararg panic
+    const char* message = "Unknown interrupt";
     if (info.interruptNum < 32) {
         // CPU exception
-        panic(ExceptionDescriptions[info.interruptNum]);
+        message = ExceptionDescriptions[info.interruptNum];
     }
-    panic("Interrupt!");
+    panic(
+        "%s\n"
+        "eax: 0x%X    ebx: 0x%X    ecx: 0x%X    edx: 0x%X\n"
+        "esp: 0x%X    ebp: 0x%X    esi: 0x%X    edi: 0x%X\n"
+        "eip: 0x%X    cs: 0x%X     eflags: 0x%X\n"
+        "interrupt: 0x%X    error code: 0x%X",
+        message, info.eax, info.ebx, info.ecx, info.edx,
+        info.esp, info.ebp, info.esi, info.edi,
+        info.eip, info.cs, info.eflags, info.interruptNum,
+        info.errorCode
+    );
 }
 
 IRQPlaceholder(0)
 
 void irq1(void) {
     uint8_t scancode = inByte(0x60);
-    kprintf("Got scan code 0x%X\n", scancode);
+    kprintf("Got scan code 0x0x%X\n", scancode);
     picEndOfInterrupt(1);
 }
 
