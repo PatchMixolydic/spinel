@@ -3,13 +3,9 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <spinel/kernelLog.h>
 #include <spinel/tty.h>
 
-// A lot of mess in here due to no C library
-// I'll get it sorted eventually
-
-#define BufferSize 80
+#define BufferSize 128
 
 static const char Digits[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 static const unsigned int MinBase = 2;
@@ -25,8 +21,9 @@ static size_t kstrlen(const char* str) {
 
 /*
  * Handles base2-base36 gracefully
+ * TODO: probably move this
  */
-static char* kitoa(int value, char buf[], size_t bufSize, int base, bool isUnsigned) {
+static char* _itoa(int value, char buf[], size_t bufSize, unsigned int base, bool isUnsigned) {
     size_t i = 0;
     unsigned int valueAsUnsigned = value;
 
@@ -80,7 +77,7 @@ static char* kitoa(int value, char buf[], size_t bufSize, int base, bool isUnsig
     return buf;
 }
 
-int kvprintf(const char* format, va_list parameters) {
+int vprintf(const char* format, va_list parameters) {
 	int written = 0;
 	while (*format != '\0') {
 		size_t maxRemaining = INT_MAX - written;
@@ -138,7 +135,7 @@ int kvprintf(const char* format, va_list parameters) {
 				format++;
 				int number = va_arg(parameters, int);
 				char buf[BufferSize];
-				kitoa(number, buf, BufferSize, 10, false);
+				_itoa(number, buf, BufferSize, 10, false);
 				size_t trueLen = kstrlen(buf);
 				if (maxRemaining < trueLen) {
 					return -1;
@@ -153,7 +150,7 @@ int kvprintf(const char* format, va_list parameters) {
 				format++;
 				int number = va_arg(parameters, int);
 				char buf[BufferSize];
-				kitoa(number, buf, BufferSize, 10, true);
+				_itoa(number, buf, BufferSize, 10, true);
 				size_t trueLen = kstrlen(buf);
 				if (maxRemaining < trueLen) {
 					return -1;
@@ -168,10 +165,9 @@ int kvprintf(const char* format, va_list parameters) {
 				format++;
 				int number = va_arg(parameters, int);
 				char buf[BufferSize];
-				kitoa(number, buf, BufferSize, 8, true);
+				_itoa(number, buf, BufferSize, 8, true);
 				size_t trueLen = kstrlen(buf);
 				if (maxRemaining < trueLen) {
-					// TODO: Set errno to EOVERFLOW.
 					return -1;
 				}
 				putString(buf);
@@ -180,12 +176,12 @@ int kvprintf(const char* format, va_list parameters) {
 			}
 
 			// hexidecimal number
-			case 'X': // only uppercase letters are supported
+			case 'X':
 			case 'x': {
 				format++;
 				int number = va_arg(parameters, int);
 				char buf[BufferSize];
-				kitoa(number, buf, BufferSize, 16, true);
+				_itoa(number, buf, BufferSize, 16, true);
 				size_t trueLen = kstrlen(buf);
 				if (maxRemaining < trueLen) {
 					return -1;
@@ -200,7 +196,7 @@ int kvprintf(const char* format, va_list parameters) {
 				format++;
 				uintptr_t pointer = (uintptr_t)va_arg(parameters, void*);
 				char buf[BufferSize];
-				kitoa(pointer, buf, BufferSize, 16, true);
+				_itoa(pointer, buf, BufferSize, 16, true);
 				size_t trueLen = kstrlen(buf);
 				if (maxRemaining < trueLen) {
 					return -1;
@@ -228,10 +224,10 @@ int kvprintf(const char* format, va_list parameters) {
 	return written;
 }
 
-int kprintf(const char* format, ...) {
+int printf(const char* format, ...) {
 	va_list parameters;
 	va_start(parameters, format);
-	int written = kvprintf(format, parameters);
+	int written = vprintf(format, parameters);
 	va_end(parameters);
     return written;
 }

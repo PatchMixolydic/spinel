@@ -16,7 +16,7 @@ INCLUDEDIR ?= $(PREFIX)/include
 CFLAGS := $(CFLAGS) -ffreestanding -Wall -Wextra -Wpedantic
 CPPFLAGS := $(CPPFLAGS) -Iinclude
 LIBCKERN_CFLAGS := $(CFLAGS)
-LIBCKERN_CPPFLAGS := $(CPPFLAGS) -D__is_libk
+LIBCKERN_CPPFLAGS := $(CPPFLAGS) -D__LIBCKERN
 
 ARCHDIR = arch/$(HOSTARCH)
 
@@ -30,6 +30,7 @@ LIBCKERN_CPPFLAGS := $(LIBCKERN_CPPFLAGS) $(LIBC_ARCH_CPPFLAGS)
 FREESTANDING_OBJS = \
 $(LIBC_ARCH_FREESTANDING_OBJS) \
 ctype/isdigit.o \
+stdio/printf.o \
 
 HOSTED_OBJS = \
 $(LIBC_ARCH_HOSTED_OBJS) \
@@ -54,13 +55,13 @@ libckern.a: $(LIBCKERN_OBJS)
 	$(AR) rcs $@ $(LIBCKERN_OBJS)
 
 .c.o:
-	$(CC) -MD -c $< -o $@ -std=gnu11 $(CFLAGS) $(CPPFLAGS)
+	$(CC) -MD -c $< -o $@ -std=c11 $(CFLAGS) $(CPPFLAGS)
 
 .asm.o:
 	$(NASM) -f elf32 -o $@ $<
 
 .c.libckern.o:
-	$(CC) -MD -c $< -o $@ -std=gnu11 $(LIBCKERN_CFLAGS) $(LIBCKERN_CPPFLAGS)
+	$(CC) -MD -c $< -o $@ -std=c11 $(LIBCKERN_CFLAGS) $(LIBCKERN_CPPFLAGS)
 
 .asm.libckern.o:
 	$(NASM) -f elf32 -o $@ $<

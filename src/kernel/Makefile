@@ -14,7 +14,7 @@ BOOTDIR ?= $(EXEC_PREFIX)/boot
 INCLUDEDIR ?= $(PREFIX)/include
 
 CFLAGS := $(CFLAGS) -ffreestanding -Wall -Wextra -Wpedantic
-CPPFLAGS := $(CPPFLAGS) -D__is_kernel -Iinclude
+CPPFLAGS := $(CPPFLAGS) -D__Kernel -Iinclude
 LDFLAGS := $(LDFLAGS)
 LIBS := $(LIBS) -nostdlib -lgcc -lckern
 
@@ -29,7 +29,6 @@ LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
 
 KERNEL_OBJS=\
 $(KERNEL_ARCH_OBJS) \
-core/kernelLog.o \
 core/kernelMain.o \
 core/panic.o\
 ../misc/ansi.o
