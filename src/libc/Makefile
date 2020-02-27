@@ -31,6 +31,9 @@ FREESTANDING_OBJS = \
 $(LIBC_ARCH_FREESTANDING_OBJS) \
 ctype/isdigit.o \
 stdio/printf.o \
+string/memcmp.o \
+string/memmove.o \
+string/strlen.o \
 
 HOSTED_OBJS = \
 $(LIBC_ARCH_HOSTED_OBJS) \

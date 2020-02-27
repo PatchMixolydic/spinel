@@ -41,18 +41,14 @@ static void newline(void) {
     terminalY++;
     if (terminalY >= VGAHeight) {
         // Scrolling time!
-        // TODO: memcpy
-        for (unsigned int i = 0; i < VGAWidth * (VGAHeight - 1); i++) {
-            // Take the character from the next line
-            textBuffer[i] = textBuffer[i + VGAWidth];
-        }
-        for (
-            unsigned int i = VGAWidth * (VGAHeight - 1);
-            i < VGAWidth * VGAHeight;
-            i++
-        ) {
-            // Clear the bottom line
-            textBuffer[i] = toVGAChar(' ');
+        for (unsigned int i = 0; i < VGAWidth * VGAHeight; i++) {
+            if (i < VGAWidth* (VGAHeight - 1)) {
+                // Take the character from the next line
+                textBuffer[i] = textBuffer[i + VGAWidth];
+            } else {
+                // Clear the bottom line
+                textBuffer[i] = toVGAChar(' ');
+            }
         }
         terminalY = VGAHeight - 1;
     }
@@ -118,9 +114,8 @@ void putStringLen(const char s[], size_t length) {
 }
 
 void clearScreen(void) {
-    // TODO: memset
     for (unsigned int i = 0; i < VGAWidth * VGAHeight; i++) {
-        textBuffer[i] = ' ';
+        textBuffer[i] = toVGAChar(' ');
     }
     terminalX = 0;
     terminalY = 0;

@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 #include "cpu.h"
 #include "gdt.h"
 
@@ -58,14 +59,8 @@ uint16_t getGDTOffset(GDTEntry entry) {
 
 void initGDT(void) {
     // Clear our data structures
-    // TODO: memset
-    for (size_t i = 0; i < sizeof(GDTDescriptor) * 6; i++) {
-        // aaaaaaaaa! this will go away when we get memset
-        *((uint8_t*)&gdt + i) = 0;
-    }
-    for (size_t i = 0; i < sizeof(TaskStateSegment); i++) {
-        *((uint8_t*)&tss + i) = 0;
-    }
+    memset((void*)gdt, 0, sizeof(GDTDescriptor) * 6);
+    memset((void*)&tss, 0, sizeof(TaskStateSegment));
 
     gdt[GDTKernelCode] = (GDTDescriptor){
         0xFFFF, 0, 0, GDTPresent | GDTNotTSS | GDTExecutable | GDTReadWrite,

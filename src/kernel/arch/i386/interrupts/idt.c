@@ -55,11 +55,8 @@ static InterruptDesc idt[256];
 static IDTPointer idtp = {sizeof(idt) - 1, idt};
 
 void initIDT(void) {
-    // TODO: memset
     // Let's go ahead and clear the IDT lest anything strange happen
-    for (size_t i = 0; i < sizeof(idt); i++) {
-        ((uint8_t*)idt)[i] = 0;
-    }
+    memset((void*)idt, 0, sizeof(idt));
     // nb. C thinks anything starting with 0 is an octal constant
     RegisterTenISRs(/*0*/);
     RegisterTenISRs(1);
