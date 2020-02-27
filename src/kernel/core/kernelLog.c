@@ -27,7 +27,7 @@ static size_t kstrlen(const char* str) {
  * Handles base2-base36 gracefully
  */
 static char* kitoa(int value, char buf[], size_t bufSize, int base, bool isUnsigned) {
-    int i = 0;
+    size_t i = 0;
     unsigned int valueAsUnsigned = value;
 
     if ((base > MaxBase || base < MinBase)) {

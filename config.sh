@@ -1,6 +1,6 @@
 #!/bin/sh
-SYSTEM_HEADER_PROJECTS="src thirdparty/miscInc"
-PROJECTS="src"
+SYSTEM_HEADER_PROJECTS="src/libc src/kernel thirdparty/miscInc"
+PROJECTS="src/libc src/kernel"
 
 export MAKE="${MAKE:-make} -j`expr $(nproc) + 1`"
 export HOST=${HOST:-`./defaultHost.sh`}

@@ -1,6 +1,6 @@
-DEFAULT_HOST != ../defaultHost.sh
+DEFAULT_HOST != ../../defaultHost.sh
 HOST ?= DEFAULT_HOST
-HOSTARCH != ../tripletToArch.sh $(HOST)
+HOSTARCH != ../../tripletToArch.sh $(HOST)
 
 CFLAGS ?= -O2 -g
 CPPFLAGS ?=
@@ -16,9 +16,9 @@ INCLUDEDIR ?= $(PREFIX)/include
 CFLAGS := $(CFLAGS) -ffreestanding -Wall -Wextra -Wpedantic
 CPPFLAGS := $(CPPFLAGS) -D__is_kernel -Iinclude
 LDFLAGS := $(LDFLAGS)
-LIBS := $(LIBS) -nostdlib -lgcc # -lc -lm -lg -lnosys
+LIBS := $(LIBS) -nostdlib -lgcc -lckern
 
-ARCHDIR = kernel/arch/$(HOSTARCH)
+ARCHDIR = arch/$(HOSTARCH)
 
 include $(ARCHDIR)/make.config
 
@@ -29,10 +29,10 @@ LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
 
 KERNEL_OBJS=\
 $(KERNEL_ARCH_OBJS) \
-kernel/core/kernelLog.o \
-kernel/core/kernelMain.o \
-kernel/core/panic.o \
-misc/ansi.o \
+core/kernelLog.o \
+core/kernelMain.o \
+core/panic.o\
+../misc/ansi.o
 
 OBJS=\
 $(ARCHDIR)/core/crti.o \
@@ -77,7 +77,7 @@ install: install-headers install-kernel
 
 install-headers:
 	mkdir -p $(DESTDIR)$(INCLUDEDIR)
-	cp -R --preserve=timestamps ../include/. $(DESTDIR)$(INCLUDEDIR)/.
+	cp -R --preserve=timestamps include/. $(DESTDIR)$(INCLUDEDIR)/.
 
 install-kernel: spinel.elf
 	mkdir -p $(DESTDIR)$(BOOTDIR)

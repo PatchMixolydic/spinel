@@ -1,6 +1,6 @@
 #include <spinel/ansi.h>
 
-// TODO: This might go well in a library -- libspinel or something? libspinelansi?
+// TODO: This might go well in a library -- libspinel or something?
 
 int parseANSIEscape(const char s[]) {
     if(s[0] != '\x1B') {

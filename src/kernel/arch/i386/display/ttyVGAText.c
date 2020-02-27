@@ -107,7 +107,7 @@ void putString(const char s[]) {
 }
 
 void putStringLen(const char s[], size_t length) {
-    for (int i = 0; i < length; i++) {
+    for (size_t i = 0; i < length; i++) {
         if (s[i] == '\x1B') {
             i += parseANSIEscape(s + i);
         } else {
