@@ -11,7 +11,6 @@ void processMultibootInfo(struct multiboot_tag* info) {
         // Next power of 2 up from the size
         info = (struct multiboot_tag*)((uint8_t*)info + ((info->size + 7) & ~7))
     ) {
-        printf("Got Multiboot tag %d\n", info->type);
         switch (info->type) {
             case MULTIBOOT_TAG_TYPE_MMAP: {
                 initPhysicalAlloc(
