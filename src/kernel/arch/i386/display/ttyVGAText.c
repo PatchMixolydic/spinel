@@ -1,8 +1,8 @@
 #include <stddef.h>
 #include <spinel/ansi.h>
+#include <spinel/archInfo.h>
 #include <spinel/tty.h>
 #include "../core/cpu.h"
-#include "../core/kernel.h"
 
 typedef uint16_t vgachar_t;
 
@@ -23,7 +23,7 @@ static const unsigned int VGAHeight = 25;
 static const uint16_t VGACursorCommandPort = 0x3D4;
 static const uint16_t VGACursorDataPort = 0x3D5;
 
-static vgachar_t* const textBuffer = (vgachar_t*)(KernelOffset + 0x000B8000);
+static vgachar_t* textBuffer = (vgachar_t*)(0xC00B8000);
 static unsigned int terminalX = 0, terminalY = 0;
 static uint8_t terminalColour = 0x0F;
 

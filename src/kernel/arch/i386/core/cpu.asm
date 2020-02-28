@@ -9,8 +9,12 @@ section .text
     global loadGDT:function
     global loadIDT:function
     global getESP:function
+    global getCR2:function
+    global setCR3:function
+    global getCR3:function
     global enableInterrupts:function
     global disableInterrupts:function
+    global invalidatePage:function
 
     haltCPU:
         hlt
@@ -72,6 +76,19 @@ section .text
         mov     eax, esp
         ret
 
+    getCR2:
+        mov     eax, cr2
+        ret
+
+    setCR3:
+        mov     edx, [esp + 4]
+        mov     cr3, edx
+        ret
+
+    getCR3:
+        mov     eax, cr3
+        ret
+
     enableInterrupts:
         sti
         in      eax, 0x70
@@ -84,4 +101,9 @@ section .text
         in      eax, 0x70
         and     eax, 0x7F ; turn off NMI
         out     0x70, eax
+        ret
+
+    invalidatePage:
+        mov     eax, [esp + 4]
+        invlpg  [eax]
         ret

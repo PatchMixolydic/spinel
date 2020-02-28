@@ -31,6 +31,7 @@ KERNEL_OBJS=\
 $(KERNEL_ARCH_OBJS) \
 core/kernelMain.o \
 core/panic.o\
+memory/alloc.o\
 ../misc/ansi.o
 
 OBJS=\

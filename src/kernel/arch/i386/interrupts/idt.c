@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 #include "../core/cpu.h"
 #include "../core/gdt.h"
 #include "interrupts.h"

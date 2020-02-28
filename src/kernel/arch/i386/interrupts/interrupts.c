@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <spinel/panic.h>
 #include "../core/cpu.h"
+#include "../memory/virtualMem.h"
 #include "../peripherals/pic.h"
 #include "interrupts.h"
 
@@ -48,22 +49,32 @@ typedef enum {
 } IntelExceptions;
 
 void interruptHandler(InterruptInfo info) {
-    const char* message = "Unknown interrupt";
-    if (info.interruptNum < 32) {
-        // CPU exception
-        message = ExceptionDescriptions[info.interruptNum];
+    switch (info.interruptNum) {
+        case PageFault: {
+            handlePageFault();
+            break;
+        }
+
+        default: {
+            const char* message = "Unknown interrupt";
+            if (info.interruptNum < 32) {
+                // CPU exception
+                message = ExceptionDescriptions[info.interruptNum];
+            }
+            panic(
+                "%s\n"
+                "eax: 0x%X    ebx: 0x%X    ecx: 0x%X    edx: 0x%X\n"
+                "esp: 0x%X    ebp: 0x%X    esi: 0x%X    edi: 0x%X\n"
+                "eip: 0x%X    cs: 0x%X     eflags: 0x%X\n"
+                "interrupt: 0x%X    error code: 0x%X",
+                message, info.eax, info.ebx, info.ecx, info.edx,
+                info.esp, info.ebp, info.esi, info.edi,
+                info.eip, info.cs, info.eflags, info.interruptNum,
+                info.errorCode
+            );
+            break;
+        }
     }
-    panic(
-        "%s\n"
-        "eax: 0x%X    ebx: 0x%X    ecx: 0x%X    edx: 0x%X\n"
-        "esp: 0x%X    ebp: 0x%X    esi: 0x%X    edi: 0x%X\n"
-        "eip: 0x%X    cs: 0x%X     eflags: 0x%X\n"
-        "interrupt: 0x%X    error code: 0x%X",
-        message, info.eax, info.ebx, info.ecx, info.edx,
-        info.esp, info.ebp, info.esi, info.edi,
-        info.eip, info.cs, info.eflags, info.interruptNum,
-        info.errorCode
-    );
 }
 
 IRQPlaceholder(0)
