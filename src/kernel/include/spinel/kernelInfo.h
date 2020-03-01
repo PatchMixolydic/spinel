@@ -25,8 +25,8 @@ extern const char* const SpinelBuildVerison;
 // This would be Major.Minor.Patch for Spinel
 
 // Architecture-dependent version info
-extern const char* const SpinelMachineName;
-extern const char* const SpinelProcessorName;
+extern const char* const MachineName;
+extern const char* const ProcessorName;
 
 // Architecture-dependent
 extern const size_t PageSize;

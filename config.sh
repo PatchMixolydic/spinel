@@ -15,7 +15,8 @@ export BOOTDIR=/boot
 export LIBDIR=$EXEC_PREFIX/lib
 export INCLUDEDIR=$PREFIX/include
 
-export CFLAGS='-O2 -g -D__Commit__=\"$(shell git rev-parse --short HEAD)\"'
+export CFLAGS='-O2 -g -D__Commit__=\"$(shell git rev-parse --short HEAD)\"\
+  -D__DateTime__="\"$(shell date)\""'
 export CPPFLAGS=''
 
 # Configure the cross-compiler to use the desired system root.

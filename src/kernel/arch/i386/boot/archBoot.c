@@ -19,7 +19,7 @@ void archBoot(uint32_t multibootMagic, struct multiboot_tag* multibootInfo) {
         "%s %d.%d.%d %s on %s %s\n",
         SpinelKernelName,
         SpinelVersionMajor, SpinelVersionMinor, SpinelVersionPatch,
-        SpinelBuildVerison, SpinelProcessorName, SpinelMachineName
+        SpinelBuildVerison, ProcessorName, MachineName
     );
     initGDT();
     initIDT();
