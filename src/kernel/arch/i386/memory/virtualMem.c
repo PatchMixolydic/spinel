@@ -53,9 +53,17 @@ static inline uintptr_t* getPageMapEntry(uintptr_t page, size_t level) {
     // TODO
     switch (level) {
         case 0:
-            return KernelPageMapOffset + (addrToMapIdx(page, 1) * sizeof(uintptr_t) * PageMapSize) + (addrToMapIdx(page, 0) * sizeof(uintptr_t));
+            return (uintptr_t*)(
+                KernelPageMapOffset +
+                (addrToMapIdx(page, 1) * sizeof(uintptr_t) * PageMapSize) +
+                (addrToMapIdx(page, 0) * sizeof(uintptr_t))
+            );
         case 1:
-            return KernelPageMapOffset + (1023 * sizeof(uintptr_t) * PageMapSize) + (addrToMapIdx(page, 1) * sizeof(uintptr_t));
+            return (uintptr_t*)(
+                KernelPageMapOffset +
+                (1023 * sizeof(uintptr_t) * PageMapSize) +
+                (addrToMapIdx(page, 1) * sizeof(uintptr_t))
+            );
         default:
             panic("FIXME: getPageMapEntry for a level %d pagemap!", level);
     }
@@ -65,12 +73,20 @@ static inline uintptr_t* getPageMapEntry(uintptr_t page, size_t level) {
 void setupPageMaps() {
     kernelPageDirectory[0] = 0; // remove identity mapping
     uintptr_t* pageEntry;
-    for (uintptr_t page = __TextStart; page < __TextEnd; page += PageSize) {
+    for (
+        uintptr_t page = __TextStart;
+        page < (uintptr_t)__TextEnd;
+        page += PageSize
+    ) {
         // Remove read/write status
         pageEntry = getPageMapEntry(page, 0);
         *pageEntry &= ~PageReadWriteFlag;
     }
-    for (uintptr_t page = __RODataStart; page < __RODataEnd; page += PageSize) {
+    for (
+        uintptr_t page = __RODataStart;
+        page < (uintptr_t)__RODataEnd;
+        page += PageSize
+    ) {
         pageEntry = getPageMapEntry(page, 0);
         *pageEntry &= ~PageReadWriteFlag;
     }

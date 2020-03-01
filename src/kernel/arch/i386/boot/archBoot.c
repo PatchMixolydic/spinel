@@ -16,10 +16,9 @@ void archBoot(uint32_t multibootMagic, struct multiboot_tag* multibootInfo) {
     clearScreen();
     disableCursor();
     printf(
-        "%s %d.%d.%d %s on %s %s\n",
-        SpinelKernelName,
-        SpinelVersionMajor, SpinelVersionMinor, SpinelVersionPatch,
-        SpinelBuildVerison, ProcessorName, MachineName
+        "%s %s %s on %s %s\n",
+        SpinelKernelName, SpinelReleaseVersion, SpinelBuildVerison,
+        ProcessorName, MachineName
     );
     initGDT();
     initIDT();

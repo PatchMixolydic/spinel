@@ -22,7 +22,7 @@ extern const char* const SpinelBuildVerison;
 // Release version:
 // Based on uname's release field
 // Typically a version number, sometimes with a hash
-// This would be Major.Minor.Patch for Spinel
+extern const char* const SpinelReleaseVersion;
 
 // Architecture-dependent version info
 extern const char* const MachineName;
