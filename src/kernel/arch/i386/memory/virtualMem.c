@@ -70,7 +70,7 @@ static inline uintptr_t* getPageMapEntry(uintptr_t page, size_t level) {
     return NULL;
 }
 
-void setupPageMaps() {
+void setupPageMaps(void) {
     kernelPageDirectory[0] = 0; // remove identity mapping
     uintptr_t* pageEntry;
     for (

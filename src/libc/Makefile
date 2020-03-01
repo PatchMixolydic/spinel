@@ -31,6 +31,7 @@ FREESTANDING_OBJS = \
 $(LIBC_ARCH_FREESTANDING_OBJS) \
 ctype/isdigit.o \
 stdio/printf.o \
+stdlib/malloc.o \
 string/memcmp.o \
 string/memmove.o \
 string/strlen.o \
