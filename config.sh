@@ -16,7 +16,7 @@ export LIBDIR=$EXEC_PREFIX/lib
 export INCLUDEDIR=$PREFIX/include
 
 export CFLAGS='-O2 -g -D__Commit__=\"$(shell git rev-parse --short HEAD)\"\
-  -D__DateTime__="\"$(shell date)\""'
+  -D__DateTime__="\"$(shell date +"%F %I:%M%P %Z")\""'
 export CPPFLAGS=''
 
 # Configure the cross-compiler to use the desired system root.
