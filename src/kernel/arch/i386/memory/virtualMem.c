@@ -74,7 +74,7 @@ void setupPageMaps(void) {
     kernelPageDirectory[0] = 0; // remove identity mapping
     uintptr_t* pageEntry;
     for (
-        uintptr_t page = __TextStart;
+        uintptr_t page = (uintptr_t)__TextStart;
         page < (uintptr_t)__TextEnd;
         page += PageSize
     ) {
@@ -83,7 +83,7 @@ void setupPageMaps(void) {
         *pageEntry &= ~PageReadWriteFlag;
     }
     for (
-        uintptr_t page = __RODataStart;
+        uintptr_t page = (uintptr_t)__RODataStart;
         page < (uintptr_t)__RODataEnd;
         page += PageSize
     ) {

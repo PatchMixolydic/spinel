@@ -92,8 +92,8 @@ void initPhysicalAlloc(const memmap_t* memoryMapPtr, size_t memoryMapLength) {
         ) {
             // If this is the kernel or the bitmap...
             if (
-                __KernelStart <= addr && \
-                addr < __KernelStart + kernelReservedSize
+                (uintptr_t)__KernelStart <= addr && \
+                addr < (uintptr_t)__KernelStart + kernelReservedSize
             ) {
                 // These don't get to be freed or swapped out.
                 setPageFree(addr, false);
