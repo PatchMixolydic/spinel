@@ -3,7 +3,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include <spinel/archInfo.h>
+#include <spinel/kernelInfo.h>
+#include <spinel/panic.h>
 #include "physicalMem.h"
 
 // from linker script
@@ -70,8 +71,10 @@ void initPhysicalAlloc(const memmap_t* memoryMapPtr, size_t memoryMapLength) {
 
     // Ok, we know how much memory there is. Now our bitmaps need to be set up.
     bitmapSize = availableMemory / PageSize;
-    pageMap = __KernelEnd; // The page map is located at the end of the kernel
-    availMap = __KernelEnd + bitmapSize; // After the page map is the availMap
+    // The page map is located at the end of the kernel
+    pageMap = (uint32_t*)__KernelEnd;
+    // After the page map is the availMap
+    availMap = (uint32_t*)(__KernelEnd + bitmapSize);
     kernelReservedSize += bitmapSize * 2; // Grow reserved size
 
 	for (
@@ -101,17 +104,12 @@ void initPhysicalAlloc(const memmap_t* memoryMapPtr, size_t memoryMapLength) {
                 setPageAvailable(addr, valid);
             }
         }
-        // TODO: no long specifiers... convert to uint in the meantime
-        printf(
-            "Memory region 0x%X - 0x%X is%s available.\n",
-            (unsigned int)start, (unsigned int)end - 1, valid ? "" : "n't"
-        );
 	}
     setPageFree((uintptr_t)NULL, false); // Zero page --  can't touch this
     setPageAvailable((uintptr_t)NULL, false);
 }
 
-void* allocatePageFrame() {
+void* allocatePageFrame(void) {
     size_t searchStartLoc = nextFreePageIdx;
     uintptr_t res = (uintptr_t)NULL;
     do {

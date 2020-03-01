@@ -1,6 +1,6 @@
 #include <stddef.h>
 #include <spinel/ansi.h>
-#include <spinel/archInfo.h>
+#include <spinel/kernelInfo.h>
 #include <spinel/tty.h>
 #include "../core/cpu.h"
 

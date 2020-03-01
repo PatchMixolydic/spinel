@@ -1,10 +1,9 @@
-#include <assert.h>
-#include <ctype.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <multiboot2.h>
-#include <spinel/panic.h>
+#include <spinel/kernelInfo.h>
 #include <spinel/tty.h>
 #include "../core/cpu.h"
 #include "../core/gdt.h"
@@ -16,7 +15,12 @@
 void archBoot(uint32_t multibootMagic, struct multiboot_tag* multibootInfo) {
     clearScreen();
     disableCursor();
-    printf("Spinel booting for i386\n");
+    printf(
+        "%s %d.%d.%d %s on %s %s\n",
+        SpinelKernelName,
+        SpinelVersionMajor, SpinelVersionMinor, SpinelVersionPatch,
+        SpinelBuildVerison, SpinelProcessorName, SpinelMachineName
+    );
     initGDT();
     initIDT();
     picSetAllMasked(true);

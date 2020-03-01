@@ -51,7 +51,7 @@ typedef enum {
 void interruptHandler(InterruptInfo info) {
     switch (info.interruptNum) {
         case PageFault: {
-            handlePageFault();
+            handlePageFault(info);
             break;
         }
 

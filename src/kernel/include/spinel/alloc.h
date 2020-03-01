@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 
+void initAlloc(void);
 void* kmalloc(size_t size);
 void kfree(void* alloc);
 

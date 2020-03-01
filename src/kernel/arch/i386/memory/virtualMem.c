@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include <spinel/archInfo.h>
+#include <spinel/kernelInfo.h>
 #include <spinel/panic.h>
 #include "../core/cpu.h"
 #include "../interrupts/interrupts.h"
@@ -11,10 +11,6 @@
 #include "virtualMem.h"
 
 #define PageMapSize (PageSize / sizeof(uintptr_t))
-
-// 0: Page table
-// 1: Page directory
-static const unsigned int MaxPageMapLevel = 1;
 
 static const uint32_t PageFaultPresentFlag = 1;
 static const uint32_t PageFaultWriteFlag = 1 << 1;
@@ -63,6 +59,7 @@ static inline uintptr_t* getPageMapEntry(uintptr_t page, size_t level) {
         default:
             panic("FIXME: getPageMapEntry for a level %d pagemap!", level);
     }
+    return NULL;
 }
 
 void setupPageMaps() {
@@ -93,17 +90,17 @@ void mapPage(uintptr_t virtual, uintptr_t flags) {
             *pageDirEntry |= PageUserModeFlag;
         }
         memset(getPageMapEntry(PageAlign(virtual), 0), 0, PageSize);
-        invalidatePage(virtual);
+        invalidatePage((void*)virtual);
     }
     uintptr_t physical = (uintptr_t)allocatePageFrame();
     *pageTabEntry = PageAlign(physical) | PagePresentFlag | flags;
-    invalidatePage(virtual);
+    invalidatePage((void*)virtual);
 }
 
 void unmapPage(uintptr_t virtual) {
     uintptr_t* pageEntry = getPageMapEntry(virtual, 0);
     *pageEntry = 0;
-    invalidatePage(virtual);
+    invalidatePage((void*)virtual);
 }
 
 void handlePageFault(InterruptInfo info) {

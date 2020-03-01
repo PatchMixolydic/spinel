@@ -1,7 +1,7 @@
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <spinel/archInfo.h>
+#include <spinel/kernelInfo.h>
 #include <spinel/panic.h>
 
 typedef enum {
@@ -24,9 +24,9 @@ static HeapData* firstFreeData;
 // We're the kernel! We own the entire kernel heap. Cool!
 // If kmalloc faults, the VMM will give kmalloc a page because she is cute
 
-void initAlloc() {
+void initAlloc(void) {
     HeapSize = KernelHeapEnd - KernelHeapStart;
-    firstFreeData = KernelHeapStart;
+    firstFreeData = (HeapData*)KernelHeapStart;
     *firstFreeData = (HeapData){
         Free,
         NULL,

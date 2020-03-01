@@ -19,8 +19,7 @@ static size_t kstrlen(const char* str) {
     return res;
 }
 
-/*
- * Handles base2-base36 gracefully
+/* Handles base2-base36 gracefully
  * TODO: probably move this
  */
 static char* _itoa(int value, char buf[], size_t bufSize, unsigned int base, bool isUnsigned) {
