@@ -16,7 +16,7 @@ INCLUDEDIR ?= $(PREFIX)/include
 CFLAGS := $(CFLAGS) -ffreestanding -Wall -Wextra -Wpedantic
 CPPFLAGS := $(CPPFLAGS) -D__Kernel -Iinclude
 LDFLAGS := $(LDFLAGS)
-LIBS := $(LIBS) -nostdlib -lgcc -lckern
+LIBS := $(LIBS) -nostdlib -lgcc -lhakurei -lckern
 
 ARCHDIR = arch/$(HOSTARCH)
 
@@ -32,8 +32,7 @@ $(KERNEL_ARCH_OBJS) \
 core/kernelInfo.o \
 core/kernelMain.o \
 core/panic.o\
-memory/alloc.o\
-../misc/ansi.o
+memory/alloc.o
 
 OBJS=\
 $(ARCHDIR)/core/crti.o \

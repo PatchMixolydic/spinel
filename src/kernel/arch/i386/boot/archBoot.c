@@ -20,12 +20,15 @@ void archBoot(uint32_t multibootMagic, struct multiboot_tag* multibootInfo) {
         SpinelKernelName, SpinelReleaseVersion, SpinelBuildVerison,
         ProcessorName, MachineName
     );
+
     initGDT();
     initIDT();
+
     picSetAllMasked(true);
     initPIC();
     enableInterrupts();
     picSetIRQMasked(1, false);
+
     processMultibootInfo(multibootInfo);
     setupPageMaps();
 }

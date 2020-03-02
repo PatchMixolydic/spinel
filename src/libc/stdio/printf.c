@@ -110,7 +110,6 @@ int vprintf(const char* format, va_list parameters) {
 					return -1;
 				}
 			    putChar(c);
-                updateCursor();
 				written++;
 				break;
 			}

@@ -34,6 +34,7 @@ stdio/printf.o \
 stdlib/malloc.o \
 string/memcmp.o \
 string/memmove.o \
+string/strlcpy.o \
 string/strlen.o \
 
 HOSTED_OBJS = \
@@ -45,7 +46,7 @@ $(HOSTED_OBJS) \
 
 LIBCKERN_OBJS=$(FREESTANDING_OBJS:.o=.libckern.o)
 
-BINARIES = libckern.a # libc.a
+BINARIES = libckern.a libc.a
 
 .PHONY: all clean install install-libs
 .SUFFIXES: .o .libckern.o .c .asm

@@ -8,7 +8,6 @@ void putString(const char s[]);
 void putStringLen(const char s[], size_t length);
 void enableCursor(void);
 void disableCursor(void);
-void updateCursor(void);
 void clearScreen(void);
 
 #endif // ndef SPINEL_TTY_H

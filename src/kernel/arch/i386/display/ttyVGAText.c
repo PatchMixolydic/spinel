@@ -1,10 +1,11 @@
+#include <stdbool.h>
 #include <stddef.h>
-#include <spinel/ansi.h>
+#include <hakurei.h>
 #include <spinel/kernelInfo.h>
 #include <spinel/tty.h>
 #include "../core/cpu.h"
 
-typedef uint16_t vgachar_t;
+typedef uint16_t VGAChar;
 
 typedef enum {
     VGABlack,
@@ -15,42 +16,83 @@ typedef enum {
     VGAMagenta,
     VGABrown,
     VGALightGrey
-} VGAColours;
+} VGAColour;
 
-static const uint8_t VGABrightBit = 0x80; // 0b1000_0000
+static const VGAColour VGAToANSIColour[] = {
+    VGABlack,
+    VGARed,
+    VGAGreen,
+    VGABrown,
+    VGABlue,
+    VGAMagenta,
+    VGACyan,
+    VGALightGrey
+};
+
+static const uint8_t VGABrightBit = 0x8; // 0b1000
 static const unsigned int VGAWidth = 80;
 static const unsigned int VGAHeight = 25;
 static const uint16_t VGACursorCommandPort = 0x3D4;
 static const uint16_t VGACursorDataPort = 0x3D5;
 
-static vgachar_t* textBuffer = (vgachar_t*)(0xC00B8000);
-static unsigned int terminalX = 0, terminalY = 0;
-static uint8_t terminalColour = 0x0F;
+static VGAChar* textBuffer = (VGAChar*)(0xC00B8000);
 
-static inline void setTerminalColour(uint8_t fg, uint8_t bg) {
-    terminalColour = (fg << 4) | bg;
-}
+static void putCharCallback(char c);
+static void updateCursorCallback(void);
+static void belowScreenCallback(void);
+static void clearScreenCallback(void);
+
+static HakuTerminalState state = {
+    VGAWidth, VGAHeight,
+    0, 0,
+    true, false,
+    HakuANSILightGrey,
+    HakuANSIBlack,
+    HakuNoError,
+    putCharCallback,
+    updateCursorCallback,
+    belowScreenCallback,
+    clearScreenCallback
+};
 
 // Convert char to VGA char, using current colour
-static inline vgachar_t toVGAChar(char c) {
-    return ((uint16_t)(terminalColour) << 8) | c;
+static inline VGAChar toVGAChar(char c) {
+    VGAColour bg =
+        VGAToANSIColour[state.bgColour] + (state.bgBright ? VGABrightBit : 0);
+    VGAColour fg =
+        VGAToANSIColour[state.fgColour] + (state.fgBright ? VGABrightBit : 0);
+    VGAChar colour = (bg << 4) | fg;
+    return (uint16_t)(colour << 8) | c;
 }
 
-static void newline(void) {
-    terminalX = 0;
-    terminalY++;
-    if (terminalY >= VGAHeight) {
-        // Scrolling time!
-        for (unsigned int i = 0; i < VGAWidth * VGAHeight; i++) {
-            if (i < VGAWidth* (VGAHeight - 1)) {
-                // Take the character from the next line
-                textBuffer[i] = textBuffer[i + VGAWidth];
-            } else {
-                // Clear the bottom line
-                textBuffer[i] = toVGAChar(' ');
-            }
+static void putCharCallback(char c) {
+    textBuffer[state.y * VGAWidth + state.x] = toVGAChar(c);
+}
+
+static void updateCursorCallback(void) {
+    uint16_t newPos = state.y * VGAWidth + state.x;
+    outByte(VGACursorCommandPort, 0x0F);
+    outByte(VGACursorDataPort, (uint8_t)(newPos & 0xFF));
+    outByte(VGACursorCommandPort, 0x0E);
+    outByte(VGACursorDataPort, (uint8_t)(newPos >> 8));
+}
+
+static void belowScreenCallback(void) {
+    // Scrolling time!
+    for (unsigned int i = 0; i < VGAWidth * VGAHeight; i++) {
+        if (i < VGAWidth * (VGAHeight - 1)) {
+            // Take the character from the next line
+            textBuffer[i] = textBuffer[i + VGAWidth];
+        } else {
+            // Clear the bottom line
+            textBuffer[i] = toVGAChar(' ');
         }
-        terminalY = VGAHeight - 1;
+    }
+}
+
+static void clearScreenCallback(void) {
+    for (unsigned int i = 0; i < VGAWidth * VGAHeight; i++) {
+        textBuffer[i] = toVGAChar(' ');
     }
 }
 
@@ -66,58 +108,18 @@ void disableCursor(void) {
     outByte(VGACursorDataPort, 0x20);
 }
 
-void updateCursor(void) {
-    uint16_t newPos = terminalY * VGAWidth + terminalX;
-    outByte(VGACursorCommandPort, 0x0F);
-    outByte(VGACursorDataPort, (uint8_t)(newPos & 0xFF));
-    outByte(VGACursorCommandPort, 0x0E);
-    outByte(VGACursorDataPort, (uint8_t)(newPos >> 8));
-}
-
-// Put a character at the current position
 void putChar(char c) {
-    switch (c) {
-        case '\n':
-            newline();
-            break;
-        default: {
-            textBuffer[terminalY * VGAWidth + terminalX] = toVGAChar(c);
-            terminalX++;
-            if (terminalX >= VGAWidth) {
-                newline();
-            }
-            break;
-        }
-    }
+    hakuPutChar(&state, c);
 }
 
 void putString(const char s[]) {
-    for (int i = 0; s[i] != '\0'; i++) {
-        if (s[i] == '\x1B') {
-            i += parseANSIEscape(s + i);
-        } else {
-            putChar(s[i]);
-        }
-    }
-    updateCursor();
+    hakuPutString(&state, s);
 }
 
 void putStringLen(const char s[], size_t length) {
-    for (size_t i = 0; i < length; i++) {
-        if (s[i] == '\x1B') {
-            i += parseANSIEscape(s + i);
-        } else {
-            putChar(s[i]);
-        }
-    }
-    updateCursor();
+    hakuPutStringLen(&state, s, length);
 }
 
 void clearScreen(void) {
-    for (unsigned int i = 0; i < VGAWidth * VGAHeight; i++) {
-        textBuffer[i] = toVGAChar(' ');
-    }
-    terminalX = 0;
-    terminalY = 0;
-    updateCursor();
+    hakuClearScreen(&state);
 }
