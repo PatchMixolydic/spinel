@@ -43,6 +43,7 @@ menuentry "spinel" {
 EOF
     mkdir -p build
     grub-mkrescue -o build/spinel.iso $TMPDIR
+    rm -rf $TMPDIR
 }
 
 qemu() {
