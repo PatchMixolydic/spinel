@@ -5,7 +5,7 @@
 #include "hakurei.h"
 
 // These messages must be at most HakuBufferSize long
-static const char* const ErrorStrings = {
+static const char* const * const ErrorStrings = {
     "No error recorded\n", // HakuNoError
     "NULL in argument or callback\n", // HakuNULLPointer
     "Height and/or width is zero\n", // HakuBadSize
@@ -61,7 +61,7 @@ HakuError hakuPutStringLen(
         return err;
     }
 
-    for (int i = 0; i < len && str[i] != '\0'; i++) {
+    for (size_t i = 0; i < len && str[i] != '\0'; i++) {
         switch (str[i]) {
             case '\n': {
                 newLine(state);
