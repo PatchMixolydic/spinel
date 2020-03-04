@@ -4,6 +4,7 @@
 #include <spinel/kernelInfo.h>
 #include <spinel/tty.h>
 #include "../core/cpu.h"
+#include "../peripherals/serial.h"
 
 typedef uint16_t VGAChar;
 
@@ -109,14 +110,20 @@ void disableCursor(void) {
 }
 
 void putChar(char c) {
+    // TODO: smarter multiplexing to serial port
+    // (some kind of kernel logging facility)
+    // Probably should wait for VFS
+    serialWrite(SerialPort1, c);
     hakuPutChar(&state, c);
 }
 
 void putString(const char s[]) {
+    serialWriteStr(SerialPort1, s);
     hakuPutString(&state, s);
 }
 
 void putStringLen(const char s[], size_t length) {
+    serialWriteStrLen(SerialPort1, s, length);
     hakuPutStringLen(&state, s, length);
 }
 

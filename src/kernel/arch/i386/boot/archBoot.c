@@ -10,6 +10,7 @@
 #include "../interrupts/idt.h"
 #include "../memory/virtualMem.h"
 #include "../peripherals/pic.h"
+#include "../peripherals/serial.h"
 #include "multibootProc.h"
 
 void archBoot(uint32_t multibootMagic, struct multiboot_tag* multibootInfo) {
@@ -28,6 +29,8 @@ void archBoot(uint32_t multibootMagic, struct multiboot_tag* multibootInfo) {
     initPIC();
     enableInterrupts();
     picSetIRQMasked(1, false);
+
+    initSerial(SerialMaxBaudRate);
 
     processMultibootInfo(multibootInfo);
     setupPageMaps();
