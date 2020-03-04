@@ -45,9 +45,9 @@ static void clearScreenCallback(void);
 static HakuTerminalState state = {
     VGAWidth, VGAHeight,
     0, 0,
-    true, false,
-    HakuANSILightGrey,
-    HakuANSIBlack,
+    true, false, true, false,
+    HakuANSILightGrey, HakuANSIBlack,
+    HakuANSILightGrey, HakuANSIBlack,
     HakuNoError,
     putCharCallback,
     updateCursorCallback,

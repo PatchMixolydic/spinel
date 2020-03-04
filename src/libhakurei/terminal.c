@@ -5,7 +5,7 @@
 #include "hakurei.h"
 
 // These messages must be at most HakuBufferSize long
-static const char* const * const ErrorStrings = {
+static const char ErrorStrings[][HakuBufferSize] = {
     "No error recorded\n", // HakuNoError
     "NULL in argument or callback\n", // HakuNULLPointer
     "Height and/or width is zero\n", // HakuBadSize
@@ -49,34 +49,28 @@ void hakuWriteError(HakuTerminalState* state, char buf[HakuBufferSize]) {
     }
 }
 
-HakuError hakuPutString(HakuTerminalState* state, const char* str) {
+HakuError hakuPutString(HakuTerminalState* state, const char str[]) {
     return hakuPutStringLen(state, str, strlen(str));
 }
 
 HakuError hakuPutStringLen(
-    HakuTerminalState* state, const char* str, size_t len
+    HakuTerminalState* state, const char str[], size_t len
 ) {
     HakuError err = hakuVerifyStateOK(state);
     if (err != HakuNoError) {
         return err;
     }
 
+    if (str == NULL) {
+        return HakuNULLPointer;
+    }
+
     for (size_t i = 0; i < len && str[i] != '\0'; i++) {
-        switch (str[i]) {
-            case '\n': {
-                newLine(state);
-                break;
-            }
-
-            case '\r': {
-                state->x = 0;
-                break;
-            }
-
-            default: {
-                hakuPutChar(state, str[i]);
-                break;
-            }
+        if (str[i] == '\x1B') {
+            // ANSI escape
+            i += hakuParseANSI(state, str + i) - 1;
+        } else {
+            hakuPutChar(state, str[i]);
         }
     }
 
@@ -91,8 +85,28 @@ HakuError hakuPutChar(HakuTerminalState* state, char c) {
         return err;
     }
 
-    state->putCharCallback(c);
-    state->x++;
+    switch (c) {
+        case '\n': {
+            newLine(state);
+            break;
+        }
+
+        case '\r': {
+            state->x = 0;
+            break;
+        }
+
+        case '\x1B': {
+            // stray escape... ignore
+            break;
+        }
+
+        default: {
+            state->putCharCallback(c);
+            state->x++;
+            break;
+        }
+    }
 
     if (state->x >= state->width) {
         newLine(state);
@@ -107,7 +121,12 @@ HakuError hakuMoveCursor(HakuTerminalState* state, size_t x, size_t y) {
         return err;
     }
 
-    state->x = x;
+    if (x >= state->width) {
+        state->x = state->width;
+    } else {
+        state->x = x;
+    }
+
     state->y = y;
     state->updateCursorCallback();
 

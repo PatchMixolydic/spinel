@@ -14,6 +14,7 @@ CPPFLAGS := $(CPPFLAGS) -Iinclude
 LIBS := $(LIBS) -lckern # TODO
 
 OBJS=\
+ansi.o\
 terminal.o\
 
 BINARIES = libhakurei.a

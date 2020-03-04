@@ -44,8 +44,9 @@ typedef struct HakuTerminalState {
     size_t width, height;
     size_t x, y;
     bool fgBright, bgBright;
-    HakuANSIColour fgColour;
-    HakuANSIColour bgColour;
+    bool defaultFGBright, defaultBGBright;
+    HakuANSIColour fgColour, bgColour;
+    HakuANSIColour defaultFGColour, defaultBGColour;
     HakuError lastError;
 
     HakuPutCharCallback putCharCallback;
@@ -57,13 +58,15 @@ typedef struct HakuTerminalState {
 HakuError hakuVerifyStateOK(HakuTerminalState* state);
 void hakuWriteError(HakuTerminalState* state, char buf[HakuBufferSize]);
 
-HakuError hakuPutString(HakuTerminalState* state, const char* str);
+HakuError hakuPutString(HakuTerminalState* state, const char str[]);
 HakuError hakuPutStringLen(
-    HakuTerminalState* state, const char* str, size_t len
+    HakuTerminalState* state, const char str[], size_t len
 );
 HakuError hakuPutChar(HakuTerminalState* state, char c);
 
 HakuError hakuMoveCursor(HakuTerminalState* state, size_t x, size_t y);
 HakuError hakuClearScreen(HakuTerminalState* state);
+
+int hakuParseANSI(HakuTerminalState* state, const char str[]);
 
 #endif // ndef _HAKUREI_H
