@@ -94,13 +94,17 @@ void setSerialBaudRate(uint16_t serialPort, unsigned baudRate) {
 
 uint8_t serialRead(uint16_t serialPort) {
     // Poll until line is clear
-    while ((inByte(serialPort + LineStatusOffset) & 1) == 0) {}
+    while ((inByte(serialPort + LineStatusOffset) & 1) == 0) {
+        __asm__("pause");
+    }
     return inByte(serialPort);
 }
 
 void serialWrite(uint16_t serialPort, uint8_t val) {
     // Poll until Tx buffer is clear
-    while ((inByte(serialPort + LineStatusOffset) & 0x20) == 0) {}
+    while ((inByte(serialPort + LineStatusOffset) & 0x20) == 0) {
+        __asm__("pause");
+    }
     outByte(serialPort, val);
 }
 
