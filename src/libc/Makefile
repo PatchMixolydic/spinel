@@ -29,9 +29,13 @@ LIBCKERN_CPPFLAGS := $(LIBCKERN_CPPFLAGS) $(LIBC_ARCH_CPPFLAGS)
 
 FREESTANDING_OBJS = \
 $(LIBC_ARCH_FREESTANDING_OBJS) \
+ctype/isalpha.o \
 ctype/isdigit.o \
 stdio/printf.o \
+stdio/vprintf.o \
+stdlib/free.o \
 stdlib/malloc.o \
+stdlib/itoa.o \
 string/memcmp.o \
 string/memmove.o \
 string/strlcpy.o \

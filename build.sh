@@ -33,7 +33,7 @@ iso() {
     build
     TMPDIR=$(mktemp -d -t spinelTmp_ 2>/dev/null) || TMPDIR=/tmp/spineliso$$ \
         && mkdir $TMPDIR
-    trap "rm -rf $TMPDIR" 1 5 15
+    trap "rm -rf $TMPDIR" 1 5 15 EXIT
     mkdir -p $TMPDIR/boot/grub
     cp -R sysroot/* $TMPDIR
     cat > $TMPDIR/boot/grub/grub.cfg << EOF
@@ -57,7 +57,7 @@ if [ "$1" = "clean" ] || [ "$1" = "headers" ] || [ "$1" = "build" ] || \
     $1
 else
     TMPFILE=$(tempfile 2>/dev/null) || TMPFILE=/tmp/spinelmenu$$
-    trap "rm -f $TMPFILE" 1 5 15
+    trap "rm -f $TMPFILE" 1 5 15 EXIT
 
     dialog --clear --menu \
     "Select an option\n\
