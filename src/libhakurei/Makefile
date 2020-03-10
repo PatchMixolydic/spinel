@@ -12,7 +12,7 @@ INCLUDEDIR ?= $(PREFIX)/include
 CFLAGS := $(CFLAGS) -Wall -Wextra -Wpedantic
 CPPFLAGS := $(CPPFLAGS) -Iinclude
 LIBS := $(LIBS) -lc
-KERN_LIBS := $(LIBS) -lckern
+KERN_LIBS := $(KERN_LIBS) -lckern
 
 OBJS=\
 ansi.o\
