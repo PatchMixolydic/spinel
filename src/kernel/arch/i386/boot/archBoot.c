@@ -16,6 +16,8 @@
 void archBoot(uint32_t multibootMagic, struct multiboot_tag* multibootInfo) {
     clearScreen();
     disableCursor();
+
+    initSerial(SerialMaxBaudRate);
     printf(
         "%s %s %s on %s %s\n",
         SpinelKernelName, SpinelReleaseVersion, SpinelBuildVerison,
@@ -29,8 +31,6 @@ void archBoot(uint32_t multibootMagic, struct multiboot_tag* multibootInfo) {
     initPIC();
     enableInterrupts();
     picSetIRQMasked(1, false);
-
-    initSerial(SerialMaxBaudRate);
 
     processMultibootInfo(multibootInfo);
     setupPageMaps();

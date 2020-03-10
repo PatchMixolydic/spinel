@@ -11,29 +11,38 @@ INCLUDEDIR ?= $(PREFIX)/include
 
 CFLAGS := $(CFLAGS) -Wall -Wextra -Wpedantic
 CPPFLAGS := $(CPPFLAGS) -Iinclude
-LIBS := $(LIBS) -lckern # TODO
+LIBS := $(LIBS) -lc
+KERN_LIBS := $(LIBS) -lckern
 
 OBJS=\
 ansi.o\
 terminal.o\
 
-BINARIES = libhakurei.a
+KERN_OBJS=$(OBJS:.o=.kern.o)
+
+BINARIES = libhakurei.a libhakukern.a
 
 .PHONY: all clean install install-libs
-.SUFFIXES: .o .c
+.SUFFIXES: .o .kern.o .c
 
 all: $(BINARIES)
 
 libhakurei.a: $(OBJS)
 	$(AR) rcs $@ $(OBJS)
 
+libhakukern.a: $(KERN_OBJS)
+	$(AR) rcs $@ $(KERN_OBJS)
+
 .c.o:
 	$(CC) -MD -c $< -o $@ -std=c11 $(CFLAGS) $(CPPFLAGS)
 
+.c.kern.o:
+	$(CC) -MD -c $< -o $@ -std=c11 $(CFLAGS) $(CPPFLAGS) $(KERN_LIBS)
+
 clean:
 	rm -f $(BINARIES) *.a
-	rm -f $(OBJS) *.o */*.o */*/*.o
-	rm -f $(OBJS:.o=.d) *.d */*.d */*/*.d
+	rm -f $(OBJS) $(KERN_OBJS) *.o */*.o */*/*.o
+	rm -f $(OBJS:.o=.d) $(KERN_OBJS:.o=.d) *.d */*.d */*/*.d
 
 install: install-headers install-libs
 
@@ -46,3 +55,4 @@ install-libs: $(BINARIES)
 	cp $(BINARIES) $(DESTDIR)$(LIBDIR)
 
 -include $(OBJS:.o=.d)
+-include $(KERN_OBJS:.o=.d)

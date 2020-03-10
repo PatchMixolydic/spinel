@@ -53,7 +53,7 @@ int vprintf(const char* format, va_list parameters) {
 			if (maxRemaining < amount) {
 				return -1;
 			}
-			putStringLen(format, amount);
+			__print(format, amount);
 			format += amount;
 			written += amount;
 			continue;
