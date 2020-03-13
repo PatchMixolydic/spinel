@@ -14,6 +14,8 @@ void panic(const char why[], ...) {
 	vprintf(why, parameters);
 	va_end(parameters);
 
+    printf("\n");
+
     while (1) {
         disableInterrupts();
         haltCPU();

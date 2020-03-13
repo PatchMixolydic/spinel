@@ -22,10 +22,13 @@ char* itoa(int value, char* str, int base) {
 	size_t i = 0;
     bool negative = value < 0;
 
-    // Value needs to be positive or else the string will not be constructed
-    // correctly
     if (negative) {
+        // Value needs to be positive or else the string will not be constructed
+        // correctly
         value = -value;
+    } else if (value == 0) {
+        i = 1; // 1 digit
+        strlcpy(str, "0", 2);
     }
 
 	while (value != 0) {
@@ -49,6 +52,11 @@ char* itoa(int value, char* str, int base) {
 // in the same file... I hope that's okay
 char* uitoa(unsigned value, char* str, int base) {
 	size_t i = 0;
+
+    if (value == 0) {
+        i = 1; // 1 digit
+        strlcpy(str, "0", 2);
+    }
 
 	while (value != 0) {
 		str[i++] = ItoaDigits[value % base];
