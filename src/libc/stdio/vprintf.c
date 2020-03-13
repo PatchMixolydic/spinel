@@ -33,7 +33,7 @@ static void __print(const char* str, size_t len) {
 	#else
 		(void)str;
 		(void)len;
-		#warning "__print not implemented for hosted"
+		// __print not implemented for hosted
 	#endif
 }
 

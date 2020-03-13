@@ -23,6 +23,20 @@ day.
 You can see my current plans on the
 [projects page](https://github.com/Sparkpin/spinel/projects/1).
 
+## License
+
+Spinel is licensed under the
+[MIT license](https://github.com/Sparkpin/spinel/blob/master/LICENSE).
+This includes every file that comprises Spinel, unless it is overriden
+by a license included within the file or within a closer parent directory. For
+instance, if there is a LICENSE file in `src` and a LICENSE file in
+`src/libpd`, the file `src/libpd/foo.c` would fall under the LICENSE in
+`src/libpd`, while the file `src/kernel/bar.c` would fall under the LICENSE in
+`src`, unless there is a LICENSE in `src/kernel` or a license in the contents
+of `bar.c`.
+
+Typically, different licenses will only affect the files in `src/thirdparty`.
+
 ## Building Spinel
 
 To build Spinel, you will need a cross compiler of some sort.

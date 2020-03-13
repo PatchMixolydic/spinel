@@ -1,6 +1,6 @@
-DEFAULT_HOST != ../../defaultHost.sh
+DEFAULT_HOST != $(ROOTDIR)/defaultHost.sh
 HOST ?= DEFAULT_HOST
-HOSTARCH != ../../tripletToArch.sh $(HOST)
+HOSTARCH != $(ROOTDIR)/tripletToArch.sh $(HOST)
 
 CFLAGS ?= -O2 -g
 CPPFLAGS ?=
@@ -19,6 +19,7 @@ LIBCKERN_CFLAGS := $(CFLAGS)
 LIBCKERN_CPPFLAGS := $(CPPFLAGS) -D__LIBCKERN
 
 ARCHDIR = arch/$(HOSTARCH)
+GENERICARCHDIR = arch/generic
 
 include $(ARCHDIR)/make.config
 
@@ -36,8 +37,11 @@ stdio/vprintf.o \
 stdlib/free.o \
 stdlib/malloc.o \
 stdlib/itoa.o \
+stdlib/realloc.o \
 string/memcmp.o \
 string/memmove.o \
+string/strncmp.o \
+string/strdup.o \
 string/strlcpy.o \
 string/strlen.o \
 

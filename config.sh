@@ -1,6 +1,15 @@
 #!/bin/sh
-SYSTEM_HEADER_PROJECTS="src/libc src/kernel src/libhakurei thirdparty/miscInc"
-PROJECTS="src/libc src/libhakurei src/kernel"
+SYSTEM_HEADER_PROJECTS="\
+  src/libc \
+  src/kernel \
+  src/libhakurei \
+  src/thirdparty/miscInc\
+"
+PROJECTS="\
+  src/libc \
+  src/libhakurei \
+  src/kernel \
+"
 
 export MAKE="${MAKE:-make} -j`expr $(nproc) + 1`"
 export HOST=${HOST:-`./defaultHost.sh`}
@@ -14,6 +23,8 @@ export EXEC_PREFIX=$PREFIX
 export BOOTDIR=/boot
 export LIBDIR=$EXEC_PREFIX/lib
 export INCLUDEDIR=$PREFIX/include
+
+export ROOTDIR=`pwd`
 
 export CFLAGS='-O2 -g -D__Commit__=\"$(shell git rev-parse --short HEAD)\"\
   -D__DateTime__="\"$(shell date +"%F %I:%M%P %Z")\""'

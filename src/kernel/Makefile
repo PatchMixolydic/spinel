@@ -1,6 +1,6 @@
-DEFAULT_HOST != ../../defaultHost.sh
+DEFAULT_HOST != $(ROOTDIR)/defaultHost.sh
 HOST ?= DEFAULT_HOST
-HOSTARCH != ../../tripletToArch.sh $(HOST)
+HOSTARCH != $(ROOTDIR)/tripletToArch.sh $(HOST)
 
 CFLAGS ?= -O2 -g
 CPPFLAGS ?=
@@ -32,7 +32,9 @@ $(KERNEL_ARCH_OBJS) \
 core/kernelInfo.o \
 core/kernelMain.o \
 core/panic.o\
-memory/alloc.o
+filesystem/zero.o\
+filesystem/vfs.o\
+memory/alloc.o\
 
 OBJS=\
 $(ARCHDIR)/core/crti.o \

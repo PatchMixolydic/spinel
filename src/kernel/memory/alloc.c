@@ -1,6 +1,9 @@
 #include <assert.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
+#include <spinel/alloc.h>
 #include <spinel/kernelInfo.h>
 #include <spinel/panic.h>
 
@@ -17,26 +20,33 @@ typedef struct HeapData {
     size_t size;
 } HeapData;
 
-static size_t HeapSize;
+static bool allocInitialized = false;
+static size_t heapSize;
 
 static HeapData* firstFreeData;
 
 // We're the kernel! We own the entire kernel heap. Cool!
 // If kmalloc faults, the VMM will give kmalloc a page because she is cute
 
+static HeapData* getHeapData(void* ptr) {
+    return (HeapData*)((uintptr_t)ptr - sizeof(HeapData));
+}
+
 void initAlloc(void) {
-    HeapSize = KernelHeapEnd - KernelHeapStart;
+    heapSize = KernelHeapEnd - KernelHeapStart;
     firstFreeData = (HeapData*)KernelHeapStart;
     *firstFreeData = (HeapData){
         Free,
         NULL,
         NULL,
-        HeapSize - sizeof(HeapData)
+        heapSize - sizeof(HeapData)
     };
+    allocInitialized = true;
     printf("kmalloc initiated.\n");
 }
 
 void* kmalloc(size_t size) {
+    assert(allocInitialized);
     assert(firstFreeData != NULL);
     HeapData* free = firstFreeData;
 
@@ -46,6 +56,7 @@ void* kmalloc(size_t size) {
         free->size < size && free->status != Free && free->next != NULL;
         free = free->next
     ) {}
+
     if (free->size < size || free->status != Free) {
         // there are no blocks big enough :<
         panic("kmalloc failed (size %d bytes)", size);
@@ -100,8 +111,44 @@ void* kmalloc(size_t size) {
     return (void*)((uintptr_t)free + sizeof(HeapData));
 }
 
+void* krealloc(void* ptr, size_t size) {
+    assert(allocInitialized);
+
+    if (ptr == NULL) {
+        // Growing nothing
+        return kmalloc(size);
+    }
+
+    if (size == 0) {
+        // Resize to 0 == freeing
+        kfree(ptr);
+        return NULL;
+    }
+
+    HeapData* data = getHeapData(ptr);
+
+    // Determined by the new size or the current size, whichever is smaller
+    size_t bytesToPreserve = size < data->size ? size : data->size;
+    // Not sure if shrinking the allocated data would be good
+    // This may lead to smaller fragments being created than this method
+    void* res = kmalloc(size);
+    if (res == NULL) {
+        // ???
+        return NULL;
+    }
+
+    memcpy(res, ptr, bytesToPreserve);
+    kfree(ptr);
+    return res;
+}
+
 void kfree(void* alloc) {
-    HeapData* data = (HeapData*)((uint8_t*)alloc - sizeof(HeapData));
+    assert(allocInitialized);
+    if (alloc == NULL) {
+        return;
+    }
+
+    HeapData* data = getHeapData(alloc);
     data->status = Free;
     if (data->prev != NULL && data->prev->status == Free) {
         // Combine

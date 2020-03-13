@@ -4,7 +4,6 @@
 #include <stdarg.h>
 
 #define EOF -1
-#define NULL ((void*)0)
 
 int printf(const char* format, ...);
 int vprintf(const char* format, va_list parameters);

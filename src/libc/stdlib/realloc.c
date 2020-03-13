@@ -5,12 +5,13 @@
 #include <spinel/alloc.h>
 #endif
 
-void* malloc(size_t size) {
+void* realloc(void* ptr, size_t size) {
     #ifdef __LIBCKERN
-        return kmalloc(size);
+        return krealloc(ptr, size);
     #else
         printf("realloc not implemented for hosted\n");
         (void)size;
+        (void)ptr;
         return NULL;
     #endif // def __LIBCKERN
 }
