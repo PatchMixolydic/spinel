@@ -22,6 +22,7 @@ headers() {
 }
 
 build() {
+    clean
     headers
     mkdir -p "$SYSROOT"
     for PROJECT in $PROJECTS; do
