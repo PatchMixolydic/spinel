@@ -10,7 +10,6 @@ const char* const MachineName = "PC compatible";
 const char* const ProcessorName = "i386";
 
 const size_t PageSize = 4096;
-// From linker script
-const uintptr_t KernelOffset = __KernelStart;
+const uintptr_t KernelOffset = 0xC0000000;
 const uintptr_t KernelHeapStart = 0xD0000000;
 const uintptr_t KernelHeapEnd = 0xE0000000;
