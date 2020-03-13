@@ -1,16 +1,16 @@
 #include <stddef.h>
 #include <stdint.h>
 
-// Not sure if this is technically true, but it's probably more accurate than
-// redoubling "i386"
-// Also, if I port this to a non-IBM PC x86 architecture later, (PC-98 maybe?),
-// this will help disambiguate between them
-// Also also, similar tactics will probably be *very* useful in the event of
-// an ARM or RISC-V port
+// This probably isn't technically correct anymore, but this is probably the
+// best name for the modern x86 computer architecture. Amigas can be PCs, but
+// they aren't IBM PC compatibles.
 const char* const MachineName = "PC compatible";
+// Also extant: 486, 586, 686. Might be worth it to use x86, but it's kind of
+// funny to call a 686 (or perhaps a Threadripper running 32-bit Spinel) a 386.
 const char* const ProcessorName = "i386";
 
 const size_t PageSize = 4096;
-const uintptr_t KernelOffset = 0xC0000000;
+// From linker script
+const uintptr_t KernelOffset = __KernelStart;
 const uintptr_t KernelHeapStart = 0xD0000000;
 const uintptr_t KernelHeapEnd = 0xE0000000;

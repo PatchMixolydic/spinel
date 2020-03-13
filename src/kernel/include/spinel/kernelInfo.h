@@ -17,14 +17,23 @@ extern const uint32_t SpinelVersionPatch;
 // Version info
 extern const char* const SpinelKernelName;
 // Based on uname's version field
-// Seems to generally contain build date, commit number
+// For other operating systems,
+// seems to generally contain build date, commit id
 extern const char* const SpinelBuildVerison;
 // Release version:
 // Based on uname's release field
-// Typically a version number, sometimes with a hash
+// For other operating systems,
+// typically a version number, sometimes with a commit id
 extern const char* const SpinelReleaseVersion;
 
 // Architecture-dependent version info
+// Machine name should represent the hardware platform
+// Contrary to common uname practices, this is not the processor
+// (unless the processor defines the platform)
+// If there are multiple processor architectures for a given hardware platform
+// (like the PC compatible), they should be disambiguated by ProcessorName.
+// Examples:
+// PC compatible, PC-98, Amiga, PinePhone, HiFive Unleashed, Sharp X68000
 extern const char* const MachineName;
 extern const char* const ProcessorName;
 
