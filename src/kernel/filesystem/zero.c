@@ -4,13 +4,13 @@
 
 static const char* const DeviceName = "zero";
 
-size_t zeroReadCallback(struct VNode* vnode, uint8_t* buf, size_t length) {
-    memset(buf, 0, length);
-    return length;
+size_t zeroReadCallback(struct VNode* vnode, uint8_t* buf, size_t len) {
+    memset(buf, 0, len);
+    return len;
 }
 
 size_t zeroWriteCallback(struct VNode* vnode, uint8_t* data, size_t len) {
-    return 0;
+    return len;
 }
 
 void initDevZero(void) {

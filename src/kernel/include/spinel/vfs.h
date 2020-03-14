@@ -44,6 +44,8 @@ typedef size_t (*ReadCallback)(struct VNode*, uint8_t*, size_t);
 typedef size_t (*WriteCallback)(struct VNode*, uint8_t*, size_t);
 typedef void (*OpenCallback)(struct VNode*, FileFlags);
 typedef void (*CloseCallback)(struct VNode*);
+// Called when refCount hits zero and the vnode is removed from the VFS
+typedef void (*DestroyCallback)(struct VNode*);
 
 typedef struct VNode {
     char name[VFSFilenameLength];
@@ -73,9 +75,15 @@ typedef struct VNode {
     WriteCallback writeCallback;
     OpenCallback openCallback;
     CloseCallback closeCallback;
+    DestroyCallback destroyCallback;
 } VNode;
 
 void initVFS(void);
 void vfsEmplace(const char parentDir[], VNode* vnode);
+VNode* vfsOpen(const char path[], FileFlags flags);
+void vfsClose(VNode* vnode);
+void vfsDestroy(VNode* vnode);
+size_t vfsRead(VNode* vnode, void* buf, size_t size);
+size_t vfsWrite(VNode* vnode, void* buf, size_t size);
 
 #endif // ndef SPINEL_VFS_H
