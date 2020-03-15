@@ -41,9 +41,13 @@ stdlib/realloc.o \
 string/memcmp.o \
 string/memmove.o \
 string/strncmp.o \
+string/strcspn.o \
 string/strdup.o \
 string/strlcpy.o \
 string/strlen.o \
+string/strpbrk.o \
+string/strspn.o \
+string/strtok_r.o \
 
 HOSTED_OBJS = \
 $(LIBC_ARCH_HOSTED_OBJS) \

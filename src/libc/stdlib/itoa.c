@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include <string.h>
 
 static const char ItoaDigits[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 

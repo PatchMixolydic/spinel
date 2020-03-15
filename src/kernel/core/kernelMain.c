@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <spinel/alloc.h>
 #include <spinel/cpu.h>
 #include <spinel/tty.h>
