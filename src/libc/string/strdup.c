@@ -2,9 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-char* strdup(const char* s) {
+char* strdup(const char* str) {
     // TODO: calloc
-    size_t len = strlen(s);
+    // be sure to account for nul terminator
+    size_t len = strlen(str) + 1;
     char* res = malloc(sizeof(char) * len);
 
     if (res == NULL) {
@@ -12,6 +13,6 @@ char* strdup(const char* s) {
         return NULL;
     }
 
-    strlcpy(res, s, len);
+    strlcpy(res, str, len);
     return res;
 }

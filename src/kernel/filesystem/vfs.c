@@ -14,9 +14,72 @@ typedef struct VFSTreeNode {
     size_t numChildren;
 } VFSTreeNode;
 
-VFSTreeNode vfsRoot = {NULL, NULL, NULL, 0};
+static VFSTreeNode vfsRoot = {NULL, NULL, NULL, 0};
+static bool vfsInitialized = false;
 
-bool vfsInitialized = false;
+// Given a parent TreeNode and a VNode,
+// create a new child TreeNode to hold the VNode
+static VFSTreeNode* addChildToNode(VFSTreeNode* parent, VNode* data) {
+    parent->numChildren++;
+    // TODO: recalloc / reallocarray
+    // TODO: or perhaps it'd be better to use a linked list? it'd reduce
+    // fragmentation as well as runtime
+    // (malloc is intrinsically faster than realloc in this implementation)
+    parent->children = realloc(
+        parent->children, parent->numChildren * sizeof(VFSTreeNode)
+    );
+    VFSTreeNode* newNode = &parent->children[parent->numChildren - 1];
+    memset(newNode, 0, sizeof(VFSTreeNode));
+    newNode->vnode = data;
+    newNode->parent = parent;
+    return newNode;
+}
+
+static bool isVNodeNamed(const char name[], VNode* vnode) {
+    return strncmp(name, vnode->name, VFSFilenameLength) == 0;
+}
+
+static VFSTreeNode* getNodeByPath(const char path[]) {
+    assert(vfsInitialized);
+
+    if (path == NULL || *path == '\0') {
+        return NULL;
+    } else if (strncmp(path, "/", 2) == 0) {
+        return &vfsRoot;
+    }
+
+    VFSTreeNode* currNode = &vfsRoot;
+    // strtok_r modifies its first argument, but path is const
+    // can't just use strdup(...) as the first argument, we must free this
+    char* mutPath = strdup(path);
+    char* tokState;
+    char* token = strtok_r(mutPath, "/", &tokState);
+    assert(token != NULL);
+    do {
+        VFSTreeNode* nextNode = NULL;
+        for (size_t i = 0; i < currNode->numChildren; i++) {
+            if (isVNodeNamed(token, currNode->children[i].vnode)) {
+                // found a match
+                nextNode = &currNode->children[i];
+                break;
+            }
+        }
+
+        if (nextNode == NULL) {
+            // The next directory wasn't found
+            // TODO: try and open the next directory based off of the parent
+            // directory's device
+            free(mutPath);
+            return NULL;
+        }
+
+        currNode = nextNode; // move onwards
+    } while((token = strtok_r(NULL, "/", &tokState)) != NULL);
+
+    // We found the node
+    free(mutPath);
+    return currNode;
+}
 
 void initVFS(void) {
     VNode* root = malloc(sizeof(VNode));
@@ -25,56 +88,43 @@ void initVFS(void) {
     vfsInitialized = true;
 }
 
-void vfsEmplace(const char parentDir[], VNode* vnode) {
+int vfsEmplace(const char parentDir[], VNode* vnode) {
     assert(vfsInitialized);
-
-    // TODO: path traversal
-    // for this prototype just put everything in /
-    if (vnode == NULL) {
-        return;
+    if (parentDir == NULL || vnode == NULL || *parentDir == '\0') {
+        return -1;
     }
 
-    vfsRoot.numChildren++;
-    // TODO: recalloc / reallocarray
-    vfsRoot.children = realloc(
-        vfsRoot.children, vfsRoot.numChildren * sizeof(VFSTreeNode)
-    );
-    VFSTreeNode* newNode = &vfsRoot.children[vfsRoot.numChildren - 1];
-    memset(newNode, 0, sizeof(VFSTreeNode));
-    newNode->vnode = vnode;
-    newNode->parent = &vfsRoot;
+    if (strncmp(parentDir, "/", 2) == 0) {
+        // Emplacing to the root directory, don't need to do anything fancy...
+        addChildToNode(&vfsRoot, vnode);
+        return 0;
+    }
+
+    // We need to find where this vnode should go, and then emplace it
+    VFSTreeNode* immediateParent = getNodeByPath(parentDir);
+    if (immediateParent == NULL) {
+        return -1;
+    }
+
+    addChildToNode(immediateParent, vnode);
+    return 0;
 }
 
 VNode* vfsOpen(const char path[], FileFlags flags) {
+    assert(vfsInitialized);
     if (strlen(path) == 0) {
         // Not a path
         return NULL;
     }
 
-    // skip root slash
-    path++;
-    // TODO: path traversal, will probably need tokenization
-    // for now, assume everything is located in /
-    // TODO: handle flags
-    for (size_t i = 0; i < vfsRoot.numChildren; i++) {
-        if (
-            strncmp(
-                vfsRoot.children[i].vnode->name, path, VFSFilenameLength
-            ) == 0
-        ) {
-            VNode* res = vfsRoot.children[i].vnode;
-            res->refCount++;
-            if (res->openCallback != NULL) {
-                res->openCallback(res, flags);
-            }
-            return res;
-        }
-    }
-
-    return NULL;
+    // TODO: flags
+    // grab the node
+    VFSTreeNode* res = getNodeByPath(path);
+    return res->vnode;
 }
 
 void vfsClose(VNode* vnode) {
+    assert(vfsInitialized);
     if (vnode == NULL) {
         return;
     }
@@ -91,6 +141,7 @@ void vfsClose(VNode* vnode) {
 }
 
 void vfsDestroy(VNode* vnode) {
+    assert(vfsInitialized);
     if (vnode == NULL) {
         return;
     }
@@ -101,7 +152,8 @@ void vfsDestroy(VNode* vnode) {
     free(vnode);
 }
 
-size_t vfsRead(VNode* vnode, void* buf, size_t size) {
+int64_t vfsRead(VNode* vnode, void* buf, size_t size) {
+    assert(vfsInitialized);
     if (vnode == NULL) {
         return -1;
     }
@@ -113,7 +165,8 @@ size_t vfsRead(VNode* vnode, void* buf, size_t size) {
     return -1;
 }
 
-size_t vfsWrite(VNode* vnode, void* buf, size_t size) {
+int64_t vfsWrite(VNode* vnode, void* buf, size_t size) {
+    assert(vfsInitialized);
     if (vnode == NULL) {
         return -1;
     }

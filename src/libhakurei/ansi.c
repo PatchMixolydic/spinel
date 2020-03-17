@@ -45,7 +45,7 @@ int hakuParseANSI(HakuTerminalState* state, const char str[]) {
                 if (0x40 <= str[i] && str[i] <= 0x7E) {
                     // found command byte
                     command = str[i];
-                    commandLoc = str + i;
+                    commandLoc = (char*)str + i;
                     escapeLen += i;
                     break;
                 }

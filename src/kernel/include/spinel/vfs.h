@@ -40,8 +40,8 @@ typedef enum {
 
 struct VNode;
 
-typedef size_t (*ReadCallback)(struct VNode*, uint8_t*, size_t);
-typedef size_t (*WriteCallback)(struct VNode*, uint8_t*, size_t);
+typedef int64_t (*ReadCallback)(struct VNode*, uint8_t*, size_t);
+typedef int64_t (*WriteCallback)(struct VNode*, uint8_t*, size_t);
 typedef void (*OpenCallback)(struct VNode*, FileFlags);
 typedef void (*CloseCallback)(struct VNode*);
 // Called when refCount hits zero and the vnode is removed from the VFS
@@ -58,7 +58,8 @@ typedef struct VNode {
     uint64_t inode;
 
     // We might have to know the device
-    // For instance, if this is a directory and we want to look at its children
+    // For instance, if we want to open a child directory in a directory,
+    // or if this directory is a mountpoint
     void* device;
 
     FileFlags flags;
@@ -79,11 +80,11 @@ typedef struct VNode {
 } VNode;
 
 void initVFS(void);
-void vfsEmplace(const char parentDir[], VNode* vnode);
+int vfsEmplace(const char parentDir[], VNode* vnode);
 VNode* vfsOpen(const char path[], FileFlags flags);
 void vfsClose(VNode* vnode);
 void vfsDestroy(VNode* vnode);
-size_t vfsRead(VNode* vnode, void* buf, size_t size);
-size_t vfsWrite(VNode* vnode, void* buf, size_t size);
+int64_t vfsRead(VNode* vnode, void* buf, size_t size);
+int64_t vfsWrite(VNode* vnode, void* buf, size_t size);
 
 #endif // ndef SPINEL_VFS_H

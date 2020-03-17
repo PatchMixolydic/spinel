@@ -61,7 +61,7 @@ void initPhysicalAlloc(const memmap_t* memoryMapPtr, size_t memoryMapLength) {
         (uintptr_t)memoryMapPtr + memoryMapLength
     );
 	for (
-        memmap_t* ptr = memoryMapPtr;
+        memmap_t* ptr = (memmap_t*)memoryMapPtr;
         ptr < memoryMapEnd;
         ptr++
     ) {
@@ -78,7 +78,7 @@ void initPhysicalAlloc(const memmap_t* memoryMapPtr, size_t memoryMapLength) {
     kernelReservedSize += bitmapSize * 2; // Grow reserved size
 
 	for (
-        memmap_t* ptr = memoryMapPtr;
+        memmap_t* ptr = (memmap_t*)memoryMapPtr;
         ptr < memoryMapEnd;
         ptr++
     ) {

@@ -46,6 +46,8 @@ string/strdup.o \
 string/strlcpy.o \
 string/strlen.o \
 string/strpbrk.o \
+string/strchr.o \
+string/strrchr.o \
 string/strspn.o \
 string/strtok_r.o \
 
