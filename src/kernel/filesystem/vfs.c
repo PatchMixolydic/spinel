@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <spinel/concurrency.h>
 #include <spinel/vfs.h>
 
 // TODO: perhaps a red/black tree could be used for faster lookup by inode
@@ -16,6 +17,7 @@ typedef struct VFSTreeNode {
 
 static VFSTreeNode vfsRoot = {NULL, NULL, NULL, 0};
 static bool vfsInitialized = false;
+static Mutex vfsTreeMutex = false;
 
 // Given a parent TreeNode and a VNode,
 // create a new child TreeNode to hold the VNode
@@ -35,10 +37,14 @@ static VFSTreeNode* addChildToNode(VFSTreeNode* parent, VNode* data) {
     return newNode;
 }
 
+// Convenience function for checking VNode name, bounded by VFSFilenameLength,
+// since the comparison is pretty long
 static bool isVNodeNamed(const char name[], VNode* vnode) {
     return strncmp(name, vnode->name, VFSFilenameLength) == 0;
 }
 
+// Get a pointer to a file's node in the VFS tree, or NULL if a corresponding
+// node doesn't exist
 static VFSTreeNode* getNodeByPath(const char path[]) {
     assert(vfsInitialized);
 
@@ -94,19 +100,23 @@ int vfsEmplace(const char parentDir[], VNode* vnode) {
         return -1;
     }
 
+    spinlockMutex(&vfsTreeMutex);
     if (strncmp(parentDir, "/", 2) == 0) {
         // Emplacing to the root directory, don't need to do anything fancy...
         addChildToNode(&vfsRoot, vnode);
+        unlockMutex(&vfsTreeMutex);
         return 0;
     }
 
     // We need to find where this vnode should go, and then emplace it
     VFSTreeNode* immediateParent = getNodeByPath(parentDir);
     if (immediateParent == NULL) {
+        unlockMutex(&vfsTreeMutex);
         return -1;
     }
 
     addChildToNode(immediateParent, vnode);
+    unlockMutex(&vfsTreeMutex);
     return 0;
 }
 
@@ -119,7 +129,9 @@ VNode* vfsOpen(const char path[], FileFlags flags) {
 
     // TODO: flags
     // grab the node
+    spinlockMutex(&vfsTreeMutex);
     VFSTreeNode* res = getNodeByPath(path);
+    unlockMutex(&vfsTreeMutex);
     return res->vnode;
 }
 
@@ -149,7 +161,10 @@ void vfsDestroy(VNode* vnode) {
     if (vnode->destroyCallback != NULL) {
         vnode->destroyCallback(vnode);
     }
+
+    spinlockMutex(&vfsTreeMutex);
     free(vnode);
+    unlockMutex(&vfsTreeMutex);
 }
 
 int64_t vfsRead(VNode* vnode, void* buf, size_t size) {

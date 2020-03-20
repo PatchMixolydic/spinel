@@ -29,6 +29,7 @@ LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
 
 KERNEL_OBJS=\
 $(KERNEL_ARCH_OBJS) \
+concurrency/mutex.o\
 core/kernelInfo.o \
 core/kernelMain.o \
 core/panic.o\

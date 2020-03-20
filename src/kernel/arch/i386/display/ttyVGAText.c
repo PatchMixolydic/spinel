@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <hakurei.h>
+#include <spinel/concurrency.h>
 #include <spinel/kernelInfo.h>
 #include <spinel/tty.h>
 #include "../core/cpu.h"
@@ -37,6 +38,8 @@ static const uint16_t VGACursorCommandPort = 0x3D4;
 static const uint16_t VGACursorDataPort = 0x3D5;
 
 static VGAChar* textBuffer = (VGAChar*)(0xC00B8000);
+
+static Mutex ttyMutex = false;
 
 static void putCharCallback(char c);
 static void updateCursorCallback(void);
@@ -113,20 +116,28 @@ void putChar(char c) {
     // TODO: smarter multiplexing to serial port
     // (some kind of kernel logging facility)
     // Probably should wait for VFS
+    spinlockMutex(&ttyMutex);
     serialWrite(SerialPort1, c);
     hakuPutChar(&state, c);
+    unlockMutex(&ttyMutex);
 }
 
 void putString(const char s[]) {
+    spinlockMutex(&ttyMutex);
     serialWriteStr(SerialPort1, s);
     hakuPutString(&state, s);
+    unlockMutex(&ttyMutex);
 }
 
 void putStringLen(const char s[], size_t length) {
+    spinlockMutex(&ttyMutex);
     serialWriteStrLen(SerialPort1, s, length);
     hakuPutStringLen(&state, s, length);
+    unlockMutex(&ttyMutex);
 }
 
 void clearScreen(void) {
+    spinlockMutex(&ttyMutex);
     hakuClearScreen(&state);
+    unlockMutex(&ttyMutex);
 }

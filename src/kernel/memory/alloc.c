@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <spinel/alloc.h>
+#include <spinel/concurrency.h>
 #include <spinel/kernelInfo.h>
 #include <spinel/panic.h>
 
@@ -22,6 +23,7 @@ typedef struct HeapData {
 
 static bool allocInitialized = false;
 static size_t heapSize;
+static Mutex heapDataMutex;
 
 static HeapData* firstFreeData;
 
@@ -51,6 +53,7 @@ void* kmalloc(size_t size) {
     HeapData* free = firstFreeData;
 
     // Go until either we find a big enough block or free->next is NULL
+    spinlockMutex(&heapDataMutex);
     for (
         ;
         free->size < size && free->status != Free && free->next != NULL;
@@ -107,6 +110,7 @@ void* kmalloc(size_t size) {
             }
         }
     }
+    unlockMutex(&heapDataMutex);
 
     return (void*)((uintptr_t)free + sizeof(HeapData));
 }
@@ -125,10 +129,13 @@ void* krealloc(void* ptr, size_t size) {
         return NULL;
     }
 
+    spinlockMutex(&heapDataMutex);
     HeapData* data = getHeapData(ptr);
 
     // Determined by the new size or the current size, whichever is smaller
     size_t bytesToPreserve = size < data->size ? size : data->size;
+    unlockMutex(&heapDataMutex);
+
     // Not sure if shrinking the allocated data would be good
     // This may lead to smaller fragments being created than this method
     void* res = kmalloc(size);
@@ -148,6 +155,7 @@ void kfree(void* alloc) {
         return;
     }
 
+    spinlockMutex(&heapDataMutex);
     HeapData* data = getHeapData(alloc);
     data->status = Free;
     if (data->prev != NULL && data->prev->status == Free) {
@@ -168,4 +176,5 @@ void kfree(void* alloc) {
     if (firstFreeData == NULL || (uintptr_t)data < (uintptr_t)firstFreeData) {
         firstFreeData = data;
     }
+    unlockMutex(&heapDataMutex);
 }

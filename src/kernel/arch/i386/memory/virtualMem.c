@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <spinel/concurrency.h>
 #include <spinel/kernelInfo.h>
 #include <spinel/panic.h>
 #include "../core/cpu.h"
@@ -41,6 +42,8 @@ typedef enum {
     PageGlobalFlag = 1 << 8
 } PageFlags;
 
+static Mutex virtualMemoryMutex = false;
+
 static inline size_t addrToMapIdx(uintptr_t addr, int level) {
     size_t divisor = sizeof(uintptr_t) * PageMapSize;
     for (; level > 0; level--) {
@@ -71,6 +74,7 @@ static inline uintptr_t* getPageMapEntry(uintptr_t page, size_t level) {
 }
 
 void setupPageMaps(void) {
+    spinlockMutex(&virtualMemoryMutex);
     kernelPageDirectory[0] = 0; // remove identity mapping
     uintptr_t* pageEntry;
     for (
@@ -93,9 +97,11 @@ void setupPageMaps(void) {
 
     // TODO: might be slow; we need to invalidate all the pages we just changed
     setCR3(getCR3());
+    unlockMutex(&virtualMemoryMutex);
 }
 
 void mapPage(uintptr_t virtual, uintptr_t flags) {
+    spinlockMutex(&virtualMemoryMutex);
     uintptr_t* pageTabEntry = getPageMapEntry(virtual, 0);
     uintptr_t* pageDirEntry = getPageMapEntry(virtual, 1);
     if ((*pageDirEntry & PagePresentFlag) == 0) {
@@ -111,19 +117,22 @@ void mapPage(uintptr_t virtual, uintptr_t flags) {
     uintptr_t physical = (uintptr_t)allocatePageFrame();
     *pageTabEntry = PageAlign(physical) | PagePresentFlag | flags;
     invalidatePage((void*)virtual);
+    unlockMutex(&virtualMemoryMutex);
 }
 
 void unmapPage(uintptr_t virtual) {
+    spinlockMutex(&virtualMemoryMutex);
     uintptr_t* pageEntry = getPageMapEntry(virtual, 0);
     *pageEntry = 0;
     invalidatePage((void*)virtual);
+    unlockMutex(&virtualMemoryMutex);
 }
 
 void handlePageFault(InterruptInfo info) {
     printf("Page fault at 0x%p\n", getCR2());
     if (KernelHeapStart <= getCR2() && getCR2() < KernelHeapEnd) {
         if (info.errorCode & PageFaultUserModeFlag) {
-            printf("User process tried to allocate kernel heap memory");
+            printf("User process tried to allocate kernel heap memory\n");
             return;
         }
         // Oh, kmalloc? Nonononono, you didn't do anything wrong

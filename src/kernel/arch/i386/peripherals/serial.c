@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <spinel/concurrency.h>
 #include "../core/cpu.h"
 #include "../peripherals/pic.h"
 #include "serial.h"
@@ -27,6 +28,8 @@ static const uint16_t ModemCtrlOffset = 4;
 static const uint16_t LineStatusOffset = 5;
 static const uint16_t ModemStatusOffset = 6;
 static const uint16_t ScratchOffset = 7;
+
+static Mutex serialPortMutexes[4] = {0, 0, 0, 0};
 
 static void initSerialPort(uint16_t port, uint16_t baud) {
     // Disable interrupts
@@ -61,6 +64,27 @@ static void initSerialPort(uint16_t port, uint16_t baud) {
     // Bit 0 - Data ready interrupt
     // It seems like since most serial I/O will be through a file most likely,
     // we don't need/shouldn't use interrupts (we can just spin~)
+}
+
+// Convert from an I/O port ID to its number
+// ex. serialPortToNum(SerialPort1) == 1
+static inline unsigned serialPortToNum(uint16_t serialPort) {
+    switch (serialPort) {
+        case SerialPort1:
+            return 1;
+
+        case SerialPort2:
+            return 2;
+
+        case SerialPort3:
+            return 3;
+
+        case SerialPort4:
+            return 4;
+
+        default:
+            return 0;
+    }
 }
 
 void initSerial(unsigned baudRate) {
@@ -109,9 +133,11 @@ void serialWrite(uint16_t serialPort, uint8_t val) {
 }
 
 void serialWriteStrLen(uint16_t serialPort, const char str[], size_t len) {
+    spinlockMutex(&serialPortMutexes[serialPortToNum(serialPort)]);
     for (size_t i = 0; i < len && str[i] != '\0'; i++) {
         serialWrite(serialPort, str[i]);
     }
+    unlockMutex(&serialPortMutexes[serialPortToNum(serialPort)]);
 }
 
 void serialWriteStr(uint16_t serialPort, const char str[]) {

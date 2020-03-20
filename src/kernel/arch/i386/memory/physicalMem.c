@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <spinel/concurrency.h>
 #include <spinel/kernelInfo.h>
 #include <spinel/panic.h>
 #include "physicalMem.h"
@@ -11,11 +12,12 @@
 extern const uint8_t __KernelStart[];
 extern const uint8_t __KernelEnd[];
 
-uint32_t* pageMap; // Contains info about which pages are free (1) or not (0)
-uint32_t* availMap; // Contains info about which pages are available
-size_t nextFreePageIdx = 0; // index of the uint32_t with the next free page
-size_t availableMemory = 0;
-size_t bitmapSize = 0; // size in bytes, not length, for page and avail map
+static uint32_t* pageMap; // Contains info about which pages are free (1) or not (0)
+static uint32_t* availMap; // Contains info about which pages are available
+static size_t nextFreePageIdx = 0; // index of the uint32_t with the next free page
+static size_t availableMemory = 0;
+static size_t bitmapSize = 0; // size in bytes, not length, for page and avail map
+static Mutex pageFrameMutex = false;
 
 static inline size_t getBitmapIndex(uint64_t addr) {
     return addr / PageSize / 32; // Page idx of addr divided into groups of 32
@@ -110,6 +112,7 @@ void initPhysicalAlloc(const memmap_t* memoryMapPtr, size_t memoryMapLength) {
 }
 
 void* allocatePageFrame(void) {
+    spinlockMutex(&pageFrameMutex);
     size_t searchStartLoc = nextFreePageIdx;
     uintptr_t res = (uintptr_t)NULL;
     do {
@@ -152,6 +155,7 @@ void* allocatePageFrame(void) {
         // For now, panic
         panic("Out of memory");
     }
+    unlockMutex(&pageFrameMutex);
     return (void*)res;
 }
 
@@ -162,8 +166,10 @@ void freePageFrame(void* frame) {
         printf("Tried to free reserved page frame 0x%p\n", frame);
         return;
     }
+    spinlockMutex(&pageFrameMutex);
     setPageFree(addr, true);
     if ((pageMap[nextFreePageIdx] & availMap[nextFreePageIdx]) == 0) {
         nextFreePageIdx = getBitmapIndex(addr);
     }
+    unlockMutex(&pageFrameMutex);
 }
