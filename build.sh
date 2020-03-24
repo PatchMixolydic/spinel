@@ -4,6 +4,22 @@ set -e
 
 . ./config.sh
 
+ONLYTHIS=false
+
+help() {
+    printf "Usage: build.sh [-o] [-h] [action]\n"
+    printf "\t-o - Only perform this action, do not perform prerequisites\n"
+    printf "\t-h - Print help\n"
+    printf "\taction - An action to perform\n"
+    printf "\t\tclean - Clean up build files\n"
+    printf "\t\theaders - Install header files\n"
+    printf "\t\tbuild - Build Spinel\n"
+    printf "\t\ttests - Run unit tests\n"
+    printf "\t\tiso - Generate an ISO file\n"
+    printf "\t\tqemu - Run Spinel in QEMU\n"
+    printf "\t\tProviding no action will open an interactive menu\n"
+}
+
 clean() {
     for PROJECT in $PROJECTS; do
         (cd $PROJECT && $MAKE clean)
@@ -22,16 +38,29 @@ headers() {
 }
 
 build() {
-    clean
-    headers
+    if [ $ONLYTHIS = false ]; then
+        clean
+        headers
+    fi
     mkdir -p "$SYSROOT"
     for PROJECT in $PROJECTS; do
         (cd $PROJECT && DESTDIR="$SYSROOT" $MAKE install)
     done
 }
 
+tests() {
+    if [ $ONLYTHIS = false ]; then
+        build
+    fi
+    for PROJECT in $PROJECTS; do
+        (cd $PROJECT && $MAKE test)
+    done
+}
+
 iso() {
-    build
+    if [ $ONLYTHIS = false ]; then
+        build
+    fi
     TMPDIR=$(mktemp -d -t spinelTmp_ 2>/dev/null) || TMPDIR=/tmp/spineliso$$ \
         && mkdir $TMPDIR
     trap "rm -rf $TMPDIR" 1 5 15 EXIT
@@ -48,26 +77,72 @@ EOF
 }
 
 qemu() {
-    iso
+    if [ $ONLYTHIS = false ]; then
+        iso
+    fi
     qemu-system-$(./tripletToArch.sh $HOST) -cdrom build/spinel.iso -s -m 512 \
         -soundhw pcspk -enable-kvm -serial mon:stdio
 }
 
+rotate() {
+    echo $1 | tr 'A-Za-z' 'N-ZA-Mn-za-m'
+}
+
+while getopts 'qoh' OPTION; do
+  case "$OPTION" in
+    o)
+      ONLYTHIS=1
+      ;;
+
+    h)
+      help
+      exit 0
+      ;;
+    ?)
+      help >&2
+      exit 1
+      ;;
+  esac
+done
+shift "$(($OPTIND -1))"
+
+rotated=$(rotate $1)
+
 if [ "$1" = "clean" ] || [ "$1" = "headers" ] || [ "$1" = "build" ] || \
-[ "$1" = "iso" ] || [ "$1" = "qemu" ]; then
+[ "$1" = "iso" ] || [ "$1" = "qemu" ] || [ "$1" = "tests" ]; then
     $1
+# Are there Easter eggs in this program?
+elif [ $(rotate $1) = "zbb" ]; then
+    echo $(rotate "\\g\\gGuvf ohvyq fpevcg qbrf abg unir Fhcre Pbj Cbjref.")
+elif [ $(rotate $1) = "png" ]; then
+    echo $(rotate "\\g\\gGuvf ohvyq fpevcg unf Fhcre Png Cbjref.")
+elif [ $(rotate $1) = "zrbj" ]; then
+    echo $(rotate "Lbh'er trggvat pybfre.")
+elif [ $(rotate $1) = "aln" ] || [ $(rotate $1) = "alnn" ] || \
+    [ $(rotate $1) = "alnnn" ] || [ $(rotate $1) = "alna" ];
+then
+    echo $(rotate "Fcvary pbclevtug Ehol Ynmhyv 2019-2020")
+    echo $(rotate "Gunax lbh sbe lbhe vagrerfg!")
+    echo $(rotate "V ubcr gur pbqr vfa'g gbb onq :C")
+    echo $(rotate "\\g\\gLbh abj unir Fhcre Png Cbjref.")
 else
     TMPFILE=$(tempfile 2>/dev/null) || TMPFILE=/tmp/spinelmenu$$
     trap "rm -f $TMPFILE" 1 5 15 EXIT
 
     dialog --clear --menu \
     "Select an option\n\
+    Unless you specify the -o option, selecting an action may\n\
+    perform its prerequisites (ex. qemu will run iso, which\n\
+    runs build, which runs headers and clean).\n\
     (Note: you can also specify these on the command line)" \
-    0 0 0 "clean" "Delete all build files" \
+    0 0 0 \
+    "help" "Help for using this script" \
+    "clean" "Delete all build files" \
     "headers" "Copy headers to sysroot" \
     "build" "Perform a full build" \
-    "iso" "Create a bootable ISO (first building Spinel)" \
-    "qemu" "Boot Spinel in QEMU (first building Spinel)" \
+    "tests" "Run unit tests" \
+    "iso" "Create a bootable ISO" \
+    "qemu" "Boot Spinel in QEMU" \
     2> $TMPFILE
 
     RETCODE=$?
