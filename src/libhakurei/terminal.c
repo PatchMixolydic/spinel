@@ -68,6 +68,7 @@ HakuError hakuPutStringLen(
     for (size_t i = 0; i < len && str[i] != '\0'; i++) {
         if (str[i] == '\x1B') {
             // ANSI escape
+            // TODO: continue parsing ANSI escapes across calls
             i += hakuParseANSI(state, str + i) - 1;
         } else {
             hakuPutChar(state, str[i]);
@@ -98,6 +99,7 @@ HakuError hakuPutChar(HakuTerminalState* state, char c) {
 
         case '\x1B': {
             // stray escape... ignore
+            // TODO: start ANSI parser instead
             break;
         }
 

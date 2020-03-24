@@ -3,10 +3,10 @@
 
 #include <stdint.h>
 
-extern const uint16_t SerialPort1;
-extern const uint16_t SerialPort2;
-extern const uint16_t SerialPort3;
-extern const uint16_t SerialPort4;
+#define SerialPort1 0x3F8
+#define SerialPort2 0x2F8
+#define SerialPort3 0x3E8
+#define SerialPort4 0x2E8
 
 extern const unsigned SerialMaxBaudRate;
 

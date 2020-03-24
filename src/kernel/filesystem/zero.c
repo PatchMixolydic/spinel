@@ -7,11 +7,14 @@
 static const char* const DeviceName = "zero";
 
 int64_t zeroReadCallback(struct VNode* vnode, uint8_t* buf, size_t len) {
+    (void)vnode;
     memset(buf, 0, len);
     return len;
 }
 
 int64_t zeroWriteCallback(struct VNode* vnode, uint8_t* data, size_t len) {
+    (void)vnode;
+    (void)data;
     return len;
 }
 

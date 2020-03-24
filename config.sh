@@ -2,11 +2,13 @@
 SYSTEM_HEADER_PROJECTS="\
   src/libc \
   src/kernel \
+  src/libdastr \
   src/libhakurei \
   src/thirdparty/miscInc\
 "
 PROJECTS="\
   src/libc \
+  src/libdastr \
   src/libhakurei \
   src/kernel \
 "

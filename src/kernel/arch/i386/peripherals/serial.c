@@ -7,11 +7,6 @@
 #include "../peripherals/pic.h"
 #include "serial.h"
 
-const uint16_t SerialPort1 = 0x3F8;
-const uint16_t SerialPort2 = 0x2F8;
-const uint16_t SerialPort3 = 0x3E8;
-const uint16_t SerialPort4 = 0x2E8;
-
 const unsigned SerialMaxBaudRate = 115200;
 
 // Each serial port has several ports at various offsets
