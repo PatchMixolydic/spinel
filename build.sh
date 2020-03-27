@@ -52,9 +52,22 @@ tests() {
     if [ $ONLYTHIS = false ]; then
         build
     fi
+
+    OLDAR="$AR"
+    OLDNASM="$NASM"
+    OLDCC="$CC"
+
+    export AR="$TESTAR"
+    export NASM="$TESTNASM"
+    export CC="$TESTCC"
+
     for PROJECT in $PROJECTS; do
         (cd $PROJECT && $MAKE test)
     done
+
+    export AR="$OLDAR"
+    export NASM="$OLDNASM"
+    export CC="$OLDCC"
 }
 
 iso() {

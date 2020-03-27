@@ -53,7 +53,7 @@ $(LIBS) \
 $(ARCHDIR)/core/crtend.o \
 $(ARCHDIR)/core/crtn.o \
 
-.PHONY: all clean install install-headers install-kernel
+.PHONY: all clean install install-headers install-kernel test
 .SUFFIXES: .o .c .asm
 
 all: spinel.elf
@@ -75,6 +75,9 @@ clean:
 	rm -f spinel.elf
 	rm -f $(OBJS) *.o */*.o */*/*.o
 	rm -f $(OBJS:.o=.d) *.d */*.d */*/*.d
+
+test:
+	echo "The kernel currently does not have any unit tests."
 
 install: install-headers install-kernel
 

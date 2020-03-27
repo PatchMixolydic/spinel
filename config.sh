@@ -4,9 +4,12 @@ SYSTEM_HEADER_PROJECTS="\
   src/kernel \
   src/libdastr \
   src/libhakurei \
+  src/spinunit \
   src/thirdparty/miscInc\
 "
+
 PROJECTS="\
+  src/spinunit \
   src/libc \
   src/libdastr \
   src/libhakurei \
@@ -15,6 +18,13 @@ PROJECTS="\
 
 export MAKE="${MAKE:-make} -j`expr $(nproc) + 1`"
 export HOST=${HOST:-`./defaultHost.sh`}
+
+export TESTAR=ar
+export TESTNASM=nasm
+# set test C compiler to user's if they have a preference, else gcc
+TESTCC=$CC
+[ -z "$TESTCC" ] && TESTCC=gcc
+export TESTCC
 
 export AR=${HOST}-ar
 export NASM=nasm

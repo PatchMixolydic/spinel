@@ -1,3 +1,5 @@
+PROGNAME=libhakurei
+
 CFLAGS ?= -O2 -g
 CPPFLAGS ?=
 LDFLAGS ?=
@@ -22,7 +24,7 @@ KERN_OBJS=$(OBJS:.o=.kern.o)
 
 BINARIES = libhakurei.a libhakukern.a
 
-.PHONY: all clean install install-libs
+.PHONY: all clean test install install-libs
 .SUFFIXES: .o .kern.o .c
 
 all: $(BINARIES)
@@ -43,6 +45,9 @@ clean:
 	rm -f $(BINARIES) *.a
 	rm -f $(OBJS) $(KERN_OBJS) *.o */*.o */*/*.o
 	rm -f $(OBJS:.o=.d) $(KERN_OBJS:.o=.d) *.d */*.d */*/*.d
+
+test:
+	echo "$(PROGNAME) has no unit tests."
 
 install: install-headers install-libs
 

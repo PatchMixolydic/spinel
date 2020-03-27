@@ -7,8 +7,6 @@ INCLUDEDIR ?= $(PREFIX)/include
 
 all: install
 
-clean:
-
 install: install-headers
 
 install-headers:

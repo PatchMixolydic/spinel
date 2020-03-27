@@ -1,3 +1,5 @@
+PROGNAME=libc
+
 DEFAULT_HOST != $(ROOTDIR)/defaultHost.sh
 HOST ?= DEFAULT_HOST
 HOSTARCH != $(ROOTDIR)/tripletToArch.sh $(HOST)
@@ -65,7 +67,7 @@ LIBCKERN_OBJS=$(FREESTANDING_OBJS:.o=.libckern.o)
 
 BINARIES = libckern.a libc.a
 
-.PHONY: all clean install install-libs
+.PHONY: all clean tests install install-libs
 .SUFFIXES: .o .libckern.o .c .asm
 
 all: $(BINARIES)
@@ -92,6 +94,9 @@ clean:
 	rm -f $(BINARIES) *.a
 	rm -f $(OBJS) $(LIBCKERN_OBJS) *.o */*.o */*/*.o
 	rm -f $(OBJS:.o=.d) $(LIBCKERN_OBJS:.o=.d) *.d */*.d */*/*.d
+
+test:
+	echo "$(PROGNAME) has no unit tests."
 
 install: install-headers install-libs
 
