@@ -26,4 +26,6 @@ int main(void) {
     SpinUnitRunTests(testGroupTrueFalse);
     SpinUnitRunTests(testGroup2);
     SpinUnitPrintStatistics;
+    // expect one failure
+    return testsRun - testsPassed == 1 ? 0 : 1;
 }

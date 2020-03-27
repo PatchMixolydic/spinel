@@ -62,4 +62,8 @@ const SpinUnitTest __##name[] = {\
     printf(SpinUnitStatsMsg, testsRun, testsPassed, testsRun - testsPassed);\
 } while (0)
 
+// nonzero if any tests failed, else 0
+// Useful for returning from main
+#define SpinUnitDidAnyFail (testsRun - testsPassed != 0)
+
 #endif // ndef SPINUNIT_H
