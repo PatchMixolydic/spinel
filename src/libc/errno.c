@@ -1,0 +1,1 @@
+unsigned errno = 0;

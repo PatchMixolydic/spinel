@@ -34,6 +34,7 @@ FREESTANDING_OBJS = \
 $(LIBC_ARCH_FREESTANDING_OBJS) \
 ctype/isalpha.o \
 ctype/isdigit.o \
+errno.o \
 stdio/printf.o \
 stdio/vprintf.o \
 stdlib/calloc.o \
