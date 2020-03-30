@@ -10,6 +10,7 @@
 #include "../interrupts/idt.h"
 #include "../memory/virtualMem.h"
 #include "../peripherals/pic.h"
+#include "../peripherals/ps2.h"
 #include "../peripherals/serial.h"
 #include "multibootProc.h"
 
@@ -24,6 +25,7 @@ void archBoot(uint32_t multibootMagic, struct multiboot_tag* multibootInfo) {
         ProcessorName, MachineName
     );
 
+    initPS2USBLegacy();
     initGDT();
     initIDT();
 

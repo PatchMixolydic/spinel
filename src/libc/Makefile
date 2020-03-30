@@ -67,7 +67,7 @@ LIBCKERN_OBJS=$(FREESTANDING_OBJS:.o=.libckern.o)
 
 BINARIES = libckern.a libc.a
 
-.PHONY: all clean tests install install-libs
+.PHONY: all clean test install install-libs
 .SUFFIXES: .o .libckern.o .c .asm
 
 all: $(BINARIES)

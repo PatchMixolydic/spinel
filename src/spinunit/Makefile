@@ -21,6 +21,6 @@ install-headers:
 	cp -R --preserve=timestamps include/. $(DESTDIR)$(INCLUDEDIR)/.
 
 test:
-	$(CC) test.c -o test$(PROGNAME) $(CFLAGS)
+	$(TESTCC) test.c -o test$(PROGNAME) $(CFLAGS)
 	./test$(PROGNAME)
 	rm test$(PROGNAME)

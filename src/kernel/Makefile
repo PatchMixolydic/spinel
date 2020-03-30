@@ -35,6 +35,7 @@ core/kernelMain.o \
 core/panic.o\
 filesystem/zero.o\
 filesystem/vfs.o\
+input/keymap.o\
 memory/alloc.o\
 
 OBJS=\

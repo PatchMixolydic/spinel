@@ -36,7 +36,7 @@ libdastrkern.a: $(KERN_OBJS)
 	$(AR) rcs $@ $(KERN_OBJS)
 
 .c.o:
-	$(CC) -MD -c $< -o $@ -std=c11 $(CFLAGS) $(CPPFLAGS)
+	$(CC) -MD -c $< -o $@ -std=c11 $(CFLAGS) $(CPPFLAGS) $(LIBS)
 
 .c.kern.o:
 	$(CC) -MD -c $< -o $@ -std=c11 $(CFLAGS) $(CPPFLAGS) $(KERN_LIBS)

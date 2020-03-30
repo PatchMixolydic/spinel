@@ -78,13 +78,6 @@ void interruptHandler(InterruptInfo info) {
 }
 
 IRQPlaceholder(0)
-
-void irq1(void) {
-    uint8_t scancode = inByte(0x60);
-    printf("Got scan code 0x%X\n", scancode);
-    picEndOfInterrupt(1);
-}
-
 IRQPlaceholder(2)
 IRQPlaceholder(3)
 IRQPlaceholder(4)
