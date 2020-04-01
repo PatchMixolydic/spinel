@@ -11,6 +11,7 @@
 #include "../memory/virtualMem.h"
 #include "../peripherals/pic.h"
 #include "../peripherals/ps2.h"
+#include "../peripherals/ps2Keyboard.h"
 #include "../peripherals/serial.h"
 #include "multibootProc.h"
 

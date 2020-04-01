@@ -4,22 +4,20 @@
 #include <string.h>
 #include <spinel/vfs.h>
 
-static const char* const DeviceName = "zero";
-
-int64_t zeroReadCallback(struct VNode* vnode, uint8_t* buf, size_t len) {
+ssize_t zeroReadCallback(struct VNode* vnode, uint8_t* buf, size_t len) {
     (void)vnode;
     memset(buf, 0, len);
     return len;
 }
 
-int64_t zeroWriteCallback(struct VNode* vnode, uint8_t* data, size_t len) {
+ssize_t zeroWriteCallback(struct VNode* vnode, uint8_t* data, size_t len) {
     (void)vnode;
     (void)data;
     return len;
 }
 
 void initDevZero(void) {
-    VNode* vnode = malloc(sizeof(VNode));
+    /*VNode* vnode = malloc(sizeof(VNode));
     memset(vnode, 0, sizeof(VNode));
 
     *vnode = (VNode){
@@ -30,7 +28,6 @@ void initDevZero(void) {
         .readCallback = zeroReadCallback,
         .writeCallback = zeroWriteCallback
     };
-    strlcpy(vnode->name, DeviceName, strlen(DeviceName) + 1);
 
-    assert(vfsEmplace("/dev", vnode) == 0);
+    assert(vfsEmplace("/dev", vnode) == 0);*/
 }

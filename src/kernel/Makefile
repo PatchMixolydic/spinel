@@ -33,8 +33,8 @@ concurrency/mutex.o\
 core/kernelInfo.o \
 core/kernelMain.o \
 core/panic.o\
-filesystem/zero.o\
 filesystem/vfs.o\
+filesystem/zero.o\
 input/keymap.o\
 memory/alloc.o\
 

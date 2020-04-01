@@ -1,148 +1,86 @@
 #include <assert.h>
+#include <errno.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <dastr/linkedList.h>
 #include <spinel/concurrency.h>
 #include <spinel/vfs.h>
 
-// TODO: perhaps a red/black tree could be used for faster lookup by inode
-// TODO: tree data structure library/abstracted out?
+typedef struct {
+    char* path;
+    VNode* deviceNode;
+} MountInfo;
 
-typedef struct VFSTreeNode {
-    VNode* vnode;
-    struct VFSTreeNode* parent;
-    struct VFSTreeNode* children;
-    size_t numChildren;
-} VFSTreeNode;
+// TODO: a red/black tree should be used for faster lookup, indexed by inode
+LinkedList* vnodeList = NULL;
+// List of mountpoints and their devices
+LinkedList* mountList = NULL;
 
-static VFSTreeNode vfsRoot = {NULL, NULL, NULL, 0};
+static VNode* vfsRoot = NULL;
 static bool vfsInitialized = false;
-static Mutex vfsTreeMutex = false;
+static ino_t nextVFSINode = 1;
 
-// Given a parent TreeNode and a VNode,
-// create a new child TreeNode to hold the VNode
-static VFSTreeNode* addChildToNode(VFSTreeNode* parent, VNode* data) {
-    parent->numChildren++;
-    // TODO: recalloc / reallocarray
-    // TODO: or perhaps it'd be better to use a linked list? it'd reduce
-    // fragmentation as well as runtime
-    // (malloc is intrinsically faster than realloc in this implementation)
-    parent->children = realloc(
-        parent->children, parent->numChildren * sizeof(VFSTreeNode)
-    );
-    VFSTreeNode* newNode = &parent->children[parent->numChildren - 1];
-    memset(newNode, 0, sizeof(VFSTreeNode));
-    newNode->vnode = data;
-    newNode->parent = parent;
-    return newNode;
-}
-
-// Convenience function for checking VNode name, bounded by VFSFilenameLength,
-// since the comparison is pretty long
-static bool isVNodeNamed(const char name[], VNode* vnode) {
-    return strncmp(name, vnode->name, VFSFilenameLength) == 0;
-}
-
-// Get a pointer to a file's node in the VFS tree, or NULL if a corresponding
-// node doesn't exist
-static VFSTreeNode* getNodeByPath(const char path[]) {
-    assert(vfsInitialized);
-
-    if (path == NULL || *path == '\0') {
-        return NULL;
-    } else if (strncmp(path, "/", 2) == 0) {
-        return &vfsRoot;
+static VNode* getVNodeByINode(ino_t inode) {
+    ForEachInList(vnodeList, listNode) {
+        VNode* vnode = (VNode*)listNode->data;
+        if (vnode != NULL && inode == vnode->inode) {
+            return vnode;
+        }
     }
-
-    VFSTreeNode* currNode = &vfsRoot;
-    // strtok_r modifies its first argument, but path is const
-    // can't just use strdup(...) as the first argument, we must free this
-    char* mutPath = strdup(path);
-    char* tokState;
-    char* token = strtok_r(mutPath, "/", &tokState);
-    assert(token != NULL);
-    do {
-        VFSTreeNode* nextNode = NULL;
-        for (size_t i = 0; i < currNode->numChildren; i++) {
-            if (isVNodeNamed(token, currNode->children[i].vnode)) {
-                // found a match
-                nextNode = &currNode->children[i];
-                break;
-            }
-        }
-
-        if (nextNode == NULL) {
-            // The next directory wasn't found
-            // TODO: try and open the next directory based off of the parent
-            // directory's device
-            free(mutPath);
-            return NULL;
-        }
-
-        currNode = nextNode; // move onwards
-    } while((token = strtok_r(NULL, "/", &tokState)) != NULL);
-
-    // We found the node
-    free(mutPath);
-    return currNode;
+    return NULL;
 }
 
 void initVFS(void) {
     VNode* root = malloc(sizeof(VNode));
-    strlcpy(root->name, "", 2);
-    vfsRoot.vnode = root;
+    memset(root, 0, sizeof(VNode));
+    root->inode = nextVFSINode++;
+    vfsRoot = root;
+    vnodeList = linkedListCreate();
+    linkedListInsertFirst(vnodeList, linkedListCreateNode(root));
+    mountList = linkedListCreate();
     vfsInitialized = true;
 }
 
-int vfsEmplace(const char parentDir[], VNode* vnode) {
+ino_t vfsEmplace(VNode* vnode) {
     assert(vfsInitialized);
-    if (parentDir == NULL || vnode == NULL || *parentDir == '\0') {
-        return -1;
-    }
-
-    spinlockMutex(&vfsTreeMutex);
-    if (strncmp(parentDir, "/", 2) == 0) {
-        // Emplacing to the root directory, don't need to do anything fancy...
-        addChildToNode(&vfsRoot, vnode);
-        unlockMutex(&vfsTreeMutex);
+    if (vnode == NULL) {
         return 0;
     }
 
-    // We need to find where this vnode should go, and then emplace it
-    VFSTreeNode* immediateParent = getNodeByPath(parentDir);
-    if (immediateParent == NULL) {
-        unlockMutex(&vfsTreeMutex);
-        return -1;
-    }
-
-    addChildToNode(immediateParent, vnode);
-    unlockMutex(&vfsTreeMutex);
-    return 0;
+    vnode->inode = nextVFSINode++;
+    linkedListInsertLast(vnodeList, linkedListCreateNode(vnode));
+    return vnode->inode;
 }
 
-VNode* vfsOpen(const char path[], FileFlags flags) {
+VNode* vfsOpen(ino_t inode, FileFlags flags) {
     assert(vfsInitialized);
-    if (strlen(path) == 0) {
-        // Not a path
-        return NULL;
-    }
 
     // TODO: flags
-    // grab the node
-    spinlockMutex(&vfsTreeMutex);
-    VFSTreeNode* res = getNodeByPath(path);
-    unlockMutex(&vfsTreeMutex);
-    return res->vnode;
+    VNode* vnode = getVNodeByINode(inode);
+    if (vnode == NULL) {
+        // not found!
+        return NULL;
+    }
+    vnode->refCount++;
+    if (vnode->open != NULL) {
+        vnode->open(vnode, flags);
+    }
+    return vnode;
 }
 
-void vfsClose(VNode* vnode) {
+int vfsClose(ino_t inode) {
     assert(vfsInitialized);
+
+    VNode* vnode = getVNodeByINode(inode);
     if (vnode == NULL) {
-        return;
+        // not found!
+        return -EFAULT;
     }
 
-    if (vnode->closeCallback != NULL) {
-        vnode->closeCallback(vnode);
+    if (vnode->close != NULL) {
+        vnode->close(vnode);
     }
     vnode->refCount--;
 
@@ -150,6 +88,7 @@ void vfsClose(VNode* vnode) {
         // No references to this vnode, drop it
         vfsDestroy(vnode);
     }
+    return 0;
 }
 
 void vfsDestroy(VNode* vnode) {
@@ -158,37 +97,37 @@ void vfsDestroy(VNode* vnode) {
         return;
     }
 
-    if (vnode->destroyCallback != NULL) {
-        vnode->destroyCallback(vnode);
+    if (vnode->destroy != NULL) {
+        vnode->destroy(vnode);
     }
-
-    spinlockMutex(&vfsTreeMutex);
-    free(vnode);
-    unlockMutex(&vfsTreeMutex);
 }
 
-int64_t vfsRead(VNode* vnode, void* buf, size_t size) {
+ssize_t vfsRead(ino_t inode, void* buf, size_t size) {
     assert(vfsInitialized);
+
+    VNode* vnode = getVNodeByINode(inode);
     if (vnode == NULL) {
-        return -1;
+        return -EFAULT;
     }
 
-    if (vnode->readCallback != NULL) {
-        return vnode->readCallback(vnode, buf, size);
+    if (vnode->read != NULL) {
+        return vnode->read(vnode, buf, size);
     }
 
-    return -1;
+    return -ENOTSUP;
 }
 
-int64_t vfsWrite(VNode* vnode, void* buf, size_t size) {
+ssize_t vfsWrite(ino_t inode, void* buf, size_t size) {
     assert(vfsInitialized);
+
+    VNode* vnode = getVNodeByINode(inode);
     if (vnode == NULL) {
-        return -1;
+        return -EFAULT;
     }
 
-    if (vnode->writeCallback != NULL) {
-        return vnode->writeCallback(vnode, buf, size);
+    if (vnode->write != NULL) {
+        return vnode->write(vnode, buf, size);
     }
 
-    return -1;
+    return -ENOTSUP;
 }
