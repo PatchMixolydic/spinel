@@ -25,7 +25,7 @@ static ino_t nextVFSINode = 1;
 static VNode* getVNodeByINode(ino_t inode) {
     ForEachInList(vnodeList, listNode) {
         VNode* vnode = (VNode*)listNode->data;
-        if (vnode != NULL && inode == vnode->inode) {
+        if (vnode != NULL && inode == vnode->vfsINode) {
             return vnode;
         }
     }
@@ -35,7 +35,7 @@ static VNode* getVNodeByINode(ino_t inode) {
 void initVFS(void) {
     VNode* root = malloc(sizeof(VNode));
     memset(root, 0, sizeof(VNode));
-    root->inode = nextVFSINode++;
+    root->vfsINode = nextVFSINode++;
     vfsRoot = root;
     vnodeList = linkedListCreate();
     linkedListInsertFirst(vnodeList, linkedListCreateNode(root));
@@ -49,9 +49,9 @@ ino_t vfsEmplace(VNode* vnode) {
         return 0;
     }
 
-    vnode->inode = nextVFSINode++;
+    vnode->vfsINode = nextVFSINode++;
     linkedListInsertLast(vnodeList, linkedListCreateNode(vnode));
-    return vnode->inode;
+    return vnode->vfsINode;
 }
 
 VNode* vfsOpen(ino_t inode, FileFlags flags) {

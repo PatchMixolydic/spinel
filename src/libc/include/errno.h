@@ -28,7 +28,7 @@ enum {
     EDEADLK, // Deadlock would occur
     EDESTADDRREQ, // Destination address is required
     EDQUOT, // Disk quota exceeded (POSIX says "reserved"?)
-    EEXIST, // Already exists
+    EEXIST, // Item already exists
     EFAULT, // Bad Address!!
     EFBIG, // File too large
     EHOSTUNREACH, // Host unreachable
@@ -53,7 +53,7 @@ enum {
     ENODATA, // No data
     ENODEV, // No such device
     ENOENT, // No such file or directory
-    ENOEXEC, // Bad executable
+    ENOEXEC, // Bad executable or execution not allowed on this filesystem
     ENOLCK, // No locks available
     ENOLINK, // Link was severed
     ENOMEM, // Out of memory
