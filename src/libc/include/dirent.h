@@ -9,4 +9,12 @@ struct dirent {
     char d_name[256]; // TODO: constant
 };
 
+// This type is architecture dependent, so please don't use its innards
+// in user space
+typedef struct {
+    ino_t vfsINode;
+    size_t entryIdx;
+    struct dirent* currentDirent;
+} DIR;
+
 #endif // ndef _LIBC_DIRENT_H

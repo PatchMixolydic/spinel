@@ -1,6 +1,7 @@
 #ifndef _LIBC_SYS_TYPES_H
 #define _LIBC_SYS_TYPES_H
 
+#include <stddef.h>
 #include <stdint.h>
 
 // POSIX data types, and maybe more
@@ -17,7 +18,7 @@ typedef uint32_t gid_t;
 typedef uint64_t pid_t;
 // id_t must be able to hold at least a uid, gid, or a pid.
 typedef uint64_t id_t;
-// Number of symlinks
+// Number of symlinks/hard links
 typedef uint64_t nlink_t;
 // File permissions
 typedef uint16_t mode_t;

@@ -59,11 +59,12 @@ struct VNode;
 // 0 if the operation is successful and has no data to report
 // A positive integer if the operation is successful and has a size to report
 // -EFAULT if a pointer argument is NULL when it shouldn't be
+// -EINVAL if an invalid argument is provided
 // -EIO if an I/O operation fails
 // -ENOTDIR if the requested file should be a directory, but isn't
 // -EISDIR if the requested file shouldn't be a directory, but is
 // -EEXIST if the requested file exists, but it shouldn't
-// -EACCES if the caller doesn't have permission to open this file
+// -EACCES if the caller doesn't have permission to perform this operation
 // -ENOENT if the file doesn't exist and it shouldn't be created
 // -ENOTEMPTY if the requested directory has contents which render the
 //            operation invalid
@@ -73,8 +74,6 @@ struct VNode;
 // -EROFS if the requested operation is a write, but the mounted filesystem
 //        isn't writable
 // -ENOLINK if the requested symlink is unresolvable
-// -ENOEXEC if an executable is run, but the filesystem is mounted as
-//          no execute
 
 // Note that specific errors should be translated into the above errors for
 // ease of handling. For instance, on a filesystem backed by the network,
@@ -82,16 +81,25 @@ struct VNode;
 // when trying to access a file. In this case, it should return -EIO, not
 // -ENETUNREACH.
 
-typedef ssize_t (*VNodeReadCallback)(struct VNode*, uint8_t*, size_t);
-typedef ssize_t (*VNodeWriteCallback)(struct VNode*, uint8_t*, size_t);
+typedef ssize_t (*VNodeReadCallback)(struct VNode*, uint8_t* buf, size_t);
+typedef ssize_t (*VNodeWriteCallback)(struct VNode*, uint8_t* buf, size_t);
+// Read a directory, emitting structs dirent* along the way,
+// or NULL at EOF/error
+typedef struct dirent* (*VNodeReadDirCallback)(struct VNode*, DIR*);
 typedef void (*VNodeOpenCallback)(struct VNode*, FileFlags);
 typedef void (*VNodeCloseCallback)(struct VNode*);
 // Called when refCount hits zero and the vnode is removed from the VFS
 typedef void (*VNodeDestroyCallback)(struct VNode*);
+// Called when the permissions are updated. The new permissions are stored
+// within the VNode
+typedef void (*VNodeChangePermsCallback)(struct VNode*);
+// Called when ownership of this vnode is updated. The new uid and gid are
+// stored within the VNode
+typedef void (*VNodeChangeOwnerCallback)(struct VNode*);
 
 // These paths are relative to /, not the device root
 // Open a file with a given path, placing a pointer to the result in res
-// (res must be heap allocated)
+// (res is a pointer to the resultant pointer, *res must be heap allocated)
 typedef int (*FSOpenCallback)(char* path, FileFlags, struct VNode** res);
 // Create a hard link to this VNode at the specified path
 // If the file doesn't exist on this filesystem, it is created as specified by
@@ -170,20 +178,34 @@ typedef struct VNode {
 
     VNodeReadCallback read;
     VNodeWriteCallback write;
+    VNodeReadDirCallback readdir;
     VNodeOpenCallback open;
     VNodeCloseCallback close;
     VNodeDestroyCallback destroy;
+    VNodeChangePermsCallback chmod;
+    VNodeChangeOwnerCallback chown;
 } VNode;
 
+// Allocates a VNode with the given fsINode, flags, and type
+// vfsINode is set to the next available vfsINode,
+// and everything else is set to zero
+VNode* createVNode(ino_t fsINode, FileFlags flags, FileType type);
 void initVFS(void);
 // Place a VNode into the vfs
-// Returns the inode, or 0 on failure
+// Returns the vfsINode, or 0 on failure
 ino_t vfsEmplace(VNode* vnode);
+// Open a given vfsINode, incrementing its reference count
+// TODO: necessary?
 VNode* vfsOpen(ino_t inode, FileFlags flags);
+// Close the VNode represented by this vfsINode, decrementing its
+// reference count
 // Returns 0 on success, or -EFAULT if inode is not found
 int vfsClose(ino_t inode);
+// Destroy a VNode in the VFS
+// If a VNodeDestroyCallback is registered, informs the filesystem
 void vfsDestroy(VNode* vnode);
 ssize_t vfsRead(ino_t inode, void* buf, size_t size);
 ssize_t vfsWrite(ino_t inode, void* buf, size_t size);
+struct dirent* vfsReadDir(DIR* dir);
 
 #endif // ndef SPINEL_VFS_H

@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <dirent.h>
 #include <errno.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -30,6 +31,17 @@ static VNode* getVNodeByINode(ino_t inode) {
         }
     }
     return NULL;
+}
+
+VNode* createVNode(ino_t fsINode, FileFlags flags, FileType type) {
+    VNode* res = malloc(sizeof(VNode));
+    *res = (VNode) {
+        .vfsINode = nextVFSINode++,
+        .fsINode = fsINode,
+        .flags = flags,
+        .type = type
+    };
+    return res;
 }
 
 void initVFS(void) {
@@ -107,7 +119,7 @@ ssize_t vfsRead(ino_t inode, void* buf, size_t size) {
 
     VNode* vnode = getVNodeByINode(inode);
     if (vnode == NULL) {
-        return -EFAULT;
+        return -EINVAL;
     }
 
     if (vnode->read != NULL) {
@@ -122,7 +134,7 @@ ssize_t vfsWrite(ino_t inode, void* buf, size_t size) {
 
     VNode* vnode = getVNodeByINode(inode);
     if (vnode == NULL) {
-        return -EFAULT;
+        return -EINVAL;
     }
 
     if (vnode->write != NULL) {
@@ -130,4 +142,27 @@ ssize_t vfsWrite(ino_t inode, void* buf, size_t size) {
     }
 
     return -ENOTSUP;
+}
+
+struct dirent* vfsReadDir(DIR* dir) {
+    assert(vfsInitialized);
+
+    if (dir == NULL) {
+        return NULL;
+    }
+
+    VNode* vnode = getVNodeByINode(dir->vfsINode);
+    if (vnode == NULL) {
+        return NULL;
+    }
+
+    if (vnode->readdir != NULL) {
+        struct dirent* res = vnode->readdir(vnode, dir);
+        if (res != NULL) {
+            dir->entryIdx++;
+        }
+        return res;
+    }
+
+    return NULL;
 }

@@ -53,7 +53,7 @@ enum {
     ENODATA, // No data
     ENODEV, // No such device
     ENOENT, // No such file or directory
-    ENOEXEC, // Bad executable or execution not allowed on this filesystem
+    ENOEXEC, // Bad executable
     ENOLCK, // No locks available
     ENOLINK, // Link was severed
     ENOMEM, // Out of memory
@@ -62,7 +62,7 @@ enum {
     ENOSPC, // No space remaining on device
     ENOSR, // No STREAM resources available
     ENOSTR, // Not a STREAM
-    ENOSYS, // Function not implemented
+    ENOSYS, // Syscall not implemented
     ENOTCONN, // Socket not connected
     ENOTDIR, // Not a directory or a symlink to a directory
     ENOTEMPTY, // Directory not empty
