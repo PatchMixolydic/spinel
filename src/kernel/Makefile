@@ -16,7 +16,7 @@ INCLUDEDIR ?= $(PREFIX)/include
 CFLAGS := $(CFLAGS) -ffreestanding -Wall -Wextra -Wpedantic
 CPPFLAGS := $(CPPFLAGS) -D__Kernel -Iinclude
 LDFLAGS := $(LDFLAGS)
-LIBS := $(LIBS) -nostdlib -lgcc -lhakukern -ldastr -lckern
+LIBS := $(LIBS) -nostdlib -lgcc -lhakureikern -ldastrkern -lckern
 
 ARCHDIR = arch/$(HOSTARCH)
 

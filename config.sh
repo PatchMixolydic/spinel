@@ -1,18 +1,18 @@
 #!/bin/sh
 SYSTEM_HEADER_PROJECTS="\
-  src/libc \
+  src/lib/libc \
   src/kernel \
-  src/libdastr \
-  src/libhakurei \
+  src/lib/libdastr \
+  src/lib/libhakurei \
   src/spinunit \
   src/thirdparty/miscInc\
 "
 
 PROJECTS="\
   src/spinunit \
-  src/libc \
-  src/libdastr \
-  src/libhakurei \
+  src/lib/libc \
+  src/lib/libdastr \
+  src/lib/libhakurei \
   src/kernel \
 "
 

@@ -1,16 +1,16 @@
 #include <stddef.h>
 #include <stdio.h>
 
-#ifdef __LIBCKERN
+#ifdef __KERNEL
 #include <spinel/alloc.h>
 #endif
 
 void* malloc(size_t size) {
-    #ifdef __LIBCKERN
+    #ifdef __KERNEL
         return kmalloc(size);
     #else
         printf("realloc not implemented for hosted\n");
         (void)size;
         return NULL;
-    #endif // def __LIBCKERN
+    #endif // def __KERNEL
 }

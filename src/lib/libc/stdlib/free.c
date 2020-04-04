@@ -1,13 +1,13 @@
 #include <stdio.h>
-#ifdef __LIBCKERN
+#ifdef __KERNEL
 #include <spinel/alloc.h>
 #endif
 
 void free(void* ptr) {
-    #ifdef __LIBCKERN
+    #ifdef __KERNEL
         kfree(ptr);
     #else
         printf("free not implemented for hosted\n");
         (void)ptr;
-    #endif // def __LIBCKERN
+    #endif // def __KERNEL
 }

@@ -97,6 +97,17 @@ HakuError hakuPutChar(HakuTerminalState* state, char c) {
             break;
         }
 
+        case '\b': {
+            if (state->x > 0) {
+                state->x--;
+            } else {
+                state->x = state->width - 1;
+                state->y--;
+            }
+            state->putCharCallback(' ');
+            break;
+        }
+
         case '\x1B': {
             // stray escape... ignore
             // TODO: start ANSI parser instead

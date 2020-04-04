@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef __LIBCKERN
+#ifdef __KERNEL
 #include <spinel/tty.h>
 #endif
 
@@ -28,7 +28,7 @@
 
 // TODO: stdout
 static void __print(const char* str, size_t len) {
-	#ifdef __LIBCKERN
+	#ifdef __KERNEL
 		putStringLen(str, len);
 	#else
 		(void)str;
