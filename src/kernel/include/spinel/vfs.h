@@ -6,7 +6,7 @@
 #include <sys/types.h>
 
 // Length of file*system* names, not filenames
-#define FSNameLength 64
+#define FSNameLength 16
 
 typedef enum {
     FileRead = 1,
@@ -54,6 +54,7 @@ typedef enum {
 } FilePermissions;
 
 struct VNode;
+struct FSInfo;
 
 // The callbacks tend to return:
 // 0 if the operation is successful and has no data to report
@@ -109,12 +110,15 @@ typedef int (*FSOpenCallback)(char* path, FileFlags, struct VNode** res);
 typedef int (*FSLinkCallback)(struct VNode*, char* path);
 // Remove the hardlink at this path
 typedef int (*FSUnlinkCallback)(char* path);
+// Called when the filesystem is unregistered, for cleanup
+typedef int (*FSUnregisterCallback)(struct FSInfo*);
 
-typedef struct {
+typedef struct FSInfo {
     char name[FSNameLength];
     FSOpenCallback open;
     FSLinkCallback link;
     FSUnlinkCallback unlink;
+    FSUnregisterCallback unregister;
 } FSInfo;
 
 typedef struct VMount {
@@ -204,6 +208,11 @@ int vfsClose(ino_t inode);
 // Destroy a VNode in the VFS
 // If a VNodeDestroyCallback is registered, informs the filesystem
 void vfsDestroy(VNode* vnode);
+
+// Managing filesystems available for use
+int vfsRegisterFilesystem(FSInfo* fsInfo);
+int vfsUnregisterFilesystem(char* name);
+
 ssize_t vfsRead(ino_t inode, void* buf, size_t size);
 ssize_t vfsWrite(ino_t inode, void* buf, size_t size);
 struct dirent* vfsReadDir(DIR* dir);

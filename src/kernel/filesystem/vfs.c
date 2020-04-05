@@ -9,15 +9,13 @@
 #include <spinel/concurrency.h>
 #include <spinel/vfs.h>
 
-typedef struct {
-    char* path;
-    VNode* deviceNode;
-} MountInfo;
-
 // TODO: a red/black tree should be used for faster lookup, indexed by inode
 LinkedList* vnodeList = NULL;
 // List of mountpoints and their devices
 LinkedList* mountList = NULL;
+// List of all registered filesystems
+// TODO: faster way to compare to find the desired entry; hashmap?
+LinkedList* filesystemList = NULL;
 
 static VNode* vfsRoot = NULL;
 static bool vfsInitialized = false;
@@ -36,7 +34,6 @@ static VNode* getVNodeByINode(ino_t inode) {
 VNode* createVNode(ino_t fsINode, FileFlags flags, FileType type) {
     VNode* res = malloc(sizeof(VNode));
     *res = (VNode) {
-        .vfsINode = nextVFSINode++,
         .fsINode = fsINode,
         .flags = flags,
         .type = type
@@ -45,13 +42,15 @@ VNode* createVNode(ino_t fsINode, FileFlags flags, FileType type) {
 }
 
 void initVFS(void) {
-    VNode* root = malloc(sizeof(VNode));
-    memset(root, 0, sizeof(VNode));
-    root->vfsINode = nextVFSINode++;
-    vfsRoot = root;
+    // Temporary root VNode
     vnodeList = linkedListCreate();
-    linkedListInsertFirst(vnodeList, linkedListCreateNode(root));
+    VNode* root = createVNode(0, 0, FileDirectory);
+    // vfsEmplace will assert if we try and use it here
+    root->vfsINode = nextVFSINode++;
+    linkedListInsertLast(vnodeList, root);
+    vfsRoot = root;
     mountList = linkedListCreate();
+    filesystemList = linkedListCreate();
     vfsInitialized = true;
 }
 
@@ -62,7 +61,7 @@ ino_t vfsEmplace(VNode* vnode) {
     }
 
     vnode->vfsINode = nextVFSINode++;
-    linkedListInsertLast(vnodeList, linkedListCreateNode(vnode));
+    linkedListInsertLast(vnodeList, vnode);
     return vnode->vfsINode;
 }
 
@@ -112,6 +111,54 @@ void vfsDestroy(VNode* vnode) {
     if (vnode->destroy != NULL) {
         vnode->destroy(vnode);
     }
+}
+
+int vfsRegisterFilesystem(FSInfo* fsInfo) {
+    assert(vfsInitialized);
+    if (fsInfo == NULL) {
+        return -EFAULT;
+    }
+
+    // Check to make sure the filesystem isn't already registered
+    ForEachInList(filesystemList, listNode) {
+        if (listNode->data != NULL) {
+            FSInfo* other = (FSInfo*)listNode->data;
+            if (strncmp(fsInfo->name, other->name, FSNameLength) != 0) {
+                // Filesystem is already registered
+                return -EEXIST;
+            }
+        }
+    }
+
+    linkedListInsertLast(filesystemList, fsInfo);
+    return 0;
+}
+
+int vfsUnregisterFilesystem(char* name) {
+    assert(vfsInitialized);
+    if (name == NULL) {
+        return -EFAULT;
+    }
+
+    ForEachInList(filesystemList, listNode) {
+        if (listNode->data != NULL) {
+            FSInfo* other = (FSInfo*)listNode->data;
+            if (strncmp(name, other->name, FSNameLength) == 0) {
+                // Found the node
+                if (other->unregister != NULL) {
+                    other->unregister(other);
+                }
+                linkedListDestroyNode(listNode);
+                return 0;
+            }
+        }
+    }
+
+    // Filesystem wasn't registered
+    // TODO: should this be an error? I can't think of a good error to
+    // return...
+    // Linux's mount syscall uses ENODEV, but filesystems aren't devices
+    return 0;
 }
 
 ssize_t vfsRead(ino_t inode, void* buf, size_t size) {

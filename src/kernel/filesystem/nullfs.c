@@ -3,7 +3,25 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <spinel/vfs.h>
+
+int nullfsOpen(char* path, FileFlags flags, struct VNode** res);
+int nullfsLink(struct VNode* vnode, char* path);
+int nullfsUnlink(char* path);
+
+static FSInfo nullfsInfo = {
+        "nullfs",
+        nullfsOpen,
+        nullfsLink,
+        nullfsUnlink,
+        NULL
+};
+
+void nullfsInit(void) {
+    vfsRegisterFilesystem(&nullfsInfo);
+}
 
 int nullfsLink(struct VNode* vnode, char* path) {
     if (vnode == NULL || path == NULL) {
@@ -22,12 +40,12 @@ int nullfsUnlink(char* path) {
 }
 
 struct dirent* nullfsReadDir(struct VNode* vnode, DIR* dir) {
-    if (vnode == NULL | dir == NULL) {
-        return -EFAULT;
+    if (vnode == NULL || dir == NULL) {
+        return NULL;
     } else if (vnode->type != FileDirectory) {
-        return -ENOTDIR;
+        return NULL;
     } else if ((vnode->flags & FileRead) == 0) {
-        return -EACCES;
+        return NULL;
     }
 
     if (dir->currentDirent == NULL) {
@@ -36,9 +54,9 @@ struct dirent* nullfsReadDir(struct VNode* vnode, DIR* dir) {
     }
 
     if (dir->entryIdx == 0 || dir->entryIdx == 1) {
-            dir->currentDirent->ino = 2;
+            dir->currentDirent->d_ino = 2;
             strcpy(
-                dir->currentDirent->name,
+                dir->currentDirent->d_name,
                 dir->entryIdx == 0 ? "." : ".."
             );
             return dir->currentDirent;
@@ -47,7 +65,7 @@ struct dirent* nullfsReadDir(struct VNode* vnode, DIR* dir) {
     return NULL;
 }
 
-int nullfsRead(VNode* vnode, uint8_t buf[], size_t size) {
+ssize_t nullfsRead(VNode* vnode, uint8_t buf[], size_t size) {
     (void)size;
 
     if (vnode == NULL || buf == NULL) {
@@ -62,7 +80,7 @@ int nullfsRead(VNode* vnode, uint8_t buf[], size_t size) {
     return 0; // EOF
 }
 
-int nullfsWrite(VNode* vnode, uint8_t buf[], size_t size) {
+ssize_t nullfsWrite(VNode* vnode, uint8_t buf[], size_t size) {
     (void)buf;
     (void)size;
 
@@ -88,6 +106,6 @@ int nullfsOpen(char* path, FileFlags flags, struct VNode** res) {
     (*res)->permissions = 0x666;
     (*res)->read = nullfsRead;
     (*res)->write = nullfsWrite;
+    (*res)->readdir = nullfsReadDir;
     return 0;
 }
-
