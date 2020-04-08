@@ -6,6 +6,7 @@
 #include "interrupts.h"
 
 #define RegisterISR(num) do {\
+    extern void isr##num(void);\
     uintptr_t offset = (uintptr_t)isr##num;\
     idt[num] = (InterruptDesc){\
         (uint16_t)(offset & 0xFFFF),\
@@ -18,6 +19,7 @@
 } while(0)
 
 #define RegisterIRQ(num) do {\
+    extern void irqISR##num(void);\
     uintptr_t offset = (uintptr_t)irqISR##num;\
     idt[num + 32] = (InterruptDesc){\
         (uint16_t)(offset & 0xFFFF),\

@@ -14,6 +14,7 @@ struct dirent {
 typedef struct {
     ino_t vfsINode;
     size_t entryIdx;
+    // TODO: not this
     struct dirent* currentDirent;
 } DIR;
 
