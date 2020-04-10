@@ -85,7 +85,7 @@ section .text
     .pagingDone:
         ; We can't cut the identity mapping yet because of the multiboot struct
         mov     esp, stackTop ; set up stack
-        mov     ebp, esp ; set up base pointer
+        xor     ebp, ebp ; set up base pointer so stack walking terminates here
         call    _init
         push    ebx
         push    edi

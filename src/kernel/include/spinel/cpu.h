@@ -6,5 +6,6 @@
 void haltCPU(void);
 void enableInterrupts(void);
 void disableInterrupts(void);
+void printBacktrace(void);
 
 #endif // ndef SPINEL_CPU_H

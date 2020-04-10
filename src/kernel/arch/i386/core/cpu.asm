@@ -8,6 +8,7 @@ section .text
     global outDWord:function
     global loadGDT:function
     global loadIDT:function
+    global getEBP:function
     global getESP:function
     global getCR2:function
     global setCR3:function
@@ -74,6 +75,10 @@ section .text
 
     getESP:
         mov     eax, esp
+        ret
+
+    getEBP:
+        mov     eax, ebp
         ret
 
     getCR2:

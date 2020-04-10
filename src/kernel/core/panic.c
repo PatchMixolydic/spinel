@@ -15,6 +15,7 @@ void panic(const char why[], ...) {
 	va_end(parameters);
 
     printf("\n");
+    printBacktrace();
 
     while (1) {
         disableInterrupts();

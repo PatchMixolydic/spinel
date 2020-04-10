@@ -38,9 +38,11 @@ export INCLUDEDIR=$PREFIX/include
 
 export ROOTDIR=`pwd`
 
-export CFLAGS='-O2 -g -D__Commit__=\"$(shell git rev-parse --short HEAD)\"\
+export CFLAGS='-O2 -g -fno-omit-frame-pointer \
+  -D__Commit__=\"$(shell git rev-parse --short HEAD)\" \
   -D__DateTime__="\"$(shell date +"%F %I:%M%P %Z")\""'
 export CPPFLAGS=''
+export LDFLAGS='-g'
 
 # Configure the cross-compiler to use the desired system root.
 export SYSROOT="`pwd`/sysroot"

@@ -15,6 +15,7 @@ void loadGDT(uintptr_t loc);
 void loadIDT(uintptr_t loc);
 
 uintptr_t getESP(void);
+uintptr_t getEBP(void);
 uintptr_t getCR2(void);
 void setCR3(uintptr_t map);
 uintptr_t getCR3(void);
