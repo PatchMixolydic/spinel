@@ -25,6 +25,7 @@ $(LIBC_ARCH_FREESTANDING_OBJS) \
 ctype/isalpha.o \
 ctype/isdigit.o \
 errno.o \
+stdio/perror.o \
 stdio/printf.o \
 stdio/vprintf.o \
 stdlib/calloc.o \
@@ -37,6 +38,7 @@ string/memmove.o \
 string/strcpy.o \
 string/strcspn.o \
 string/strdup.o \
+string/strerror.o \
 string/strlcpy.o \
 string/strlen.o \
 string/strncmp.o \

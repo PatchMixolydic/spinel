@@ -64,12 +64,12 @@ enum {
     ENOSTR, // Not a STREAM
     ENOSYS, // Syscall not implemented
     ENOTCONN, // Socket not connected
-    ENOTDIR, // Not a directory or a symlink to a directory
+    ENOTDIR, // Not a directory or a symlink to one
     ENOTEMPTY, // Directory not empty
-    ENOTRECOVERABLE, // Not recoverable
+    ENOTRECOVERABLE, // Unrecoverable error
     ENOTSOCK, // Not a socket
     ENOTSUP, // Operation not supported
-    ENOTTY, // Invalid I/O control operation for device
+    ENOTTY, // Invalid I/O operation for device
     ENXIO, // No such device or address
     EOVERFLOW, // Value too large for data type
     EOWNERDEAD, // Owner is dead
@@ -77,7 +77,7 @@ enum {
     EPIPE, // Pipe broke, call plumber
     EPROTO, // Protocol error
     EPROTONOSUPPORT, // Protocol not supported
-    EPROTOTYPE, // Wrong type for socket given protocol
+    EPROTOTYPE, // Wrong protocol type for socket
     EROFS, // Read-only filesystem
     ESPIPE, // Bad seek for pipe
     ESRCH, // Search for process failed
@@ -87,9 +87,10 @@ enum {
     EXDEV, // Bad cross-device link
 
     // Spinel
+    ENOFS, // No such filesystem
 
     // Aliases
-    EOPTNOTSUPP = ENOTSUP,
+    EOPTNOTSUPP = ENOTSUP, // Option? not supported
     ETXTBUSY = EBUSY, // Text file busy???
     EWOULDBLOCK = EAGAIN, // Operation would block
 };

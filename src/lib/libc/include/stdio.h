@@ -5,6 +5,7 @@
 
 #define EOF -1
 
+void perror(const char* str);
 int printf(const char* format, ...);
 int vprintf(const char* format, va_list parameters);
 

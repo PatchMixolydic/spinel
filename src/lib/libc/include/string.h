@@ -11,6 +11,7 @@ void* memset(void* bufptr, int value, size_t size);
 char* strcpy(char* dest, const char* src);
 size_t strcspn(const char* str, const char* delimiters);
 char* strdup(const char* str);
+char* strerror(int error);
 size_t strlcpy(char* dest, const char* src, size_t size);
 size_t strlen(const char* str);
 int strncmp(const char* s1, const char* s2, size_t size);
