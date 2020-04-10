@@ -123,7 +123,7 @@ int vfsRegisterFilesystem(FSInfo* fsInfo) {
     ForEachInList(filesystemList, listNode) {
         if (listNode->data != NULL) {
             FSInfo* other = (FSInfo*)listNode->data;
-            if (strncmp(fsInfo->name, other->name, FSNameLength) != 0) {
+            if (strncmp(fsInfo->name, other->name, FSNameLength) == 0) {
                 // Filesystem is already registered
                 return -EEXIST;
             }
@@ -154,11 +154,7 @@ int vfsUnregisterFilesystem(char* name) {
         }
     }
 
-    // Filesystem wasn't registered
-    // TODO: should this be an error? I can't think of a good error to
-    // return...
-    // Linux's mount syscall uses ENODEV, but filesystems aren't devices
-    return 0;
+    return -ENOFS;
 }
 
 ssize_t vfsRead(ino_t inode, void* buf, size_t size) {
