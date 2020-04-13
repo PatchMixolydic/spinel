@@ -57,7 +57,7 @@ static char __ErrorMessages[][36] = {
     "Out of memory", // ENOMEM
     "No message of the desired type", // ENOMSG
     "Protocol not available", // ENOPROTOOPT
-    "No space remaining on device", // ENOSPC
+    "Not enough space on device", // ENOSPC
     "No STREAM resources available", // ENOSR
     "Not a STREAM", // ENOSTR
     "Syscall not implemented", // ENOSYS

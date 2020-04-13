@@ -8,12 +8,14 @@
 #include <spinel/vfs.h>
 
 int nullfsOpen(char* path, FileFlags flags, struct VNode** res);
+int nullfsOpenDir(char* path, DIR** res);
 int nullfsLink(struct VNode* vnode, char* path);
 int nullfsUnlink(char* path);
 
 static FSInfo nullfsInfo = {
         "nullfs",
         nullfsOpen,
+        nullfsOpenDir,
         nullfsLink,
         nullfsUnlink,
         NULL
@@ -39,34 +41,26 @@ int nullfsUnlink(char* path) {
     return 0;
 }
 
-struct dirent* nullfsReadDir(struct VNode* vnode, DIR* dir) {
-    if (vnode == NULL || dir == NULL) {
+struct dirent* nullfsReadDir(DIR* dir) {
+    if (dir == NULL) {
         return NULL;
-    } else if (vnode->type != FileDirectory) {
-        return NULL;
-    } else if ((vnode->flags & FileRead) == 0) {
-        return NULL;
-    }
-
-    if (dir->currentDirent == NULL) {
-        // epic awesome
-        dir->currentDirent = malloc(sizeof(struct dirent));
     }
 
     if (dir->entryIdx == 0 || dir->entryIdx == 1) {
-            dir->currentDirent->d_ino = 2;
+            dir->currentDirent.d_ino = 2;
             strcpy(
-                dir->currentDirent->d_name,
+                dir->currentDirent.d_name,
                 dir->entryIdx == 0 ? "." : ".."
             );
-            return dir->currentDirent;
+            return &dir->currentDirent;
     }
 
     return NULL;
 }
 
-ssize_t nullfsRead(VNode* vnode, uint8_t buf[], size_t size) {
+ssize_t nullfsRead(VNode* vnode, uint8_t buf[], size_t size, off_t offset) {
     (void)size;
+    (void)offset;
 
     if (vnode == NULL || buf == NULL) {
         // even though we do nothing with them...
@@ -80,9 +74,9 @@ ssize_t nullfsRead(VNode* vnode, uint8_t buf[], size_t size) {
     return 0; // EOF
 }
 
-ssize_t nullfsWrite(VNode* vnode, uint8_t buf[], size_t size) {
-    (void)buf;
+ssize_t nullfsWrite(VNode* vnode, uint8_t buf[], size_t size, off_t offset) {
     (void)size;
+    (void)offset;
 
     if (vnode == NULL || buf == NULL) {
         return -EFAULT;
@@ -95,7 +89,34 @@ ssize_t nullfsWrite(VNode* vnode, uint8_t buf[], size_t size) {
     return size;
 }
 
-int nullfsOpen(char* path, FileFlags flags, struct VNode** res) {
+int nullfsOpenDir(char* path, DIR** res) {
+    if (path == NULL || res == NULL) {
+        return -EFAULT;
+    }
+
+    *res = malloc(sizeof(DIR));
+    memset((unsigned char*)*res, 0, sizeof(DIR));
+    VNode* vnode = createVNode(0, FileRead, FileDirectory);
+    // -r-- -r-- -r--
+    vnode->permissions = 0x444;
+    vnode->read = nullfsRead;
+    vnode->write = nullfsWrite;
+    vnode->readdir = nullfsReadDir;
+    vfsEmplace(vnode);
+    (*res)->vfsINode = vnode->vfsINode;
+    return 0;
+}
+
+int nullfsCloseDir(DIR* dir) {
+    if (dir == NULL) {
+        return -EFAULT;
+    }
+    vfsClose(dir->vfsINode);
+    free(dir);
+    return 0;
+}
+
+int nullfsOpen(char* path, FileFlags flags, VNode** res) {
     if (path == NULL || res == NULL) {
         return -EFAULT;
     } else if (path[strlen(path) - 1] == '/') {

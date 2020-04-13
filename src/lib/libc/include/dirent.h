@@ -1,6 +1,7 @@
 #ifndef _LIBC_DIRENT_H
 #define _LIBC_DIRENT_H
 
+#include <stdint.h>
 #include <sys/types.h>
 
 struct dirent {
@@ -12,10 +13,9 @@ struct dirent {
 // This type is operating system dependent,
 // so please don't use its innards in user space
 typedef struct {
+    struct dirent currentDirent;
     ino_t vfsINode;
     size_t entryIdx;
-    // TODO: not this
-    struct dirent* currentDirent;
 } DIR;
 
 #endif // ndef _LIBC_DIRENT_H

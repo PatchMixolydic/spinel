@@ -7,8 +7,8 @@
 #include <spinel/concurrency.h>
 #include <spinel/cpu.h>
 #include <spinel/tty.h>
-#include <spinel/zero.h>
 #include <spinel/vfs.h>
+#include <spinel/zero.h>
 
 // Temporary, until modules exist
 void nullfsInit(void);

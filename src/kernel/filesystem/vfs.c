@@ -65,7 +65,7 @@ ino_t vfsEmplace(VNode* vnode) {
     return vnode->vfsINode;
 }
 
-VNode* vfsOpen(ino_t inode, FileFlags flags) {
+VNode* vfsOpenINode(ino_t inode, FileFlags flags) {
     assert(vfsInitialized);
 
     // TODO: flags
@@ -97,12 +97,12 @@ int vfsClose(ino_t inode) {
 
     if (vnode->refCount == 0 && !(vnode->flags & FileIgnoreRefCount)) {
         // No references to this vnode, drop it
-        vfsDestroy(vnode);
+        vfsDestroyVNode(vnode);
     }
     return 0;
 }
 
-void vfsDestroy(VNode* vnode) {
+void vfsDestroyVNode(VNode* vnode) {
     assert(vfsInitialized);
     if (vnode == NULL) {
         return;
@@ -111,6 +111,8 @@ void vfsDestroy(VNode* vnode) {
     if (vnode->destroy != NULL) {
         vnode->destroy(vnode);
     }
+
+    free(vnode);
 }
 
 int vfsRegisterFilesystem(FSInfo* fsInfo) {
@@ -157,7 +159,7 @@ int vfsUnregisterFilesystem(char* name) {
     return -ENOFS;
 }
 
-ssize_t vfsRead(ino_t inode, void* buf, size_t size) {
+ssize_t vfsRead(ino_t inode, void* buf, size_t size, off_t offset) {
     assert(vfsInitialized);
 
     VNode* vnode = getVNodeByINode(inode);
@@ -166,13 +168,13 @@ ssize_t vfsRead(ino_t inode, void* buf, size_t size) {
     }
 
     if (vnode->read != NULL) {
-        return vnode->read(vnode, buf, size);
+        return vnode->read(vnode, buf, size, offset);
     }
 
     return -ENOTSUP;
 }
 
-ssize_t vfsWrite(ino_t inode, void* buf, size_t size) {
+ssize_t vfsWrite(ino_t inode, void* buf, size_t size, off_t offset) {
     assert(vfsInitialized);
 
     VNode* vnode = getVNodeByINode(inode);
@@ -181,7 +183,7 @@ ssize_t vfsWrite(ino_t inode, void* buf, size_t size) {
     }
 
     if (vnode->write != NULL) {
-        return vnode->write(vnode, buf, size);
+        return vnode->write(vnode, buf, size, offset);
     }
 
     return -ENOTSUP;
@@ -200,7 +202,7 @@ struct dirent* vfsReadDir(DIR* dir) {
     }
 
     if (vnode->readdir != NULL) {
-        struct dirent* res = vnode->readdir(vnode, dir);
+        struct dirent* res = vnode->readdir(dir);
         if (res != NULL) {
             dir->entryIdx++;
         }

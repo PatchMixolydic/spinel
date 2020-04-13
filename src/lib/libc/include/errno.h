@@ -59,7 +59,7 @@ enum {
     ENOMEM, // Out of memory
     ENOMSG, // No message of the desired type
     ENOPROTOOPT, // Protocol not available
-    ENOSPC, // No space remaining on device
+    ENOSPC, // Not enough space on device
     ENOSR, // No STREAM resources available
     ENOSTR, // Not a STREAM
     ENOSYS, // Syscall not implemented

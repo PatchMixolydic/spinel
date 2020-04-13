@@ -82,11 +82,15 @@ struct FSInfo;
 // when trying to access a file. In this case, it should return -EIO, not
 // -ENETUNREACH.
 
-typedef ssize_t (*VNodeReadCallback)(struct VNode*, uint8_t* buf, size_t);
-typedef ssize_t (*VNodeWriteCallback)(struct VNode*, uint8_t* buf, size_t);
+typedef ssize_t (*VNodeReadCallback)(
+    struct VNode*, uint8_t* buf, size_t, off_t offset
+);
 // Read a directory, emitting structs dirent* along the way,
 // or NULL at EOF/error
-typedef struct dirent* (*VNodeReadDirCallback)(struct VNode*, DIR*);
+typedef struct dirent* (*VNodeReadDirCallback)(DIR*);
+typedef ssize_t (*VNodeWriteCallback)(
+    struct VNode*, uint8_t* buf, size_t, off_t offset
+);
 typedef void (*VNodeOpenCallback)(struct VNode*, FileFlags);
 typedef void (*VNodeCloseCallback)(struct VNode*);
 // Called when refCount hits zero and the vnode is removed from the VFS
@@ -102,6 +106,9 @@ typedef void (*VNodeChangeOwnerCallback)(struct VNode*);
 // Open a file with a given path, placing a pointer to the result in res
 // (res is a pointer to the resultant pointer, *res must be heap allocated)
 typedef int (*FSOpenCallback)(char* path, FileFlags, struct VNode** res);
+// Similar to the above, but opens a directory for reading.
+typedef int (*FSOpenDirCallback)(char* path, DIR** res);
+typedef int (*FSCloseDirCallback)(DIR*);
 // Create a hard link to this VNode at the specified path
 // If the file doesn't exist on this filesystem, it is created as specified by
 // the VNode
@@ -116,6 +123,7 @@ typedef int (*FSUnregisterCallback)(struct FSInfo*);
 typedef struct FSInfo {
     char name[FSNameLength];
     FSOpenCallback open;
+    FSOpenDirCallback opendir;
     FSLinkCallback link;
     FSUnlinkCallback unlink;
     FSUnregisterCallback unregister;
@@ -132,25 +140,12 @@ typedef struct VMount {
 } VMount;
 
 typedef struct VNode {
-    // The inode that can be use to index the VFS inode list
+    // The inode that can be used to index the VFS inode list
     ino_t vfsINode;
     off_t size;
     uid_t userId;
     gid_t groupId;
     nlink_t numHardLinks;
-
-    // We might have to know the device
-    // For instance, if we want to open a child directory in a directory,
-    // or if this directory is a mountpoint
-    VMount* device;
-    // Filesystems with conflicting inodes may be mounted,
-    // so this is provided to store the inode on the filesystem, if needed.
-    // The inode for the VNode is probably different and is used for indexing
-    // the VFS.
-    ino_t fsINode;
-
-    FileFlags flags;
-    FileType type;
 
     // Spinel's permissions are different from most Unix-like systems
     // Most Unix-like systems use an octal quadruplet, representing:
@@ -174,6 +169,24 @@ typedef struct VNode {
     // bit set, if possible).
     mode_t permissions;
 
+    // We might have to know the device
+    // For instance, if we want to open a child directory in a directory,
+    // or if this directory is a mountpoint
+    VMount* device;
+
+    // Filesystems with conflicting inodes may be mounted,
+    // so this is provided to store the inode on the filesystem, if needed.
+    // The inode for the VNode is probably different and is used for indexing
+    // the VFS.
+    ino_t fsINode;
+
+    // This file may happen to store extra data in RAM, like if it's a device
+    // Maybe a hack?
+    void* extraData;
+
+    FileFlags flags;
+    FileType type;
+
     time_t lastAccessedTime;
     time_t lastModifiedTime;
     time_t createdTime;
@@ -181,8 +194,8 @@ typedef struct VNode {
     uint32_t refCount;
 
     VNodeReadCallback read;
-    VNodeWriteCallback write;
     VNodeReadDirCallback readdir;
+    VNodeWriteCallback write;
     VNodeOpenCallback open;
     VNodeCloseCallback close;
     VNodeDestroyCallback destroy;
@@ -200,21 +213,21 @@ void initVFS(void);
 ino_t vfsEmplace(VNode* vnode);
 // Open a given vfsINode, incrementing its reference count
 // TODO: necessary?
-VNode* vfsOpen(ino_t inode, FileFlags flags);
+VNode* vfsOpenINode(ino_t inode, FileFlags flags);
 // Close the VNode represented by this vfsINode, decrementing its
 // reference count
 // Returns 0 on success, or -EFAULT if inode is not found
 int vfsClose(ino_t inode);
 // Destroy a VNode in the VFS
 // If a VNodeDestroyCallback is registered, informs the filesystem
-void vfsDestroy(VNode* vnode);
+void vfsDestroyVNode(VNode* vnode);
 
 // Managing filesystems available for use
 int vfsRegisterFilesystem(FSInfo* fsInfo);
 int vfsUnregisterFilesystem(char* name);
 
-ssize_t vfsRead(ino_t inode, void* buf, size_t size);
-ssize_t vfsWrite(ino_t inode, void* buf, size_t size);
+ssize_t vfsRead(ino_t inode, void* buf, size_t size, off_t offset);
+ssize_t vfsWrite(ino_t inode, void* buf, size_t size, off_t offset);
 struct dirent* vfsReadDir(DIR* dir);
 
 #endif // ndef SPINEL_VFS_H
