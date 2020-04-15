@@ -11,7 +11,9 @@ typedef struct StackBase {
 
 void printBacktrace(void) {
     printf("Backtrace:\n");
-    for (StackBase* base = getEBP(); base != NULL; base = base->ebp) {
+    for (
+        StackBase* base = (StackBase*)getEBP(); base != NULL; base = base->ebp
+    ) {
         printf("    0x%X\n", base->eip);
     }
 }

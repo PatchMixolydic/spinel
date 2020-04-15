@@ -75,7 +75,7 @@ static inline uintptr_t* getPageMapEntry(uintptr_t page, size_t level) {
 
 void setupPageMaps(void) {
     spinlockMutex(&virtualMemoryMutex);
-    kernelPageDirectory[0] = 0; // remove identity mapping
+    kernelPageDirectory[0] = (uintptr_t)NULL; // remove identity mapping
     uintptr_t* pageEntry;
     for (
         uintptr_t page = (uintptr_t)__TextStart;

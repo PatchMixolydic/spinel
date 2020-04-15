@@ -10,6 +10,8 @@ section .text
     global loadIDT:function
     global getEBP:function
     global getESP:function
+    global setCR0:function
+    global getCR0:function
     global getCR2:function
     global setCR3:function
     global getCR3:function
@@ -79,6 +81,15 @@ section .text
 
     getEBP:
         mov     eax, ebp
+        ret
+
+    setCR0:
+        mov     edx, [esp + 4]
+        mov     cr0, edx
+        ret
+
+    getCR0:
+        mov     eax, cr0
         ret
 
     getCR2:

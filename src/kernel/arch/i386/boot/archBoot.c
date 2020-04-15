@@ -6,6 +6,7 @@
 #include <spinel/kernelInfo.h>
 #include <spinel/tty.h>
 #include "../core/cpu.h"
+#include "../core/fpu.h"
 #include "../core/gdt.h"
 #include "../interrupts/idt.h"
 #include "../memory/virtualMem.h"
@@ -37,4 +38,6 @@ void archBoot(uint32_t multibootMagic, struct multiboot_tag* multibootInfo) {
 
     processMultibootInfo(multibootInfo);
     setupPageMaps();
+
+    initFPU();
 }
