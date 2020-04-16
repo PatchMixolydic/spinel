@@ -1,21 +1,39 @@
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <spinel/cpu.h>
 #include <spinel/tty.h>
 
+static bool panicking = false;
+
+bool isPanicking(void) {
+    return panicking;
+}
+
 void panic(const char why[], ...) {
-    disableInterrupts();
-    disableCursor();
+    if (isPanicking()) {
+        printf("panicception!: ");
+        va_list parameters;
+        va_start(parameters, why);
+        vprintf(why, parameters);
+        va_end(parameters);
 
-    printf("panic: ");
+        printf("\n");
+    } else {
+        disableInterrupts();
+        panicking = true;
+        disableCursor();
 
-	va_list parameters;
-	va_start(parameters, why);
-	vprintf(why, parameters);
-	va_end(parameters);
+        printf("panic: ");
 
-    printf("\n");
-    printBacktrace();
+        va_list parameters;
+        va_start(parameters, why);
+        vprintf(why, parameters);
+        va_end(parameters);
+
+        printf("\n");
+        printBacktrace();
+    }
 
     while (1) {
         disableInterrupts();
