@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <sys/types.h>
+#include <spinel/random.h>
 
 // Not sure if this actually constitutes a "device",
 // but it's accessible as /dev/random, sooo...
@@ -30,7 +31,7 @@
 #define ChaChaRounds 20
 
 // ChaCha ouputs 64 bytes of output per block (4 * 16 = sizeof(uint32_t) * 16)
-// The key is regenerated each time a random number is obtained, so 1 block
+// The key is regenerated each time a random number request is called, so 1 block
 // is reserved expressly for this purpose
 #define MaxBlocksToGen 32
 #define SizeOfBlock ((sizeof(uint32_t) * 16))
@@ -82,10 +83,10 @@ static inline uint32_t constDistRotLeft(uint32_t x, uint32_t y) {
     return (x << y) | (x >> (32 - y));
 }
 
-void chachaCipherBlock(uint32_t out[16]) {
+void chachaCipherBlock(uint32_t in[16], uint32_t out[16]) {
     // TODO: implementation I'm referencing creates local array and only
     // copies to out at the end, is this necessary?
-    memcpy((void*)out, rngState, sizeof(uint32_t) * 16);
+    memcpy((void*)out, in, sizeof(uint32_t) * 16);
 
     for (unsigned i = 0; i < ChaChaRounds; i++) {
         if (i % 2 == 0) {
@@ -106,18 +107,18 @@ void chachaCipherBlock(uint32_t out[16]) {
 
     // Now the results are combined with the initial values
     for (int i = 0; i < 16; i++) {
-        out[i] += rngState[i];
+        out[i] += in[i];
     }
 
     // increment position, then nonce
-    rngState[13]++;
-    if (rngState[13] == 0) {
+    in[13]++;
+    if (in[13] == 0) {
         // overflow
-        rngState[12]++;
-        if (rngState[12] == 0) {
-            rngState[15]++;
-            if (rngState[15] == 0) {
-                rngState[14]++;
+        in[12]++;
+        if (in[12] == 0) {
+            in[15]++;
+            if (in[15] == 0) {
+                in[14]++;
             }
         }
     }
@@ -125,11 +126,13 @@ void chachaCipherBlock(uint32_t out[16]) {
 
 void initRandom(void) {
     // initial seed for the RNG
+    printf("Initializing RNG...\n");
     rngState[0] = ConstantA;
     rngState[1] = ConstantB;
     rngState[2] = ConstantC;
     rngState[3] = ConstantD;
     randomInitialized = true;
+    printf("RNG initialized.\n");
 }
 
 ssize_t readRandom(uint8_t* buf, size_t length) {
@@ -146,7 +149,7 @@ ssize_t readRandom(uint8_t* buf, size_t length) {
     ssize_t remainingLength = length;
     while (remainingLength > 0) {
         uint32_t block[16];
-        chachaCipherBlock(block);
+        chachaCipherBlock(rngState, block);
         memcpy(
             buf + bufOffset, block,
             remainingLength > SizeOfBlock ? SizeOfBlock : remainingLength
@@ -163,9 +166,32 @@ ssize_t readRandom(uint8_t* buf, size_t length) {
 
     // Generate new key
     uint32_t block[16];
-    chachaCipherBlock(block);
+    chachaCipherBlock(rngState, block);
     memcpy(rngState + KeyOffset, block, KeySize);
     memset(block, 0, SizeOfBlock);
+
+    return length;
+}
+
+ssize_t feedRandom(uint8_t* buf, size_t length) {
+    if (buf == NULL) {
+        return -EFAULT;
+    }
+
+    // TODO: this probably isn't that great,
+    // but it mixes entropy into the RNG, which is the goal here
+
+    size_t poolIdx = 0;
+    if (randomInitialized) {
+        // Get a random starting location -- this probably doesn't need to be
+        // good and can perhaps even be deterministic, but it might help with
+        // mixing of entropy
+        poolIdx = randomRange32(KeyOffset, KeyOffset + 8);
+    }
+    for (size_t i = 0; i < length; i++) {
+        rngState[poolIdx] ^= buf[i] ^ buf[poolIdx];
+        poolIdx = (poolIdx + 1) % KeyOffset + 8;
+    }
 
     return length;
 }
@@ -175,6 +201,20 @@ uint32_t random32(void) {
     readRandom(bytes, 4);
     // TODO: this is probably not great
     return *(uint32_t*)bytes;
+}
+
+uint32_t randomRange32(uint32_t rangeStart, uint32_t rangeEnd) {
+    // Similar to arc4random_uniform in BSD systems, this avoids modulo bias
+    uint32_t rangeLen = rangeEnd - rangeStart;
+    uint32_t res;
+    while (1) {
+        res = random32();
+        // -rangeLen == 2**32 - rangeLen
+        if (res >= -rangeLen % rangeLen) {
+            break;
+        }
+    }
+    return (res % rangeLen) + rangeStart;
 }
 
 uint64_t random64(void) {
