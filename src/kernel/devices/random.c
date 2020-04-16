@@ -151,6 +151,7 @@ ssize_t readRandom(uint8_t* buf, size_t length) {
             buf + bufOffset, block,
             remainingLength > SizeOfBlock ? SizeOfBlock : remainingLength
         );
+        memset(block, 0, SizeOfBlock);
         if (remainingLength <= SizeOfBlock) {
             // Don't even try and keep going
             break;
@@ -164,6 +165,7 @@ ssize_t readRandom(uint8_t* buf, size_t length) {
     uint32_t block[16];
     chachaCipherBlock(block);
     memcpy(rngState + KeyOffset, block, KeySize);
+    memset(block, 0, SizeOfBlock);
 
     return length;
 }
