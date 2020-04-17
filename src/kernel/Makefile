@@ -34,9 +34,9 @@ core/kernelInfo.o \
 core/kernelMain.o \
 core/panic.o\
 devices/random.o\
+devices/zero.o\
 filesystem/nullfs.o\
 filesystem/vfs.o\
-filesystem/zero.o\
 input/keymap.o\
 memory/alloc.o\
 

@@ -11,9 +11,6 @@
 #include <spinel/vfs.h>
 #include <spinel/zero.h>
 
-// Temporary, until modules exist
-void nullfsInit(void);
-
 void kernelMain(void) {
     printf("The system is coming up.\n");
     initAlloc();
