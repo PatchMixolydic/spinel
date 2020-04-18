@@ -23,20 +23,6 @@ day.
 You can see my current plans on the
 [projects page](https://github.com/Sparkpin/spinel/projects/1).
 
-## License
-
-Spinel is licensed under the
-[MIT license](https://github.com/Sparkpin/spinel/blob/master/LICENSE).
-This includes every file that comprises Spinel, unless it is overriden
-by a license included within the file or within a closer parent directory. For
-instance, if there is a LICENSE file in `src` and a LICENSE file in
-`src/libpd`, the file `src/libpd/foo.c` would fall under the LICENSE in
-`src/libpd`, while the file `src/kernel/bar.c` would fall under the LICENSE in
-`src`, unless there is a LICENSE in `src/kernel` or a license in the contents
-of `bar.c`.
-
-Typically, different licenses will only affect the files in `src/thirdparty`.
-
 ## Building Spinel
 
 To build Spinel, you will need a cross compiler of some sort.
@@ -57,3 +43,25 @@ ability to build an ISO or virtual machine disk image without using GRUB.
 Spinel is not in a usable state at the moment. However, I hope to get to user mode as
 soon as I can. Realistically, Spinel will never be in a state that it could serve as
 one's daily driver operating system... but I can dream. :P
+
+## License
+
+Spinel is licensed under the
+[MIT license](https://github.com/Sparkpin/spinel/blob/master/LICENSE).
+This includes every file that comprises Spinel, unless it is overriden
+by a license included within the file or within a closer parent directory.
+In other words, to find the license for the file, look for a license in the
+file, then in its parent directory, then in that directory's parent directory,
+and so on until you hit the project root.
+
+One significant hotspot for other licenses is in `src/thirdparty`, since that
+contains code that wasn't written for Spinel. Additionally, significant amounts
+of code contributed by others who do not wish to cede their copyright to the
+project's copyright holder (Ruby Lazuli Lord) may include licenses in their
+code. These licenses must be compatible with Spinel's MIT license. Any
+contributor who does not add a license will, as in the GitHub terms of service,
+implicitly cede their copyright to the project's copyright holder.
+
+If someone wrote a signficiant amount of code, you write a significant amount of
+code alongside it in the same file, and you wish to apply your own license to the
+file, please consult everyone who edited the file previously.
