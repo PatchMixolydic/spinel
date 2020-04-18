@@ -94,7 +94,7 @@ qemu() {
         iso
     fi
     qemu-system-$(./tripletToArch.sh $HOST) -cdrom build/spinel.iso -s -m 512 \
-        -soundhw pcspk -enable-kvm -serial mon:stdio
+        -soundhw pcspk -enable-kvm -serial stdio
 }
 
 rotate() {
