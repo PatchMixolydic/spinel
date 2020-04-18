@@ -41,8 +41,21 @@ ability to build an ISO or virtual machine disk image without using GRUB.
 ## Using Spinel
 
 Spinel is not in a usable state at the moment. However, I hope to get to user mode as
-soon as I can. Realistically, Spinel will never be in a state that it could serve as
+soon as I can. Realistically, Spinel may never be in a state that it could serve as
 one's daily driver operating system... but I can dream. :P
+
+## Contributing
+
+Right now, Spinel is in a very early state, so it is probably not too
+interesting to contribute to right now. However, if you are interested on
+getting on board once user mode applications are possible, please note that
+to keep Spinel from turning into Flamewar Central, there is a basic
+[code of conduct](https://github.com/Sparkpin/spinel/blob/master/CodeOfConduct.md)
+for contributors. These rules should be fairly obvious, but feel free to have
+a look at them.
+
+Additionally, contributors will likely be interested in licensing information,
+which is available in the following section.
 
 ## License
 
