@@ -47,7 +47,6 @@ static inline uint32_t getAddress(
 }
 
 static void enumerateBus(uint8_t bus) {
-    printf("Bus %u\n", bus);
     for (uint8_t dev = 0; dev < 32; dev++) {
         for (uint8_t func = 0; func < 8; func++) {
             if (pciReadConfig16(bus, dev, func, PCIVendorIDOffset) == 0xFFFF) {
@@ -82,17 +81,14 @@ static void enumerateBus(uint8_t bus) {
 
 void pciEnumerateDevices(void) {
     uint8_t headerType = pciReadConfig8(0, 0, 0, PCIHeaderTypeOffset);
-    uint8_t numBuses = 1;
-    if ((headerType & PCIMultifuncTypeBit)) {
-        // Multiple host controllers
-        numBuses = 8;
-    }
+    // TODO: apparently the multifunction bit can be checked to see if there's
+    // multiple buses; is this necessary?
 
     printf("Enumerating PCI devices...\n");
-    for (uint8_t bus = 0; bus < numBuses; bus++) {
+    for (uint8_t bus = 0; bus < 8; bus++) {
         if (pciReadConfig16(0, 0, bus, PCIVendorIDOffset) == 0xFFFF) {
             // Oops, this doesn't exist
-            break;
+            continue;
         }
         enumerateBus(bus);
     }
