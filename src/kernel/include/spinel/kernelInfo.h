@@ -6,7 +6,7 @@
 /* For source readers and kernel developers:
  * This header encompasses architecture-specific and general info
  * Architecture specific info should probably be placed in
- * arch/{arch}/core/kernelInfo.c
+ * arch/{arch}/core/archInfo.c
  */
 
 // Version numbers
