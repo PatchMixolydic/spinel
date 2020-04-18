@@ -5,6 +5,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <sys/endian.h>
 #include <spinel/pci.h>
 
 #ifdef __i386__
@@ -16,9 +17,6 @@
 #endif
 
 // PCI isn't exactly a device, but it's a device bus, so here it is.
-
-// TODO: PCI is little endian, so all writes should use host to little endian,
-// and all reads should use little endian to host!
 
 // TODO: ACPI allows for memory-mapped PCI tables, but ACPI is not supported yet
 
@@ -80,7 +78,6 @@ static void enumerateBus(uint8_t bus) {
 }
 
 void pciEnumerateDevices(void) {
-    uint8_t headerType = pciReadConfig8(0, 0, 0, PCIHeaderTypeOffset);
     // TODO: apparently the multifunction bit can be checked to see if there's
     // multiple buses; is this necessary?
 
@@ -99,28 +96,30 @@ uint32_t pciReadConfig32(
     uint8_t bus, uint8_t dev, uint8_t func, uint8_t offset
 ) {
     uint32_t address = getAddress(bus, dev, func, offset);
+    // TODO: this isn't portable
     outDWord(PCIAddressPort, address);
-    return inDWord(PCIDataPort);
+    return le32toh(inDWord(PCIDataPort));
 }
 
 uint16_t pciReadConfig16(
     uint8_t bus, uint8_t dev, uint8_t func, uint8_t offset
 ) {
-    uint32_t res = pciReadConfig32(bus, dev, func, offset);
+    uint32_t cfgWord = pciReadConfig32(bus, dev, func, offset);
     // Get the word-selecting bit
     uint32_t byteOffset = (offset & 2) ? 0 : 16;
-    return (uint16_t)((res >> byteOffset) & 0xFFFF);
+    // Endianness was already handled by pciReadConfig32
+    return (uint16_t)((cfgWord >> byteOffset) & 0xFFFF);
 }
 
 uint8_t pciReadConfig8(
     uint8_t bus, uint8_t dev, uint8_t func, uint8_t offset
 ) {
-    uint32_t res = pciReadConfig32(bus, dev, func, offset);
+    uint32_t cfgWord = pciReadConfig32(bus, dev, func, offset);
     // offset & 3 determines the byte
     // 8 * (3 - byteDeterminant) is the offset
     // 0 -> 24, 1 -> 16, 2 -> 8, 3 -> 0
     uint32_t byteOffset = 8 * (3 - (offset & 3));
-    return (uint8_t)((res >> byteOffset) & 0xFF);
+    return (uint8_t)((cfgWord >> byteOffset) & 0xFF);
 }
 
 #endif // def SpinelWantPCI
