@@ -62,13 +62,13 @@ void initPhysicalAlloc(const memmap_t* memoryMapPtr, size_t memoryMapLength) {
     memmap_t* memoryMapEnd = (memmap_t*)(
         (uintptr_t)memoryMapPtr + memoryMapLength
     );
-	for (
+    for (
         memmap_t* ptr = (memmap_t*)memoryMapPtr;
         ptr < memoryMapEnd;
         ptr++
     ) {
         availableMemory += ptr->len;
-	}
+    }
     printf("%d MiB memory available.\n", availableMemory / 1024 / 1024 + 1);
 
     // Ok, we know how much memory there is. Now our bitmaps need to be set up.
@@ -79,14 +79,18 @@ void initPhysicalAlloc(const memmap_t* memoryMapPtr, size_t memoryMapLength) {
     availMap = (uint32_t*)(__KernelEnd + bitmapSize);
     kernelReservedSize += bitmapSize * 2; // Grow reserved size
 
-	for (
+    for (
         memmap_t* ptr = (memmap_t*)memoryMapPtr;
         ptr < memoryMapEnd;
         ptr++
     ) {
-		uint64_t start = ptr->addr;
-		uint64_t end = ptr->addr + ptr->len;
-		bool valid = ptr->type == MULTIBOOT_MEMORY_AVAILABLE;
+        uint64_t start = ptr->addr;
+        if (start = 0xFFFFFFFFFFFFFFFF) {
+            // Weird hackfix, this isn't a valid pointer
+            break;
+        }
+        uint64_t end = ptr->addr + ptr->len;
+        bool valid = ptr->type == MULTIBOOT_MEMORY_AVAILABLE;
         for (
             uint64_t addr = NearestPage(start);
             addr < end;
@@ -106,7 +110,7 @@ void initPhysicalAlloc(const memmap_t* memoryMapPtr, size_t memoryMapLength) {
                 setPageAvailable(addr, valid);
             }
         }
-	}
+    }
     setPageFree((uintptr_t)NULL, false); // Zero page --  can't touch this
     setPageAvailable((uintptr_t)NULL, false);
 }
