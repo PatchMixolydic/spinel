@@ -14,7 +14,8 @@ BOOTDIR ?= $(EXEC_PREFIX)/boot
 INCLUDEDIR ?= $(PREFIX)/include
 
 CFLAGS := $(CFLAGS) -ffreestanding -Wall -Wextra -Wpedantic
-CPPFLAGS := $(CPPFLAGS) -D__Kernel -Iinclude
+# TODO: configuration
+CPPFLAGS := $(CPPFLAGS) -D__Kernel -DSpinelWantPCI -Iinclude
 LDFLAGS := $(LDFLAGS)
 LIBS := $(LIBS) -nostdlib -lgcc -lhakureikern -ldastrkern -lckern
 
@@ -33,6 +34,7 @@ concurrency/mutex.o\
 core/kernelInfo.o \
 core/kernelMain.o \
 core/panic.o\
+devices/pci.o\
 devices/random.o\
 devices/zero.o\
 filesystem/nullfs.o\

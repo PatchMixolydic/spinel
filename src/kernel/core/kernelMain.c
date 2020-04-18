@@ -6,6 +6,7 @@
 #include <spinel/alloc.h>
 #include <spinel/concurrency.h>
 #include <spinel/cpu.h>
+#include <spinel/pci.h>
 #include <spinel/random.h>
 #include <spinel/tty.h>
 #include <spinel/vfs.h>
@@ -14,8 +15,9 @@
 void kernelMain(void) {
     printf("The system is coming up.\n");
     initAlloc();
-    initRandom();
     initVFS();
+    initRandom();
+    pciEnumerateDevices();
 
     while (1) {
         haltCPU();
