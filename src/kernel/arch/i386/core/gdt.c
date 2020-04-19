@@ -104,3 +104,7 @@ void initGDT(void) {
     gdtPointer.offset = (uintptr_t)gdt;
     loadGDT((uintptr_t)&gdtPointer);
 }
+
+void setTSSKernelStack(uint32_t esp0) {
+    tss.esp0 = esp0;
+}

@@ -15,9 +15,10 @@ section .text
     global getCR2:function
     global setCR3:function
     global getCR3:function
+    global setTSSKernelStack:function
+    global invalidatePage:function
     global enableInterrupts:function
     global disableInterrupts:function
-    global invalidatePage:function
 
     haltCPU:
         hlt
