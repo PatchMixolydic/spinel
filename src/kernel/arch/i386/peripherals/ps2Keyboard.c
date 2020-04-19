@@ -31,6 +31,8 @@ static const uint8_t TestFailed2Resp = 0xFD;
 static const uint8_t ResendResp = 0xFE;
 static const uint8_t Error2Resp = 0xFF;
 
+static const uint8_t PauseKeyCode = 0x0F;
+
 static const unsigned MaxSendAttempts = 3;
 
 // TODO: might require different keymaps for different regions?
@@ -152,6 +154,9 @@ void irq1(void) {
         picEndOfInterrupt(1);
         return;
     }
+    // Apparently, the scancode must be awaited upon anyways lest it be
+    // reduplicated
+    scancode = recvData();
 
     uint8_t* keyCodeMap = scanCodeToKeyCode;
     bool isDown = true;
@@ -171,11 +176,24 @@ void irq1(void) {
     if (scancode == 0xE1) {
         // Hello, pause...
         // Eat the rest of the scancode
+        // 0xA0
         recvData();
+        // 0x31
         recvData();
+        // 0xE1
         recvData();
+        // 0xF0
         recvData();
+        // 0xA0
         recvData();
+        // 0xF0
+        recvData();
+        // 0x31
+        recvData();
+        // The pause key behaves as if it's pressed and
+        // released immediately
+        setKeyCode(PauseKeyCode, true);
+        setKeyCode(PauseKeyCode, false);
     } else {
         setKeyCode(keyCodeMap[scancode], isDown);
     }
