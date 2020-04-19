@@ -78,7 +78,8 @@ static uint8_t extendedScanCodeToKeyCode[256];
 
 static uint8_t recvData(void) {
     // wait for the keyboard's response
-    while (!((volatile uint8_t)inByte(PS2StatusPort) & OutputBufferFullFlag)) {
+    while (!(inByte(PS2StatusPort) & OutputBufferFullFlag)) {
+        // TODO: block
         __asm__("pause");
     }
     return inByte(PS2DataPort);
@@ -86,6 +87,7 @@ static uint8_t recvData(void) {
 
 static bool sendData(uint8_t data, unsigned port) {
     while ((volatile uint8_t)inByte(PS2StatusPort) & InputBufferFullFlag) {
+        // TODO: block
         __asm__("pause");
     }
 
@@ -143,7 +145,14 @@ void initPS2(void) {
 }
 
 void irq1(void) {
-    uint8_t scancode = recvData();
+    // The PS/2 keyboard sent us this because it has data ready.
+    uint8_t scancode = inByte(PS2DataPort);
+    if (scancode == AckResp) {
+        // This is an acknowledgement, not a keycode!
+        picEndOfInterrupt(1);
+        return;
+    }
+
     uint8_t* keyCodeMap = scanCodeToKeyCode;
     bool isDown = true;
 
@@ -170,5 +179,6 @@ void irq1(void) {
     } else {
         setKeyCode(keyCodeMap[scancode], isDown);
     }
+
     picEndOfInterrupt(1);
 }
