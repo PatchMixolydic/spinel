@@ -40,8 +40,10 @@ static inline uint32_t getAddress(
     uint8_t bus, uint8_t dev, uint8_t func, uint8_t offset
 ) {
     // align offset to uint32_t
-    return AddressEnable | ((uint32_t)bus << 16) | ((uint32_t)dev << 11) |
-        ((uint32_t)func << 8) | ((uint32_t)offset & 0xFC);
+    return htole32(
+        AddressEnable | ((uint32_t)bus << 16) | ((uint32_t)dev << 11) |
+        ((uint32_t)func << 8) | ((uint32_t)offset & 0xFC)
+    );
 }
 
 static void enumerateBus(uint8_t bus) {
