@@ -25,7 +25,6 @@
 EnumeratePCIOffsets
 #undef PCIOffset
 
-
 static const uint32_t AddressEnable = 0x80000000;
 
 static const uint16_t PCIAddressPort = 0xCF8;

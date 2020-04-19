@@ -17,7 +17,6 @@ void kernelMain(void) {
     initAlloc();
     initVFS();
     initRandom();
-    pciEnumerateDevices();
 
     while (1) {
         haltCPU();

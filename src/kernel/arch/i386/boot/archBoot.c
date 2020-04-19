@@ -27,17 +27,19 @@ void archBoot(uint32_t multibootMagic, struct multiboot_tag* multibootInfo) {
         ProcessorName, MachineName
     );
 
-    initPS2USBLegacy();
     initGDT();
     initIDT();
 
     picSetAllMasked(true);
     initPIC();
     enableInterrupts();
+
+    initPS2USBLegacy();
     picSetIRQMasked(1, false);
 
     processMultibootInfo(multibootInfo);
     setupPageMaps();
 
     initFPU();
+    pciEnumerateDevices();
 }
