@@ -36,7 +36,7 @@ void archBoot(uint32_t multibootMagic, struct multiboot_tag* multibootInfo) {
     enableInterrupts();
 
     initPS2USBLegacy();
-    picSetIRQMasked(1, false);
+    // picSetIRQMasked(1, false);
 
     processMultibootInfo(multibootInfo);
     setupPageMaps();
