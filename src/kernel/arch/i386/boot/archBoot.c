@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <multiboot2.h>
 #include <spinel/kernelInfo.h>
+#include <spinel/pci.h>
 #include <spinel/tty.h>
 #include "../core/cpu.h"
 #include "../core/fpu.h"
