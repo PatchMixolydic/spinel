@@ -11,6 +11,7 @@
 #include "../core/gdt.h"
 #include "../interrupts/idt.h"
 #include "../memory/virtualMem.h"
+#include "../peripherals/cmos.h"
 #include "../peripherals/pic.h"
 #include "../peripherals/ps2.h"
 #include "../peripherals/ps2Keyboard.h"
@@ -30,6 +31,8 @@ void archBoot(uint32_t multibootMagic, struct multiboot_tag* multibootInfo) {
 
     initGDT();
     initIDT();
+
+    initCMOS();
 
     picSetAllMasked(true);
     initPIC();

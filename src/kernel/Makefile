@@ -34,6 +34,7 @@ concurrency/mutex.o\
 core/kernelInfo.o \
 core/kernelMain.o \
 core/panic.o\
+devices/clock.o\
 devices/pci.o\
 devices/random.o\
 devices/zero.o\

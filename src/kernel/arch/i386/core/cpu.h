@@ -1,6 +1,7 @@
 #ifndef CPU_H
 #define CPU_H
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <spinel/cpu.h>
 
@@ -23,5 +24,8 @@ void setCR3(uintptr_t map);
 uintptr_t getCR3(void);
 
 void invalidatePage(void* page);
+
+// Handled by the CMOS
+extern void setNMIEnabled(bool state);
 
 #endif // ndef CPU_H
