@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <spinel/clock.h>
+#include <spinel/cpu.h>
 #include "cmos.h"
 #include "../core/cpu.h"
 
@@ -57,8 +58,15 @@ static inline uint8_t setNMIBitForRegister(uint8_t reg) {
 
 static inline volatile uint8_t readRegister(uint8_t reg) {
     // Select register
+    bool oldNMIStatus = nmiEnabled;
+    // Prevent any interrupts from overwriting our selected register
+    disableInterrupts();
+    setNMIEnabled(false);
     outByte(RegisterSelectPort, setNMIBitForRegister(reg));
-    return inByte(CMOSDataPort);
+    uint8_t res = inByte(CMOSDataPort);
+    setNMIEnabled(oldNMIStatus);
+    enableInterrupts();
+    return res;
 }
 
 static inline volatile uint8_t readRegisterRTC(uint8_t reg) {
@@ -74,8 +82,13 @@ static inline volatile uint8_t readRegisterRTC(uint8_t reg) {
 }
 
 static inline void writeRegister(uint8_t reg, uint8_t val) {
+    bool oldNMIStatus = nmiEnabled;
+    disableInterrupts();
+    setNMIEnabled(false);
     outByte(RegisterSelectPort, setNMIBitForRegister(reg));
     outByte(CMOSDataPort, val);
+    enableInterrupts();
+    setNMIEnabled(oldNMIStatus);
 }
 
 static inline void waitForRTCUpdateDone(void) {

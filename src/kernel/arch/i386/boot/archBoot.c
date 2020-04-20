@@ -32,11 +32,12 @@ void archBoot(uint32_t multibootMagic, struct multiboot_tag* multibootInfo) {
     initGDT();
     initIDT();
 
-    initCMOS();
-
     picSetAllMasked(true);
     initPIC();
     enableInterrupts();
+    setNMIEnabled(true);
+
+    initCMOS();
 
     initPS2USBLegacy();
     // picSetIRQMasked(1, false);
