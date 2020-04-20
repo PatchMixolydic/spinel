@@ -8,7 +8,7 @@
 void kernelMain(void) {
     printf("The system is coming up.\n");
     initAlloc();
-    initVFS();
+    // initVFS();
     initRandom();
 
     while (1) {
