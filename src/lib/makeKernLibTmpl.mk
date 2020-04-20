@@ -10,7 +10,7 @@ CFLAGS ?= -O2 -g -Wall -Wpedantic -Wextra
 KERN_CFLAGS ?= $(CFLAGS)
 KERN_CFLAGS := -ffreestanding $(KERN_CFLAGS)
 KERN_CPPFLAGS ?= $(CPPFLAGS)
-KERN_CPPFLAGS := $(KERN_CPPFLAGS) -D__KERNEL
+KERN_CPPFLAGS := $(KERN_CPPFLAGS) -D__Kernel
 KERN_LIBS ?= -lckern
 KERN_OBJS ?= $(OBJS:.o=.kern.o)
 BINARIES ?= $(PROGNAME).a $(PROGNAME)kern.a
