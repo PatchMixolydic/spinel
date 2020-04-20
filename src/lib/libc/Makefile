@@ -48,6 +48,7 @@ string/strchr.o \
 string/strrchr.o \
 string/strspn.o \
 string/strtok_r.o \
+time/time.o \
 
 HOSTED_OBJS = \
 $(LIBC_ARCH_HOSTED_OBJS) \

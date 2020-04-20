@@ -2,6 +2,7 @@
 #define SPINEL_CLOCK_H
 
 #include <stdbool.h>
+#include <sys/types.h>
 
 typedef struct {
     int year;

@@ -4,6 +4,16 @@
 #include <spinel/clock.h>
 
 static ClockSource* clock = NULL;
+// TODO: volatile here is a hack
+static volatile ClockTime* time = NULL;
+
+static void clockRefreshTime(void) {
+    if (clock == NULL || clock->getTime == NULL) {
+        return;
+    }
+
+    time = clock->getTime();
+}
 
 void registerClockSource(ClockSource* newClock) {
     if (clock != NULL) {
@@ -17,13 +27,11 @@ void registerClockSource(ClockSource* newClock) {
     }
 
     clock = newClock;
+    clockRefreshTime();
 }
 
 ClockTime* clockGetTime(void) {
-    if (clock == NULL || clock->getTime == NULL) {
-        return NULL;
-    }
-    return clock->getTime();
+    return time;
 }
 
 bool clockTimesEqual(ClockTime* a, ClockTime* b) {
