@@ -1,13 +1,11 @@
 #include <stdio.h>
 #include <sys/types.h>
+#include <units.h>
 
 #ifdef __Kernel
 #include <spinel/clock.h>
 #endif
 
-static const time_t UnixSecondsPerDay = 86400;
-static const time_t UnixSecondsPerHour = 3600;
-static const time_t UnixSecondsPerMinute = 60;
 static const time_t UnixEpochYear = 1970;
 static const time_t DaysPerMonth[13] = {
     0,
@@ -49,21 +47,21 @@ time_t time(time_t* dest) {
         res = 0;
         if (clockTime->year > UnixEpochYear) {
             for (int year = clockTime->year; year > UnixEpochYear; year--) {
-                res += getDaysForYear(year) * UnixSecondsPerDay;
+                res += getDaysForYear(year) * Day;
             }
         } else if (clockTime->year < UnixEpochYear) {
             for (int year = clockTime->year; year < UnixEpochYear; year++) {
-                res -= getDaysForYear(year) * UnixSecondsPerDay;
+                res -= getDaysForYear(year) * Day;
             }
         }
 
         for (int month = clockTime->month - 1; month >= 1; month--) {
-            res += getDaysForMonth(month, clockTime->year) * UnixSecondsPerDay;
+            res += getDaysForMonth(month, clockTime->year) * Day;
         }
 
-        res += UnixSecondsPerDay * (clockTime->day - 2);
-        res += UnixSecondsPerHour * clockTime->hour;
-        res += UnixSecondsPerMinute * (clockTime->minute - 1);
+        res += Day * (clockTime->day - 2);
+        res += Hour * clockTime->hour;
+        res += Minute * (clockTime->minute - 1);
         res += clockTime->second;
     #else
         printf("Warning: time() is not implemented for userspace");
