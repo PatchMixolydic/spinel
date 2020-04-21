@@ -4,8 +4,7 @@
 #include <spinel/clock.h>
 
 static ClockSource* clock = NULL;
-// TODO: volatile here is a hack
-static volatile ClockTime* time = NULL;
+static ClockTime* time = NULL;
 
 static void clockRefreshTime(void) {
     if (clock == NULL || clock->getTime == NULL) {

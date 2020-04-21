@@ -56,7 +56,7 @@ static inline uint8_t setNMIBitForRegister(uint8_t reg) {
     return nmiEnabled ? reg & ~NMIDisableBit : reg | NMIDisableBit;
 }
 
-static inline volatile uint8_t readRegister(uint8_t reg) {
+static inline uint8_t readRegister(uint8_t reg) {
     // Select register
     bool oldNMIStatus = nmiEnabled;
     // Prevent any interrupts from overwriting our selected register
@@ -69,7 +69,7 @@ static inline volatile uint8_t readRegister(uint8_t reg) {
     return res;
 }
 
-static inline volatile uint8_t readRegisterRTC(uint8_t reg) {
+static inline uint8_t readRegisterRTC(uint8_t reg) {
     uint8_t res = readRegister(reg);
     if (rtcUsesBCD) {
         // Convert to decimal
