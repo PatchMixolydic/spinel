@@ -37,6 +37,7 @@ core/panic.o\
 devices/clock.o\
 devices/pci.o\
 devices/random.o\
+devices/timer.o\
 devices/zero.o\
 filesystem/nullfs.o\
 filesystem/vfs.o\
