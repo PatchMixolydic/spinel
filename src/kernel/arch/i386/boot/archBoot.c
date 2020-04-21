@@ -13,6 +13,7 @@
 #include "../memory/virtualMem.h"
 #include "../peripherals/cmos.h"
 #include "../peripherals/pic.h"
+#include "../peripherals/pit.h"
 #include "../peripherals/ps2.h"
 #include "../peripherals/ps2Keyboard.h"
 #include "../peripherals/serial.h"
@@ -39,12 +40,14 @@ void archBoot(uint32_t multibootMagic, struct multiboot_tag* multibootInfo) {
 
     initCMOS();
 
+    initFPU();
+    initPIT();
+
     initPS2USBLegacy();
     // picSetIRQMasked(1, false);
 
     processMultibootInfo(multibootInfo);
     setupPageMaps();
 
-    initFPU();
     pciEnumerateDevices();
 }
