@@ -5,7 +5,7 @@
 #include "pic.h"
 
 static const unsigned BaseFrequency = 1193182;
-static const unsigned Divider = 2;
+static const unsigned Divider = 500;
 static const unsigned EffectiveFrequency = BaseFrequency / Divider;
 
 static const uint16_t Channel0Port = 0x40;
@@ -39,9 +39,10 @@ void initPIT(void) {
     // Clear current reload value
     outByte(Channel0Port, 0);
     outByte(Channel0Port, 0);
-    setupChannel(0, LowByteMode, RateGeneratorMode);
+    setupChannel(0, LowHighByteMode, RateGeneratorMode);
     // Load channel 0 with frequency divider
-    outByte(Channel0Port, Divider);
+    outByte(Channel0Port, Divider & 0xFF);
+    outByte(Channel0Port, (Divider >> 8) & 0xFF);
     timerSetFrequency(EffectiveFrequency);
     picSetIRQMasked(0, false);
 }
