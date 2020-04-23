@@ -100,7 +100,7 @@ static inline void waitForRTCUpdateDone(void) {
 
 void initCMOS(void) {
     rtcUsesBCD = !(readRegister(StatusRegisterB) & RTCBinaryBit);
-    registerClockSource(&rtcSource);
+    clockRegisterSource(&rtcSource);
 }
 
 ClockTime* cmosGetTime(void) {

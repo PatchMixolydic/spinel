@@ -57,7 +57,7 @@ void clockCreateAlarms(void) {
     timerSetAlarm(1 * TicksPerSecond, false, secondPassed);
 }
 
-void registerClockSource(ClockSource* newClock) {
+void clockRegisterSource(ClockSource* newClock) {
     if (clock != NULL) {
         printf("Tried to register a clock, but one is already registered\n");
         return;
