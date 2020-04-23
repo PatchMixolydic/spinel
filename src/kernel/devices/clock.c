@@ -1,17 +1,60 @@
 #include <assert.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
+#include <time.h>
+#include <units.h>
 #include <spinel/clock.h>
+#include <spinel/timer.h>
+
+// Time in seconds between resyncs of the clock
+static const int ResyncTime = 1 * Hour;
 
 static ClockSource* clock = NULL;
-static ClockTime* time = NULL;
+static ClockTime* currentTime = NULL;
 
 static void clockRefreshTime(void) {
     if (clock == NULL || clock->getTime == NULL) {
         return;
     }
 
-    time = clock->getTime();
+    currentTime = clock->getTime();
+}
+
+static void secondPassed(void) {
+    if (time == NULL) {
+        return;
+    }
+
+    currentTime->second++;
+    // TODO: leap seconds?
+    if (currentTime->second > 59) {
+        currentTime->second = 0;
+        currentTime->minute++;
+    }
+    if(currentTime->minute > 59) {
+        currentTime->minute = 0;
+        currentTime->hour++;
+    }
+    if(currentTime->hour > 23) {
+        currentTime->hour = 0;
+        currentTime->day++;
+    }
+    if(currentTime->day > daysinmonth(currentTime->month, currentTime->year)) {
+        currentTime->day = 1;
+        currentTime->month++;
+    }
+    if(currentTime->month > 12) {
+        currentTime->month = 1;
+        currentTime->year++;
+    }
+}
+
+void clockCreateAlarms(void) {
+    // This can't be done at clock source registration because alloc will probably
+    // not be initialized
+    timerSetAlarm(ResyncTime * TicksPerSecond, false, clockRefreshTime);
+    timerSetAlarm(1 * TicksPerSecond, false, secondPassed);
 }
 
 void registerClockSource(ClockSource* newClock) {
@@ -30,7 +73,7 @@ void registerClockSource(ClockSource* newClock) {
 }
 
 ClockTime* clockGetTime(void) {
-    return time;
+    return currentTime;
 }
 
 bool clockTimesEqual(ClockTime* a, ClockTime* b) {

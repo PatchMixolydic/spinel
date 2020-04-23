@@ -19,6 +19,7 @@ typedef struct {
     ClockGetTimeFunc getTime;
 } ClockSource;
 
+void clockCreateAlarms(void);
 void registerClockSource(ClockSource* newClock);
 ClockTime* clockGetTime(void);
 bool clockTimesEqual(ClockTime* a, ClockTime* b);
