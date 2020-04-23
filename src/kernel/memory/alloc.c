@@ -58,7 +58,10 @@ void* kmalloc(size_t size) {
         ;
         free->size < size && free->status != Free && free->next != NULL;
         free = free->next
-    ) {}
+    ) {
+    }
+
+
 
     if (free->size < size || free->status != Free) {
         // there are no blocks big enough :<
