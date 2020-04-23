@@ -88,11 +88,12 @@ void timerTick(void) {
             Alarm* alarm = alarmNode->data;
             assert(alarm);
             alarm->ticks += ticksPerCycle;
-            if (alarm->ticks >= alarm->interval) {
+            while (alarm->ticks >= alarm->interval) {
                 alarm->callback();
-                alarm->ticks = 0;
+                alarm->ticks -= alarm->interval;
                 if (alarm->oneShot) {
                     timerRemoveAlarm(alarm->id);
+                    break;
                 }
             }
         }
