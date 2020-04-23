@@ -48,6 +48,9 @@ string/strchr.o \
 string/strrchr.o \
 string/strspn.o \
 string/strtok_r.o \
+time/daysinmonth.o \
+time/daysinyear.o \
+time/isleapyear.o \
 time/time.o \
 
 HOSTED_OBJS = \

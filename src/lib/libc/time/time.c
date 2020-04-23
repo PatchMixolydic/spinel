@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <sys/types.h>
+#include <time.h>
 #include <units.h>
 
 #ifdef __Kernel
@@ -7,30 +8,6 @@
 #endif
 
 static const time_t UnixEpochYear = 1970;
-static const time_t DaysPerMonth[13] = {
-    0,
-    31, 28, 31, 30, 31, 30, 31,
-    31, 30, 31, 30, 31
-};
-
-static inline bool isLeapYear(int year) {
-    return year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
-}
-
-static inline time_t getDaysForMonth(int month, int year) {
-    if (month == 2) {
-        return isLeapYear(year) ? 29 : 28;
-    } else if (1 <= month && month <= 12) {
-        return DaysPerMonth[month];
-    } else {
-        printf("Invalid month %d\n", month);
-        return 0;
-    }
-}
-
-static inline time_t getDaysForYear(int year) {
-    return isLeapYear(year) ? 366 : 365;
-}
 
 time_t time(time_t* dest) {
     time_t res;
@@ -47,16 +24,16 @@ time_t time(time_t* dest) {
         res = 0;
         if (clockTime->year > UnixEpochYear) {
             for (int year = clockTime->year; year > UnixEpochYear; year--) {
-                res += getDaysForYear(year) * Day;
+                res += daysinyear(year) * Day;
             }
         } else if (clockTime->year < UnixEpochYear) {
             for (int year = clockTime->year; year < UnixEpochYear; year++) {
-                res -= getDaysForYear(year) * Day;
+                res -= daysinyear(year) * Day;
             }
         }
 
         for (int month = clockTime->month - 1; month >= 1; month--) {
-            res += getDaysForMonth(month, clockTime->year) * Day;
+            res += daysinmonth(month, clockTime->year) * Day;
         }
 
         res += Day * (clockTime->day - 2);
