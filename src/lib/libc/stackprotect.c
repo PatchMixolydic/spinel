@@ -18,7 +18,7 @@ void __stack_chk_fail(void) {
         panic("Stack smashing detected");
     #else
         // TODO: stderr
-        printf("Stack smashing detected");
+        printf("Stack smashing detected\n");
         // TODO: abort
     #endif
 }
