@@ -22,7 +22,7 @@ static void clockRefreshTime(void) {
 }
 
 static void secondPassed(void) {
-    if (time == NULL) {
+    if (currentTime == NULL) {
         return;
     }
 
