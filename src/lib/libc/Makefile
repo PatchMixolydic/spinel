@@ -25,6 +25,7 @@ $(LIBC_ARCH_FREESTANDING_OBJS) \
 ctype/isalpha.o \
 ctype/isdigit.o \
 errno.o \
+stackprotect.o\
 stdio/perror.o \
 stdio/printf.o \
 stdio/vprintf.o \

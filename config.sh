@@ -38,7 +38,7 @@ export INCLUDEDIR=$PREFIX/include
 
 export ROOTDIR=`pwd`
 
-export CFLAGS='-O2 -g -fno-omit-frame-pointer \
+export CFLAGS='-O2 -g -fno-omit-frame-pointer -fstack-protector-all \
   -D__Commit__=\"$(shell git rev-parse --short HEAD)\" \
   -D__DateTime__="\"$(shell date +"%F %I:%M%P %Z")\""'
 export CPPFLAGS=''
