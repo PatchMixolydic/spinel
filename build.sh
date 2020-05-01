@@ -100,7 +100,8 @@ qemu() {
 
 disassemble() {
     build
-    objdump -d --no-show-raw-insn src/kernel/spinel.elf | \
+    objdump -d --no-show-raw-insn \
+        --disassembler-options=intel-mnemonic src/kernel/spinel.elf | \
         sed -E 's/^[A-Fa-f0-9]{8}:\t//g' > spinel.asm
     echo "Disassembled into spinel.asm"
 }
