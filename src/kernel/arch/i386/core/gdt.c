@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
@@ -53,8 +54,16 @@ static TaskStateSegment tss;
 static GDTDescriptor gdt[6];
 static GDTPointer gdtPointer;
 
-uint16_t getGDTOffset(GDTEntry entry) {
+uint16_t getGDTSelector(GDTEntry entry) {
+    if (entry == GDTUserCode || entry == GDTUserData) {
+        // Ring 3 selectors
+        return (uint16_t)(entry * 0x8) | 3;
+    }
     return (uint16_t)(entry * 0x8);
+}
+
+void loadTSS(bool userMode) {
+    loadTSR(getGDTSelector(GDTTSS) | (userMode ? 3 : 0));
 }
 
 void initGDT(void) {
@@ -95,7 +104,7 @@ void initGDT(void) {
     tssEntry->access = GDTPresent | GDTExecutable | GDTAccessed;
 
     // Initialize the TSS
-    tss.ss0 = getGDTOffset(GDTKernelData);
+    tss.ss0 = getGDTSelector(GDTKernelData);
     tss.esp0 = getESP(); // Kernel stack to use -- this will get replaced upon context switch
     tss.iopb = tssSize; // Apparently this value works just fine
 
@@ -103,6 +112,7 @@ void initGDT(void) {
     gdtPointer.sizeMinusOne = sizeof(gdt) - 1;
     gdtPointer.offset = (uintptr_t)gdt;
     loadGDT((uintptr_t)&gdtPointer);
+    loadTSS(false);
 }
 
 void setTSSKernelStack(uint32_t esp0) {

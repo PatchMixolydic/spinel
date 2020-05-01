@@ -13,6 +13,7 @@ uint32_t inDWord(uint16_t port);
 void outDWord(uint16_t port, uint32_t data);
 
 void loadGDT(uintptr_t loc);
+void loadTSR(uintptr_t tsr);
 void loadIDT(uintptr_t loc);
 
 uintptr_t getESP(void);

@@ -7,6 +7,7 @@ section .text
     global inDWord:function
     global outDWord:function
     global loadGDT:function
+    global loadTSR:function
     global loadIDT:function
     global getEBP:function
     global getESP:function
@@ -69,6 +70,11 @@ section .text
         mov     fs, ax
         mov     gs, ax
         mov     ss, ax
+        ret
+
+    loadTSR:
+        mov     eax, [esp + 4]
+        ltr     ax
         ret
 
     loadIDT:

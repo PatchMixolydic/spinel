@@ -10,7 +10,7 @@
     uintptr_t offset = (uintptr_t)isr##num;\
     idt[num] = (InterruptDesc){\
         (uint16_t)(offset & 0xFFFF),\
-        getGDTOffset(GDTKernelCode),\
+        getGDTSelector(GDTKernelCode),\
         0,\
         /* present, ring 0, interrupt gate*/\
         0x8E, /* 0b1000_1110 */\
