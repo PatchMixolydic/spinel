@@ -1,3 +1,4 @@
+#include <limits.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -85,12 +86,12 @@ void initPhysicalAlloc(const memmap_t* memoryMapPtr, size_t memoryMapLength) {
         ptr++
     ) {
         uint64_t start = ptr->addr;
-        if (start <= 0xFFFFFFFFFFFFFFF0ull) {
-            // Weird hackfix, this isn't a valid pointer
-            continue;
-        }
         uint64_t end = ptr->addr + ptr->len;
         bool valid = ptr->type == MULTIBOOT_MEMORY_AVAILABLE;
+        if (start <= UINT32_MAX) {
+            // Not a valid pointer on x86
+            continue;
+        }
         for (
             uint64_t addr = NearestPage(start);
             addr < end;
