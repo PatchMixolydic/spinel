@@ -41,7 +41,7 @@ void initFPU(void) {
     __asm__ ("fsave %0" : "=m" (defaultFPUState));
 }
 
-uint8_t* getDefaultFPUState(void) {
+uint8_t* fpuGetDefaultState(void) {
     assert(fpuInitialized);
     return defaultFPUState;
 }
