@@ -18,19 +18,6 @@
     };\
 } while(0)
 
-#define RegisterIRQ(num) do {\
-    extern void irqISR##num(void);\
-    uintptr_t offset = (uintptr_t)irqISR##num;\
-    idt[num + 32] = (InterruptDesc){\
-        (uint16_t)(offset & 0xFFFF),\
-        getGDTOffset(GDTKernelCode),\
-        0,\
-        /* present, ring 0, interrupt gate*/\
-        0x8E, /* 0b1000_1110 */\
-        (uint16_t)(offset >> 16)\
-    };\
-} while(0)
-
 #define RegisterTenISRs(tensPlace) do {\
     RegisterISR(tensPlace##0); RegisterISR(tensPlace##1);\
     RegisterISR(tensPlace##2); RegisterISR(tensPlace##3);\
@@ -64,16 +51,15 @@ void initIDT(void) {
     RegisterTenISRs(/*0*/);
     RegisterTenISRs(1);
     RegisterTenISRs(2);
-    RegisterISR(30);
-    RegisterISR(31);
-    RegisterISR(80);
-
-    RegisterIRQ(0); RegisterIRQ(1); RegisterIRQ(2);
-    RegisterIRQ(3); RegisterIRQ(4); RegisterIRQ(5);
-    RegisterIRQ(6); RegisterIRQ(7); RegisterIRQ(8);
-    RegisterIRQ(9); RegisterIRQ(10); RegisterIRQ(11);
-    RegisterIRQ(12); RegisterIRQ(13); RegisterIRQ(14);
-    RegisterIRQ(15);
+    RegisterTenISRs(3);
+    RegisterISR(40);
+    RegisterISR(41);
+    RegisterISR(42);
+    RegisterISR(43);
+    RegisterISR(44);
+    RegisterISR(45);
+    RegisterISR(46);
+    RegisterISR(0x88);
 
     loadIDT((uintptr_t)&idtp);
 }

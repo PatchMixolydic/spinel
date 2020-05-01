@@ -17,25 +17,13 @@
         jmp     isrCommon
 %endmacro
 
-%macro irq 1
-    ; args: number
-    global irqISR%1:function
-    extern irq%1
-    irqISR%1:
-        pushad
-        cld
-        call    irq%1
-        popad
-        iretd
-%endmacro
-
 section .text
-    extern interruptHandler
+    extern mainInterruptHandler
 
     isrCommon:
         cld
         push    ecx ; set to the interrupt number in macros
-        call    interruptHandler
+        call    mainInterruptHandler
         add     esp, 4 ; remove interrupt number
         popad
         add     esp, 4 ; remove error code
@@ -63,9 +51,9 @@ section .text
     %endrep
     isrError    30
     isrNoError  31
-    %assign i 0
+    %assign i 32
     %rep    16
-        irq i
+        isrNoError i
         %assign i i+1
     %endrep
-    isrNoError  80
+    isrNoError  0x88

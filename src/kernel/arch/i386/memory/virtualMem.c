@@ -74,6 +74,7 @@ static inline uintptr_t* getPageMapEntry(uintptr_t page, size_t level) {
 }
 
 void setupPageMaps(void) {
+    registerInterruptHandler(IntPageFault, handlePageFault);
     spinlockMutex(&virtualMemoryMutex);
     kernelPageDirectory[0] = (uintptr_t)NULL; // remove identity mapping
     uintptr_t* pageEntry;
@@ -128,10 +129,11 @@ void unmapPage(uintptr_t virtual) {
     unlockMutex(&virtualMemoryMutex);
 }
 
-void handlePageFault(InterruptInfo info) {
+void handlePageFault(void) {
     printf("Page fault at 0x%p\n", getCR2());
+    InterruptInfo* info = getInterruptInfo();
     if (KernelHeapStart <= getCR2() && getCR2() < KernelHeapEnd) {
-        if (info.errorCode & PageFaultUserModeFlag) {
+        if (info->errorCode & PageFaultUserModeFlag) {
             printf("User process tried to allocate kernel heap memory\n");
             return;
         }
@@ -146,13 +148,13 @@ void handlePageFault(InterruptInfo info) {
         "CR2 0x%X    Error code 0x%X\n"
         "%s%s%s%s%s%s\n"
         "Page table entry 0x%X    Page directory entry 0x%X",
-        getCR2(), info.errorCode,
-        info.errorCode ? "Flags: " : "",
-        info.errorCode & PageFaultPresentFlag ? "present " : "",
-        info.errorCode & PageFaultWriteFlag ? "write " : "",
-        info.errorCode & PageFaultUserModeFlag ? "userMode " : "",
-        info.errorCode & PageFaultReservedWriteFlag ? "reservedWrite " : "",
-        info.errorCode & PageFaultInstrFetchFlag ? "instructionFetch" : "",
+        getCR2(), info->errorCode,
+        info->errorCode ? "Flags: " : "",
+        info->errorCode & PageFaultPresentFlag ? "present " : "",
+        info->errorCode & PageFaultWriteFlag ? "write " : "",
+        info->errorCode & PageFaultUserModeFlag ? "userMode " : "",
+        info->errorCode & PageFaultReservedWriteFlag ? "reservedWrite " : "",
+        info->errorCode & PageFaultInstrFetchFlag ? "instructionFetch" : "",
         *getPageMapEntry(getCR2(), 0), *getPageMapEntry(getCR2(), 1)
     );
 }

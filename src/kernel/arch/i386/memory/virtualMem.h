@@ -6,6 +6,6 @@
 void setupPageMaps(void);
 void mapPage(uintptr_t virtual, uintptr_t flags);
 void unmapPage(uintptr_t virtual);
-void handlePageFault(InterruptInfo info);
+void handlePageFault(void);
 
 #endif // ndef VIRTUALMEM_H

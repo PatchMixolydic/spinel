@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <spinel/timer.h>
 #include "../core/cpu.h"
+#include "../interrupts/interrupts.h"
 #include "pic.h"
 
 static const unsigned BaseFrequency = 1193182;
@@ -44,10 +45,6 @@ void initPIT(void) {
     outByte(Channel0Port, Divider & 0xFF);
     outByte(Channel0Port, (Divider >> 8) & 0xFF);
     timerSetFrequency(EffectiveFrequency);
+    registerInterruptHandler(IntIRQ0, timerTick);
     picSetIRQMasked(0, false);
-}
-
-void irq0(void) {
-    timerTick();
-    picEndOfInterrupt(0);
 }

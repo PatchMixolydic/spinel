@@ -122,36 +122,11 @@ static bool sendData(uint8_t data, unsigned port) {
     return false;
 }
 
-void initPS2USBLegacy(void) {
-    // Early boot, we're using USB Legacy emulation because the USB drivers
-    // aren't loaded yet. Still, let's try to set scancode set 2.
-    // First, disable translation
-    outByte(PS2CommandPort, GetConfigByteCommand);
-    uint8_t config = recvData();
-    config &= ~PS2Port1TransFlag;
-    outByte(PS2CommandPort, SetConfigByteCommand);
-    while ((volatile uint8_t)inByte(PS2StatusPort) & InputBufferFullFlag) {
-        __asm__("pause");
-    }
-    outByte(PS2DataPort, config);
-
-    if (!sendData(ScanCodeCommand, 1)) {
-        // uh oh
-        return;
-    }
-}
-
-void initPS2(void) {
-    // Real PS/2 initialization
-    // TODO
-}
-
 void irq1(void) {
     // The PS/2 keyboard sent us this because it has data ready.
     uint8_t scancode = inByte(PS2DataPort);
     if (scancode == AckResp) {
         // This is an acknowledgement, not a keycode!
-        picEndOfInterrupt(1);
         return;
     }
     // Apparently, the scancode must be awaited upon anyways lest it be
@@ -197,6 +172,30 @@ void irq1(void) {
     } else {
         setKeyCode(keyCodeMap[scancode], isDown);
     }
+}
 
-    picEndOfInterrupt(1);
+void initPS2USBLegacy(void) {
+    // Early boot, we're using USB Legacy emulation because the USB drivers
+    // aren't loaded yet. Still, let's try to set scancode set 2.
+    // First, disable translation
+    outByte(PS2CommandPort, GetConfigByteCommand);
+    uint8_t config = recvData();
+    config &= ~PS2Port1TransFlag;
+    outByte(PS2CommandPort, SetConfigByteCommand);
+    while ((volatile uint8_t)inByte(PS2StatusPort) & InputBufferFullFlag) {
+        __asm__("pause");
+    }
+    outByte(PS2DataPort, config);
+
+    if (!sendData(ScanCodeCommand, 1)) {
+        // uh oh
+        return;
+    }
+
+    registerInterruptHandler(IntIRQ1, irq1);
+}
+
+void initPS2(void) {
+    // Real PS/2 initialization
+    // TODO
 }
