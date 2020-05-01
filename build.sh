@@ -17,6 +17,7 @@ help() {
     printf "\t\ttests - Run unit tests\n"
     printf "\t\tiso - Generate an ISO file\n"
     printf "\t\tqemu - Run Spinel in QEMU\n"
+    printf "\t\tdisassemble - Disassemble the kernel into a diffable format\n"
     printf "\t\tProviding no action will open an interactive menu\n"
 }
 
@@ -97,6 +98,13 @@ qemu() {
         -soundhw pcspk -enable-kvm -serial stdio -device ich9-ahci
 }
 
+disassemble() {
+    build
+    objdump -d --no-show-raw-insn src/kernel/spinel.elf | \
+        sed -E 's/^[A-Fa-f0-9]{8}:\t//g' > spinel.asm
+    echo "Disassembled into spinel.asm"
+}
+
 rotate() {
     echo $1 | tr 'A-Za-z' 'N-ZA-Mn-za-m'
 }
@@ -122,7 +130,8 @@ shift "$(($OPTIND -1))"
 rotated=$(rotate $1)
 
 if [ "$1" = "clean" ] || [ "$1" = "headers" ] || [ "$1" = "build" ] || \
-[ "$1" = "iso" ] || [ "$1" = "qemu" ] || [ "$1" = "tests" ]; then
+[ "$1" = "iso" ] || [ "$1" = "qemu" ] || [ "$1" = "tests" ] || \
+[ "$1" = "disassemble" ]; then
     $1
 # Are there Easter eggs in this program?
 elif [ $(rotate $1) = "zbb" ]; then
@@ -156,6 +165,7 @@ else
     "tests" "Run unit tests" \
     "iso" "Create a bootable ISO" \
     "qemu" "Boot Spinel in QEMU" \
+    "disassemble" "Dissamble the kernel into a diffable format" \
     2> $TMPFILE
 
     RETCODE=$?
