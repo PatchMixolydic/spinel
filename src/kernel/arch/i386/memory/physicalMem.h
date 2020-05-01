@@ -5,12 +5,12 @@
 #include <multiboot2.h>
 #include <spinel/kernelInfo.h>
 
-#define PageAlign(addr) (addr & ~0x0FFF)
+#define PageAlign(addr) ((addr) & ~0x0FFF)
 // The next page, no matter what
 #define NextPage(addr) (PageAlign(addr) + PageSize)
 // This page if it's already page aligned, otherwise the next page
 #define NearestPage(addr) \
-    ((addr & 0x0FFF) == 0 ? addr : NextPage(addr))
+    (((addr) & 0x0FFF) == 0 ? (addr) : NextPage(addr))
 
 typedef multiboot_memory_map_t memmap_t;
 
