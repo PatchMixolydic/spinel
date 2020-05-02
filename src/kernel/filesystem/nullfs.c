@@ -13,12 +13,12 @@ int nullfsLink(struct VNode* vnode, char* path);
 int nullfsUnlink(char* path);
 
 static FSInfo nullfsInfo = {
-        "nullfs",
-        nullfsOpen,
-        nullfsOpenDir,
-        nullfsLink,
-        nullfsUnlink,
-        NULL
+    "nullfs",
+    nullfsOpen,
+    nullfsOpenDir,
+    nullfsLink,
+    nullfsUnlink,
+    NULL
 };
 
 void nullfsInit(void) {
