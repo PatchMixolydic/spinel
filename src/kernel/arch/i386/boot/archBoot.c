@@ -47,7 +47,7 @@ void archBoot(uint32_t multibootMagic, struct multiboot_tag* multibootInfo) {
     // picSetIRQMasked(1, false);
 
     processMultibootInfo(multibootInfo);
-    setupPageMaps();
+    initVirtualMemory();
 
     pciEnumerateDevices();
 }

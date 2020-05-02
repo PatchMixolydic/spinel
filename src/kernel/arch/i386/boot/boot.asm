@@ -52,11 +52,12 @@ align 4096
             %assign i i+1
         %endrep
     kernelPageDirectory:
-        dd      kernelPageTable - KernelOffset + 0x03
+        ; 0x203: allocated, writable, present
+        dd      kernelPageTable - KernelOffset + 0x203
         times 767 dd 0
-        dd      kernelPageTable - KernelOffset + 0x03
+        dd      kernelPageTable - KernelOffset + 0x203
         times 254 dd 0
-        dd      kernelPageDirectory - KernelOffset + 0x03
+        dd      kernelPageDirectory - KernelOffset + 0x203
 
 ; Code
 section .text
