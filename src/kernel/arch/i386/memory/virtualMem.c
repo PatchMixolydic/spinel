@@ -95,7 +95,6 @@ void handlePageFault(void) {
         (*pageTabEntry & PagePresentFlag) == 0
     ) {
         // Oh, that's an easy one!
-        printf("Committing...\n");
         commitPage(cr2);
         return;
     }
