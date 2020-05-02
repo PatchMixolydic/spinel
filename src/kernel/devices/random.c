@@ -62,7 +62,7 @@ static const uint32_t ConstantA = 0x65787061;
 // nd 3
 static const uint32_t ConstantB = 0x6E642033;
 // 2-by
-static const uint64_t ConstantC = 0x322D6279;
+static const uint32_t ConstantC = 0x322D6279;
 // te k
 static const uint32_t ConstantD = 0x7465206B;
 static const size_t KeySize = 32;
