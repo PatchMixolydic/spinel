@@ -154,6 +154,13 @@ void mapPage(uintptr_t virtual, uintptr_t flags) {
     uintptr_t* pageTabEntry = getPageMapEntry(virtual, 0);
     uintptr_t* pageDirEntry = getPageMapEntry(virtual, 1);
 
+    if (virtual >= KernelOffset && (flags & PageUserModeFlag)) {
+        panic(
+            "Tried to map 0x%X as user mode accessible (flags 0x%X)",
+            virtual, flags
+        );
+    }
+
     if ((*pageDirEntry & PagePresentFlag) == 0) {
         // Oops, we kind of need a page table...
         uintptr_t pageTab = (uintptr_t)allocatePageFrame();
