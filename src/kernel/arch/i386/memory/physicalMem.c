@@ -88,7 +88,7 @@ void initPhysicalAlloc(const memmap_t* memoryMapPtr, size_t memoryMapLength) {
         uint64_t start = ptr->addr;
         uint64_t end = ptr->addr + ptr->len;
         bool valid = ptr->type == MULTIBOOT_MEMORY_AVAILABLE;
-        if (start <= UINT32_MAX) {
+        if (start >= UINT32_MAX) {
             // Not a valid pointer on x86
             continue;
         }
