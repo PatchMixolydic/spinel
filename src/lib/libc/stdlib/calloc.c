@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef __Kernel
 #include <spinel/panic.h>
@@ -32,5 +33,10 @@ void* calloc(size_t nmemb, size_t size) {
         // TODO: is there a way to check for overflow here?
         mallocSize = nmemb * size;
     #endif
-    return malloc(mallocSize);
+
+    void* res = malloc(mallocSize);
+    if (res != NULL) {
+        memset(res, 0, mallocSize);
+    }
+    return res;
 }
