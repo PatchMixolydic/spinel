@@ -55,8 +55,6 @@
 } while (0)
 
 // TODO: I'm not sure how endianness affects the constant
-// This might affect usage of files encrypted on a machine with
-// a different endianness vs. the current machine
 // expa
 static const uint32_t ConstantA = 0x65787061;
 // nd 3
@@ -69,7 +67,6 @@ static const size_t KeySize = 32;
 static const size_t KeyOffset = 4;
 
 static bool randomInitialized = false;
-// TODO: is this correct?
 static uint32_t rngState[16] = {
     0, 0, 0, 0,
     0, 0, 0, 0,
