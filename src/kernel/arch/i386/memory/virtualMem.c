@@ -8,6 +8,7 @@
 #include <spinel/concurrency.h>
 #include <spinel/kernelInfo.h>
 #include <spinel/panic.h>
+#include <spinel/virtualMemory.h>
 #include "../core/cpu.h"
 #include "../interrupts/interrupts.h"
 #include "physicalMem.h"
@@ -81,7 +82,7 @@ static inline uintptr_t commitPage(uintptr_t addr) {
 
 void handlePageFault(void) {
     uintptr_t cr2 = getCR2();
-    printf("Page fault at 0x%p\n", cr2);
+    printf("Page fault at 0x%p ", cr2);
     InterruptInfo* info = getInterruptInfo();
 
     uintptr_t* pageTabEntry = getPageMapEntry(cr2, 0);
@@ -95,8 +96,15 @@ void handlePageFault(void) {
         (*pageTabEntry & PagePresentFlag) == 0
     ) {
         // Oh, that's an easy one!
+        printf("(okay)\n");
         commitPage(cr2);
         return;
+    }
+
+    printf("(exception)\n");
+
+    if (cr2 < PageSize) {
+        printf("Zero page dereference: cr2 = 0x%X\n", cr2);
     }
 
     panic(
@@ -141,15 +149,13 @@ void initVirtualMemory(void) {
         *pageEntry &= ~PageWritableFlag;
     }
 
-    // Map in the heap's pages
-    mapPageRange(KernelHeapStart, KernelHeapEnd, PageWritableFlag);
-
     // TODO: might be slow; we need to invalidate all the pages we just changed
     setCR3(getCR3());
     unlockMutex(&virtualMemoryMutex);
 }
 
-void mapPage(uintptr_t virtual, uintptr_t flags) {
+int vMemMapPage(void* addr, unsigned flags) {
+    uintptr_t virtual = (uintptr_t)addr;
     spinlockMutex(&virtualMemoryMutex);
     uintptr_t* pageTabEntry = getPageMapEntry(virtual, 0);
     uintptr_t* pageDirEntry = getPageMapEntry(virtual, 1);
@@ -181,19 +187,22 @@ void mapPage(uintptr_t virtual, uintptr_t flags) {
     invalidatePage((void*)pageTabEntry);
     invalidatePage((void*)virtual);
     unlockMutex(&virtualMemoryMutex);
+    return 0;
 }
 
-void mapPageRange(uintptr_t start, uintptr_t end, uintptr_t flags) {
+int vMemMapInRange(void* start, void* end, unsigned flags) {
     for (
-        uintptr_t page = PageAlign(start);
-        page < NearestPage(end);
+        uintptr_t page = PageAlign((uintptr_t)start);
+        page < NearestPage((uintptr_t)end);
         page += PageSize
     ) {
-        mapPage(page, flags);
+        vMemMapPage((void*)page, flags);
     }
+    return 0;
 }
 
-void unmapPage(uintptr_t virtual) {
+int vMemUnmapPage(void* addr) {
+    uintptr_t virtual = (uintptr_t)addr;
     spinlockMutex(&virtualMemoryMutex);
     uintptr_t* pageEntry = getPageMapEntry(virtual, 0);
     uintptr_t physAddr = PageAlign(*pageEntry);
@@ -202,4 +211,16 @@ void unmapPage(uintptr_t virtual) {
     invalidatePage((void*)pageEntry);
     invalidatePage((void*)virtual);
     unlockMutex(&virtualMemoryMutex);
+    return 0;
+}
+
+int vMemUnmapInRange(void* start, void* end) {
+    for (
+        uintptr_t page = NearestPage((uintptr_t)start);
+        page < NearestPage((uintptr_t)end);
+        page += PageSize
+    ) {
+        vMemUnmapPage((void*)page);
+    }
+    return 0;
 }
