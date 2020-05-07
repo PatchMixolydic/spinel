@@ -15,7 +15,7 @@
 
 // Simple memory allocator
 // Uses buddy allocation up to 4KiB, then mmap
-// Tries to stay 8-byte aligned for compatibility
+// Tries to stay 4-byte aligned for compatibility
 // with processors that need it
 
 // Cool fact: Spinel's mmap will, when given NULL for the address,
@@ -55,7 +55,6 @@ typedef struct AllocMemoryBlock {
 static FreeMemoryBlock* freeLists[BuddyMaxOrder - BuddyMinOrder + 1];
 
 #ifdef __Kernel
-// FIXME
 static void* heapEnd = KernelHeapStart;
 #endif
 
