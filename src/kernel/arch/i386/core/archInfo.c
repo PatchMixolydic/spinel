@@ -8,8 +8,3 @@ const char* const MachineName = "PC compatible";
 // Also extant: 486, 586, 686. Might be worth it to use x86, but it's kind of
 // funny to call a 686 (or perhaps a Threadripper running 32-bit Spinel) a 386.
 const char* const ProcessorName = "i386";
-
-const size_t PageSize = 4096;
-const uintptr_t KernelOffset = 0xC0000000;
-const uintptr_t KernelHeapStart = 0xD0000000;
-const uintptr_t KernelHeapEnd = 0xE0000000;

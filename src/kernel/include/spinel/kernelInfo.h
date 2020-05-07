@@ -37,10 +37,17 @@ extern const char* const SpinelReleaseVersion;
 extern const char* const MachineName;
 extern const char* const ProcessorName;
 
-// Architecture-dependent
-extern const size_t PageSize;
-extern const uintptr_t KernelOffset;
-extern const uintptr_t KernelHeapStart;
-extern const uintptr_t KernelHeapEnd;
+// Architecture-dependent:
+// PageSize, KernelOffset, KernelHeapStart, KernelHeapEnd
+// or: things that make you say "I wish I had constexpr right now"
+// TODO: install arch header files and devise a mechanism for including from there
+#ifdef __i386__
+    #define PageSize 4096
+    #define KernelOffset 0xC0000000
+    #define KernelHeapStart 0xD0000000
+    #define KernelHeapEnd 0xE0000000
+#else
+    #error "No kernelInfo available for your platform"
+#endif
 
 #endif // ndef SPINEL_KERNELINFO_H
