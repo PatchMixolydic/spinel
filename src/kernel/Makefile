@@ -42,7 +42,6 @@ devices/zero.o\
 filesystem/nullfs.o\
 filesystem/vfs.o\
 input/keymap.o\
-memory/alloc.o\
 
 OBJS=\
 $(ARCHDIR)/core/crti.o \

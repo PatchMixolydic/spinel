@@ -30,10 +30,8 @@ stdio/perror.o \
 stdio/printf.o \
 stdio/vprintf.o \
 stdlib/calloc.o \
-stdlib/free.o \
 stdlib/malloc.o \
 stdlib/itoa.o \
-stdlib/realloc.o \
 string/memcmp.o \
 string/memmove.o \
 string/strcpy.o \
