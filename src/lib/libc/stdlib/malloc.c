@@ -23,7 +23,7 @@
 // So we don't need sbrk, mmap will do all the work
 
 // Since our allocations should be 8-byte aligned
-// and we use one byte for metadata, a minimum order of 4
+// and we use four bytes for metadata, a minimum order of 4
 // (= 16 bytes) makes sense
 #define BuddyMinOrder 4
 // Maximum order of 12 = 4 KiB
