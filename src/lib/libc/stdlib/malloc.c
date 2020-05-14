@@ -55,7 +55,7 @@ typedef struct AllocMemoryBlock {
 static FreeMemoryBlock* freeLists[BuddyMaxOrder - BuddyMinOrder + 1];
 
 #ifdef __Kernel
-static void* heapEnd = KernelHeapStart;
+static void* heapEnd = (void*)KernelHeapStart;
 #endif
 
 // Integer log2
