@@ -127,6 +127,22 @@ void* linkedListPopLast(LinkedList* list) {
     return res;
 }
 
+void* linkedListFirst(LinkedList* list) {
+    if (list == NULL) {
+        return NULL;
+    }
+
+    return list->first;
+}
+
+void* linkedListLast(LinkedList* list) {
+    if (list == NULL) {
+        return NULL;
+    }
+
+    return list->last;
+}
+
 LinkedListNode* linkedListFind(LinkedList* list, void* data) {
     if (list == NULL) {
         return NULL;
