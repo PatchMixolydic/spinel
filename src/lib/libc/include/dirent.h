@@ -1,13 +1,18 @@
 #ifndef _LIBC_DIRENT_H
 #define _LIBC_DIRENT_H
 
+#include <limits.h>
 #include <stdint.h>
 #include <sys/types.h>
 
 struct dirent {
     // These two fields are required by POSIX
     ino_t d_ino;
-    char d_name[256]; // TODO: constant
+    char d_name[NAME_BUFFER_SIZE];
+    // Offset from the beginning of the directory
+    // to the next dirent, or 0 if this is the last
+    // one
+    off_t d_offsetToNext;
 };
 
 // This type is operating system dependent,

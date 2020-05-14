@@ -2,6 +2,7 @@
 #define SPINEL_VFS_H
 
 #include <dirent.h>
+#include <limits.h>
 #include <stdint.h>
 #include <sys/types.h>
 
@@ -130,10 +131,9 @@ typedef struct FSInfo {
 } FSInfo;
 
 typedef struct VMount {
-    // TODO: constant
-    char devicePath[4096];
+    char devicePath[PATH_MAX];
     struct VNode* deviceVNode;
-    char mountpointPath[4096];
+    char mountpointPath[PATH_MAX];
     struct VNode* rootVNode;
     FileSystemFlags flags;
     FSInfo* filesystem;
