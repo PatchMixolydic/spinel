@@ -105,21 +105,24 @@ void handlePageFault(void) {
 
     if (cr2 < PageSize) {
         printf("Zero page dereference: cr2 = 0x%X\n", cr2);
+    } else {
+        printf(
+            "Page table entry 0x%X    Page directory entry 0x%X\n",
+            *getPageMapEntry(cr2, 0), *getPageMapEntry(cr2, 1)
+        );
     }
 
     panic(
         "Page fault\n"
         "CR2 0x%X    Error code 0x%X    EIP 0x%X\n"
-        "%s%s%s%s%s%s\n"
-        "Page table entry 0x%X    Page directory entry 0x%X",
+        "%s%s%s%s%s%s",
         cr2, info->errorCode, info->eip,
         info->errorCode ? "Flags: " : "",
         info->errorCode & PageFaultPresentFlag ? "present " : "",
         info->errorCode & PageFaultWriteFlag ? "write " : "",
         info->errorCode & PageFaultUserModeFlag ? "userMode " : "",
         info->errorCode & PageFaultReservedWriteFlag ? "reservedWrite " : "",
-        info->errorCode & PageFaultInstrFetchFlag ? "instructionFetch" : "",
-        *getPageMapEntry(cr2, 0), *getPageMapEntry(cr2, 1)
+        info->errorCode & PageFaultInstrFetchFlag ? "instructionFetch" : ""
     );
 }
 
