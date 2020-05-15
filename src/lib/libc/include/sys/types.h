@@ -1,6 +1,7 @@
 #ifndef _LIBC_SYS_TYPES_H
 #define _LIBC_SYS_TYPES_H
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
