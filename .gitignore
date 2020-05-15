@@ -10,3 +10,4 @@ sysroot
 *.o
 *.pyc
 bochs*.txt
+spinel.asm
