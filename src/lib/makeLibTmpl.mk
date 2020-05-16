@@ -6,7 +6,7 @@ ifndef OBJS
 $(error OBJS wasn't provided for $(PROGNAME))
 endif
 
-CFLAGS ?= -O2 -g -Wall -Wextra -Wpedantic
+CFLAGS ?= -O2 -g -Wall -Wextra -Wpedantic -std=c11
 CPPFLAGS ?= -Iinclude
 LDFLAGS ?=
 LIBS ?= -lc
@@ -16,6 +16,8 @@ PREFIX ?= /usr/local
 EXEC_PREFIX ?= $(PREFIX)
 BOOTDIR ?= $(EXEC_PREFIX)/boot
 INCLUDEDIR ?= $(PREFIX)/include
+
+TEST_OBJS ?= $(OBJS) tests/test.o
 
 BINARIES ?= $(PROGNAME).a
 
@@ -27,16 +29,22 @@ $(PROGNAME).a: $(OBJS)
 	$(AR) rcs $@ $(OBJS)
 
 %.o: %.c
-	$(CC) -MD -c $< -o $@ -std=c11 $(CFLAGS) $(CPPFLAGS) $(LIBS)
+	$(CC) -MD $(CPPFLAGS) -c $< -o $@ $(CFLAGS) $(LIBS)
 
 clean::
 	rm -f $(BINARIES) *.a
 	rm -f $(OBJS) *.o */*.o */*/*.o
 	rm -f $(OBJS:.o=.d) *.d */*.d */*/*.d
 
-test:
-	# TODO
+test: clean
+ifeq ("$(wildcard tests/test.c)","")
 	echo "$(PROGNAME) has no unit tests."
+else
+	$(foreach obj,$(TEST_OBJS),$(CC) -MD $(CPPFLAGS) -Iinclude -I$(ROOTDIR)/src/spinunit/include -c $(obj:.o=.c) -o $(obj) $(CFLAGS) $(LIBS);)
+	$(CC) -o test$(PROGNAME) $(TEST_OBJS) $(CFLAGS) $(LIBS)
+	./test$(PROGNAME)
+	rm test$(PROGNAME)
+endif
 
 install: install-headers install-libs
 

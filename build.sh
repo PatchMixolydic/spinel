@@ -58,9 +58,9 @@ tests() {
     OLDNASM="$NASM"
     OLDCC="$CC"
 
-    export AR="$TESTAR"
-    export NASM="$TESTNASM"
-    export CC="$TESTCC"
+    export AR="$HOSTAR"
+    export NASM="$HOSTNASM"
+    export CC="$HOSTCC"
 
     for PROJECT in $PROJECTS; do
         (cd $PROJECT && $MAKE test)

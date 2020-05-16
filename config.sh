@@ -19,12 +19,12 @@ PROJECTS="\
 export MAKE="${MAKE:-make} -j`expr $(nproc) + 1`"
 export HOST=${HOST:-`./defaultHost.sh`}
 
-export TESTAR=ar
-export TESTNASM=nasm
-# set test C compiler to user's if they have a preference, else gcc
-TESTCC=$CC
-[ -z "$TESTCC" ] && TESTCC=gcc
-export TESTCC
+export HOSTAR=ar
+export HOSTNASM=nasm
+# set host C compiler to user's if they have a preference, else gcc
+HOSTCC=$CC
+[ -z "$HOSTCC" ] && HOSTCC=gcc
+export HOSTCC
 
 export AR=${HOST}-ar
 export NASM=nasm
