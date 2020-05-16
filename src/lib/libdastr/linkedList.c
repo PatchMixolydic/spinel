@@ -27,12 +27,14 @@ void linkedListDestroy(LinkedList* list) {
 
     // now traverse to the last element, freeing along the way
     // next should be cached because the list node is freed
-    for (
-        LinkedListNode* node = list->first, * next = node->next;
-        node != NULL;
-        node = next, next = node->next
-    ) {
-        free(node);
+    if (list->first != NULL) {
+        for (
+            LinkedListNode* node = list->first, * next = node->next;
+            node != NULL;
+            node = next, next = node == NULL ? NULL : node->next
+        ) {
+            free(node);
+        }
     }
 
     free(list);
@@ -107,8 +109,14 @@ void* linkedListPopFirst(LinkedList* list) {
     void* res = list->first->data;
     LinkedListNode* oldFirst = list->first;
     LinkedListNode* newFirst = list->first->next;
-    newFirst->prev = NULL;
-    list->first = newFirst;
+    if (newFirst == NULL) {
+        // This is the only element in the list!
+        list->first = NULL;
+        list->last = NULL;
+    } else {
+        newFirst->prev = NULL;
+        list->first = newFirst;
+    }
     linkedListDestroyNode(oldFirst);
     return res;
 }
@@ -121,26 +129,31 @@ void* linkedListPopLast(LinkedList* list) {
     void* res = list->last->data;
     LinkedListNode* oldLast = list->last;
     LinkedListNode* newLast = list->last->prev;
-    newLast->next = NULL;
-    list->last = newLast;
+    if (newLast == NULL) {
+        list->first = NULL;
+        list->last = NULL;
+    } else {
+        newLast->next = NULL;
+        list->last = newLast;
+    }
     linkedListDestroyNode(oldLast);
     return res;
 }
 
 void* linkedListFirst(LinkedList* list) {
-    if (list == NULL) {
+    if (list == NULL || list->first == NULL) {
         return NULL;
     }
 
-    return list->first;
+    return list->first->data;
 }
 
 void* linkedListLast(LinkedList* list) {
-    if (list == NULL) {
+    if (list == NULL || list->last == NULL) {
         return NULL;
     }
 
-    return list->last;
+    return list->last->data;
 }
 
 LinkedListNode* linkedListFind(LinkedList* list, void* data) {

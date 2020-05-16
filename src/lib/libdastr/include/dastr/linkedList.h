@@ -34,14 +34,14 @@ LinkedListNode* linkedListInsertLast(LinkedList* list, void* data);
 void* linkedListPopFirst(LinkedList* list);
 // Removes/frees the last element of a linked list, returns its data
 void* linkedListPopLast(LinkedList* list);
-// Returns a pointer to the first element of a linked list
+// Returns a pointer to the data in the first element of a linked list
 void* linkedListFirst(LinkedList* list);
-// Returns a pointer to the last element of a linked list
+// Returns a pointer to the data in the last element of a linked list
 void* linkedListLast(LinkedList* list);
 // Returns the first occurence of the pointer data in the list,
 // or NULL if data is not in the list
 LinkedListNode* linkedListFind(LinkedList* list, void* data);
-// Removes/frees the first node containing the give pointer, while managing
+// Removes/frees the first node containing the given pointer, while managing
 // the first and last pointers of the list
 void linkedListRemove(LinkedList* list, void* data);
 // Removes/frees a node from a linked list, managing first and last pointers
