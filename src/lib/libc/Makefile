@@ -33,7 +33,9 @@ stdlib/calloc.o \
 stdlib/malloc.o \
 stdlib/itoa.o \
 string/memcmp.o \
+string/memcpy.o \
 string/memmove.o \
+string/memset.o \
 string/strcpy.o \
 string/strcspn.o \
 string/strdup.o \
