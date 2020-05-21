@@ -48,7 +48,7 @@ typedef struct FreeMemoryBlock {
 typedef struct AllocMemoryBlock {
     uint8_t order;
     uint8_t isFree;
-    uint8_t padding[2];
+    uint8_t padding[6];
     uint8_t data[];
 } __attribute__((packed)) AllocMemoryBlock;
 
@@ -89,11 +89,11 @@ static inline void* alignPtr(void* addr) {
 }
 
 static inline void* voidToMemoryBlock(void* addr) {
-    return (void*)((uintptr_t)addr - (sizeof(uint8_t) * 4));
+    return (void*)((uintptr_t)addr - 8);
 }
 
 static inline size_t memSizeToBlockSize(size_t size) {
-    return size + (sizeof(uint8_t) * 4);
+    return size + 8;
 }
 
 #ifdef __Kernel
@@ -153,7 +153,7 @@ static inline int munmap(void* addr, size_t length) {
         addr < (void*)KernelHeapStart || addr >= (void*)KernelHeapEnd
     ) {
         panic("Tried to shim munmap starting at invalid address 0x%X", addr);
-    } else if (end < (void*)KernelHeapStart || end >= heapEnd) {
+    } else if (end < (void*)KernelHeapStart || end > heapEnd) {
         panic(
             "shim munmap of size %u at address 0x%X leaves heap into 0x%X\n"
             "(current heap end is 0x%X)",
@@ -180,12 +180,16 @@ void* malloc(size_t size) {
         sizeOrder = BuddyMinOrder;
     } else if (sizeOrder > BuddyMaxOrder) {
         // Just mmap it, then...
-        void* res =
-            mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_ANONYMOUS, -1, 0);
+        size = pow2(sizeOrder);
+        AllocMemoryBlock* res = mmap(
+            NULL, size,
+            PROT_READ | PROT_WRITE, MAP_ANONYMOUS, -1, 0
+        );
         if (res == MAP_FAILED) {
             return NULL;
         }
-        return res;
+        res->order = sizeOrder;
+        return (void*)res->data;
     }
 
     FreeMemoryBlock* block = freeLists[sizeOrder - BuddyMinOrder];
@@ -264,11 +268,13 @@ void free(void* addr) {
     }
 
     AllocMemoryBlock* block = voidToMemoryBlock(addr);
-    int ret = munmap(addr, pow2(block->order));
-    if (ret < 0) {
-        // Oh dear, the munmap failed...
+
+    if (block->order > BuddyMaxOrder) {
+        // This block was just mmap'd in, so just mmap it out
+        int ret = munmap(block, pow2(block->order));
         return;
     }
+
     block->isFree = 1;
     for (
         size_t orderUp = block->order + 1;
@@ -292,7 +298,7 @@ void free(void* addr) {
         // The issue now is yanking the buddy from the free list
         // TODO: locking
         FreeMemoryBlock* prevList = NULL;
-        FreeMemoryBlock* freeList = freeLists[orderUp - BuddyMinOrder];
+        FreeMemoryBlock* freeList = freeLists[orderUp - 1 - BuddyMinOrder];
         // Of course, if the buddy's free, this should hold:
         assert(freeList != NULL);
 
@@ -309,7 +315,7 @@ void free(void* addr) {
                     prevList->next = freeList->next;
                 } else {
                     // This must be the first one
-                    freeLists[orderUp - BuddyMinOrder] = freeList->next;
+                    freeLists[orderUp - 1 - BuddyMinOrder] = freeList->next;
                 }
                 break;
             }
