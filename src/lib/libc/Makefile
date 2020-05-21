@@ -66,9 +66,9 @@ KERN_OBJS=$(FREESTANDING_OBJS:.o=.kern.o)
 BINARIES = $(PROGNAME)kern.a # $(PROGNAME).a
 
 %.o: %.asm
-	$(NASM) -f elf32 -o $@ $<
+	$(NASM) -f $(LIBC_ARCH_EXEC_FORMAT) -o $@ $<
 
 %.kern.o: %.asm
-	$(NASM) -f elf32 -o $@ $<
+	$(NASM) -f $(LIBC_ARCH_EXEC_FORMAT) -o $@ $<
 
 include $(ROOTDIR)/src/lib/makeKernLibTmpl.mk
