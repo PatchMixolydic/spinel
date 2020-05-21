@@ -9,5 +9,5 @@ sysroot
 *.iso
 *.o
 *.pyc
-bochs*.txt
+bochslog.txt
 spinel.asm

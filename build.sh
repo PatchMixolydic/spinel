@@ -17,6 +17,7 @@ help() {
     printf "\t\ttests - Run unit tests\n"
     printf "\t\tiso - Generate an ISO file\n"
     printf "\t\tqemu - Run Spinel in QEMU\n"
+    printf "\t\tbochs - Run Spinel in Bochs\n"
     printf "\t\tdisassemble - Disassemble the kernel into a diffable format\n"
     printf "\t\tProviding no action will open an interactive menu\n"
 }
@@ -98,6 +99,13 @@ qemu() {
         -soundhw pcspk -enable-kvm -serial stdio -device ich9-ahci
 }
 
+run_bochs() {
+    if [ $ONLYTHIS = false ]; then
+        iso
+    fi
+    bochs
+}
+
 disassemble() {
     if [ $ONLYTHIS = false ]; then
         build
@@ -136,6 +144,8 @@ if [ "$1" = "clean" ] || [ "$1" = "headers" ] || [ "$1" = "build" ] || \
 [ "$1" = "iso" ] || [ "$1" = "qemu" ] || [ "$1" = "tests" ] || \
 [ "$1" = "disassemble" ]; then
     $1
+elif [ "$1" = "bochs" ]; then
+    run_bochs
 # Are there Easter eggs in this program?
 elif [ $(rotate $1) = "zbb" ]; then
     echo $(rotate "\\g\\gGuvf ohvyq fpevcg qbrf abg unir Fhcre Pbj Cbjref.")
@@ -168,6 +178,7 @@ else
     "tests" "Run unit tests" \
     "iso" "Create a bootable ISO" \
     "qemu" "Boot Spinel in QEMU" \
+    "bochs" "Boot Spinel in Bochs" \
     "disassemble" "Dissamble the kernel into a diffable format" \
     2> $TMPFILE
 
