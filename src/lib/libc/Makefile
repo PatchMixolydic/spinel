@@ -4,7 +4,7 @@ DEFAULT_HOST != $(ROOTDIR)/defaultHost.sh
 HOST ?= DEFAULT_HOST
 HOSTARCH != $(ROOTDIR)/tripletToArch.sh $(HOST)
 
-CFLAGS ?= -O2 -g
+CFLAGS ?= -O2 -g -Wall -Wpedantic -Wextra -ffreestanding
 CPPFLAGS ?=
 LDFLAGS ?=
 LIBS ?=
