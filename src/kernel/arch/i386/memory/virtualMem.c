@@ -9,10 +9,10 @@
 #include <spinel/kernelInfo.h>
 #include <spinel/panic.h>
 #include <spinel/virtualMemory.h>
-#include "../core/cpu.h"
-#include "../interrupts/interrupts.h"
-#include "physicalMem.h"
-#include "virtualMem.h"
+#include <spinel/arch/i386/cpu.h>
+#include <spinel/arch/i386/interrupts.h>
+#include <spinel/arch/i386/physicalMem.h>
+#include <spinel/arch/i386/virtualMem.h>
 
 #define PageMapSize (PageSize / sizeof(uintptr_t))
 

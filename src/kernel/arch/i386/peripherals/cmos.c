@@ -2,8 +2,8 @@
 #include <stdint.h>
 #include <spinel/clock.h>
 #include <spinel/cpu.h>
-#include "cmos.h"
-#include "../core/cpu.h"
+#include <spinel/arch/i386/cmos.h>
+#include <spinel/arch/i386/cpu.h>
 
 static const uint16_t RegisterSelectPort = 0x70;
 static const uint16_t CMOSDataPort = 0x71;

@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <spinel/cpu.h>
-#include "cpu.h"
+#include <spinel/arch/i386/cpu.h>
 
 typedef struct StackBase {
     struct StackBase* ebp;

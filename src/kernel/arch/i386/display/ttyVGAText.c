@@ -4,8 +4,8 @@
 #include <spinel/concurrency.h>
 #include <spinel/kernelInfo.h>
 #include <spinel/tty.h>
-#include "../core/cpu.h"
-#include "../peripherals/serial.h"
+#include <spinel/arch/i386/cpu.h>
+#include <spinel/arch/i386/serial.h>
 
 typedef uint16_t VGAChar;
 

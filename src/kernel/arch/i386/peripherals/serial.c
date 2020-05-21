@@ -3,9 +3,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <spinel/concurrency.h>
-#include "../core/cpu.h"
-#include "../peripherals/pic.h"
-#include "serial.h"
+#include <spinel/arch/i386/cpu.h>
+#include <spinel/arch/i386/pic.h>
+#include <spinel/arch/i386/serial.h>
 
 const unsigned SerialMaxBaudRate = 115200;
 

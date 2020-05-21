@@ -2,8 +2,8 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
-#include "cpu.h"
-#include "gdt.h"
+#include <spinel/arch/i386/cpu.h>
+#include <spinel/arch/i386/gdt.h>
 
 static const uint8_t GDTPresent = 1 << 7;
 static const uint8_t GDTUserMode = 3 << 5;

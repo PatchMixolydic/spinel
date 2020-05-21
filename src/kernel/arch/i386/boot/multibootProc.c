@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdio.h>
-#include "../memory/physicalMem.h"
-#include "multibootProc.h"
+#include <spinel/arch/i386/physicalMem.h>
+#include <spinel/arch/i386/multibootProc.h>
 
 void processMultibootInfo(struct multiboot_tag* info) {
     // go ahead and skip the header

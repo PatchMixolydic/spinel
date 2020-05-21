@@ -9,7 +9,7 @@
 #include <spinel/pci.h>
 
 #ifdef __i386__
-    #include "../arch/i386/core/cpu.h"
+    #include <spinel/arch/i386/cpu.h>
 #elif defined __powerpc__
     #error "Please add PowerPC support for PCI"
 #else

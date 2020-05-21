@@ -6,18 +6,18 @@
 #include <spinel/kernelInfo.h>
 #include <spinel/pci.h>
 #include <spinel/tty.h>
-#include "../core/cpu.h"
-#include "../core/fpu.h"
-#include "../core/gdt.h"
-#include "../interrupts/idt.h"
-#include "../memory/virtualMem.h"
-#include "../peripherals/cmos.h"
-#include "../peripherals/pic.h"
-#include "../peripherals/pit.h"
-#include "../peripherals/ps2.h"
-#include "../peripherals/ps2Keyboard.h"
-#include "../peripherals/serial.h"
-#include "multibootProc.h"
+#include <spinel/arch/i386/cpu.h>
+#include <spinel/arch/i386/fpu.h>
+#include <spinel/arch/i386/gdt.h>
+#include <spinel/arch/i386/idt.h>
+#include <spinel/arch/i386/virtualMem.h>
+#include <spinel/arch/i386/cmos.h>
+#include <spinel/arch/i386/pic.h>
+#include <spinel/arch/i386/pit.h>
+#include <spinel/arch/i386/ps2.h>
+#include <spinel/arch/i386/ps2Keyboard.h>
+#include <spinel/arch/i386/serial.h>
+#include <spinel/arch/i386/multibootProc.h>
 
 void archBoot(uint32_t multibootMagic, struct multiboot_tag* multibootInfo) {
     clearScreen();

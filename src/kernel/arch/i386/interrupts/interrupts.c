@@ -2,10 +2,10 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <spinel/panic.h>
-#include "../core/cpu.h"
-#include "../memory/virtualMem.h"
-#include "../peripherals/pic.h"
-#include "interrupts.h"
+#include <spinel/arch/i386/cpu.h>
+#include <spinel/arch/i386/virtualMem.h>
+#include <spinel/arch/i386/pic.h>
+#include <spinel/arch/i386/interrupts.h>
 
 static const char ExceptionDescriptions[][32] = {
     "Division by zero",

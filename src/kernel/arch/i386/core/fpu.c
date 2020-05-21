@@ -1,8 +1,8 @@
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
-#include "cpu.h"
-#include "fpu.h"
+#include <spinel/arch/i386/cpu.h>
+#include <spinel/arch/i386/fpu.h>
 
 // Disables FWait in the event of emulated FPU instructions
 static const uint32_t FPUDisableFWait = 2;

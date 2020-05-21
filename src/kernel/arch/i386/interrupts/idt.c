@@ -1,9 +1,9 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
-#include "../core/cpu.h"
-#include "../core/gdt.h"
-#include "interrupts.h"
+#include <spinel/arch/i386/cpu.h>
+#include <spinel/arch/i386/gdt.h>
+#include <spinel/arch/i386/interrupts.h>
 
 #define RegisterISR(num) do {\
     extern void isr##num(void);\

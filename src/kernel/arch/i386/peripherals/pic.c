@@ -1,6 +1,6 @@
 #include <stdint.h>
-#include "../core/cpu.h"
-#include "pic.h"
+#include <spinel/arch/i386/cpu.h>
+#include <spinel/arch/i386/pic.h>
 
 // The PICs are here named master and subservient for no good reason
 

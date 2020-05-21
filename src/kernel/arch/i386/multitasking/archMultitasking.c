@@ -4,7 +4,7 @@
 #include <sys/types.h>
 #include <spinel/cpu.h>
 #include <spinel/kernelInfo.h>
-#include "archMultitasking.h"
+#include <spinel/arch/i386/archMultitasking.h>
 
 ArchTask* currentArchTask = NULL;
 

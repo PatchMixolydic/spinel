@@ -7,7 +7,7 @@
 #include <spinel/concurrency.h>
 #include <spinel/kernelInfo.h>
 #include <spinel/panic.h>
-#include "physicalMem.h"
+#include <spinel/arch/i386/physicalMem.h>
 
 // from linker script
 extern const uint8_t __KernelStart[];

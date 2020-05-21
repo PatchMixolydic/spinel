@@ -3,11 +3,11 @@
 #include <stdio.h>
 #include <spinel/keymap.h>
 #include <spinel/tty.h>
-#include "../core/cpu.h"
-#include "../interrupts/interrupts.h"
-#include "pic.h"
-#include "ps2.h"
-#include "ps2Keyboard.h"
+#include <spinel/arch/i386/cpu.h>
+#include <spinel/arch/i386/interrupts.h>
+#include <spinel/arch/i386/pic.h>
+#include <spinel/arch/i386/ps2.h>
+#include <spinel/arch/i386/ps2Keyboard.h>
 
 // Interrupt-based keyboard driver for PS/2 keyboards
 

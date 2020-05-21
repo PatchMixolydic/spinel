@@ -1,9 +1,9 @@
 #include <assert.h>
 #include <stdint.h>
 #include <spinel/timer.h>
-#include "../core/cpu.h"
-#include "../interrupts/interrupts.h"
-#include "pic.h"
+#include <spinel/arch/i386/cpu.h>
+#include <spinel/arch/i386/interrupts.h>
+#include <spinel/arch/i386/pic.h>
 
 static const unsigned BaseFrequency = 1193182;
 static const unsigned Divider = 500;
