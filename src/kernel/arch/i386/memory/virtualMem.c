@@ -37,7 +37,6 @@ extern uintptr_t kernelPageDirectory[];
 
 static Mutex virtualMemoryMutex = false;
 
-
 static inline size_t addrToMapIdx(uintptr_t addr, size_t level) {
     size_t divisor = sizeof(uintptr_t) * PageMapSize;
     for (size_t i = level; i > 0; i--) {
@@ -101,7 +100,7 @@ void handlePageFault(void) {
         return;
     }
 
-    printf("(exception)\n");
+    printf("(exception at 0x%X)\n", info->eip);
 
     if (cr2 < PageSize) {
         printf("Zero page dereference: cr2 = 0x%X\n", cr2);
