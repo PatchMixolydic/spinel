@@ -1,13 +1,3 @@
-.idea
-.vscode
-__pycache__
-build
-sysroot
-*.a
-*.d
-*.elf
-*.iso
-*.o
-*.pyc
+/target
 bochslog.txt
-spinel.asm
+.idea
