@@ -22,8 +22,9 @@ impl From<SerialPort> for u16 {
 }
 
 impl SerialPort {
+    /// Initialize a serial port.
+    /// Currently assumes 8N1 @ 115200 baud.
     pub fn initialize(self) {
-        // TODO: currently assuming 8N1 @ 115200 baud
         // Clock is 115200 Hz
         self.write_divisor(1);
 
