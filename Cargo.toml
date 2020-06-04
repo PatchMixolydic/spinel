@@ -11,15 +11,17 @@ default = ["serial_logging"]
 serial_logging = []
 
 [dependencies]
-bootloader = "0.9.4"
 lazy_static = { version = "1.4.0", features = ["spin_no_std"] }
 num-traits = { version = "0.2", default-features = false }
 num-derive = { version = "0.3", default-features = false }
 spin = "0.5.2"
+
+[target.'cfg(target_arch = "x86_64")'.dependencies]
+bootloader = "0.9.4"
 x86_64 = "0.11.0"
 
+# TODO: how can this be restricted to x86_64 only? Does it need to be?
 [package.metadata.bootimage]
-# The command invoked with the created bootimage
 run-command = [
     "qemu-system-x86_64", "-drive", "format=raw,file={}", "-serial", "stdio"
 ]
