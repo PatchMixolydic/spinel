@@ -1,6 +1,6 @@
 pub use crate::arch::arch_info::{MACHINE_NAME, PROCESSOR_NAME};
 
-pub const OPERATING_SYSTEM_NAME: &'static str = "Spinel";
+pub const OPERATING_SYSTEM_NAME: &str = "Spinel";
 
 macro_rules! version_number {
     ($major: literal, $minor: literal, $patche: literal) => {
@@ -9,7 +9,7 @@ macro_rules! version_number {
         pub const VERSION_MINOR: i32 = $minor;
         pub const VERSION_PATCH: i32 = $patche;
         /// String representation of the major, minor, and patch versions
-        pub const VERSION_STRING: &'static str = concat!($major, '.', $minor, '.', $patche);
+        pub const VERSION_STRING: &str = concat!($major, '.', $minor, '.', $patche);
     };
 }
 

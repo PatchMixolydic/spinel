@@ -129,7 +129,7 @@ impl Writer {
 
     fn new_line(&mut self) {
         self.column = 0;
-        self.row = self.row + 1;
+        self.row += 1;
         if self.row >= SCREEN_ROWS {
             self.row = SCREEN_ROWS - 1;
             for row in 1..SCREEN_ROWS {
