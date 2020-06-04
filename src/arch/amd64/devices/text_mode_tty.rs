@@ -9,6 +9,9 @@ const SCREEN_COLUMNS: isize = 80;
 const SCREEN_ROWS: isize = 25;
 
 lazy_static! {
+    /// Global terminal context.
+    /// It is recommended to use `print!` or `println!` rather than calling its
+    /// methods directly.
     pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer::default());
 }
 
@@ -61,8 +64,8 @@ impl VGAChar {
 
 /// Provides access to the VGA text mode buffer.
 /// Could be done with a const pointer to mutable data,
-/// especially since writes would be unsafe anyway,
 /// but I like the association of functions :>
+#[repr(transparent)]
 struct VGABuffer {
     chars: *mut u8
 }
@@ -107,6 +110,8 @@ impl VGABuffer {
     }
 }
 
+/// An abstraction of the VGA text buffer which provides a terminal-like interface to
+/// programmers.
 pub struct Writer {
     row: isize,
     column: isize,
@@ -137,7 +142,9 @@ impl Writer {
         self.clear_row(SCREEN_ROWS - 1);
     }
 
-    pub fn write_byte(&mut self, character: u8) {
+    /// Given a code page 437 character, print it on screen with the current
+    /// foreground and background colours
+    pub fn write_character(&mut self, character: u8) {
         match character {
             b'\n' => self.new_line(),
             _ => {
@@ -154,7 +161,7 @@ impl Writer {
     pub fn write_string(&mut self, s: &str) {
         for byte in s.bytes() {
             match byte {
-                0x20..=0x7E | b'\n' => self.write_byte(byte),
+                0x20..=0x7E | b'\n' => self.write_character(byte),
                 _ => ()
             }
         }

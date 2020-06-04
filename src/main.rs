@@ -3,7 +3,10 @@
 #![allow(dead_code)]
 #![no_main]
 #![no_std]
+/// Home of architecture specific code.
+/// Some interfaces to architecture specific data may be exported from here.
 mod arch;
+/// Things that are central to Spinel's operation
 mod central;
 
 #[no_mangle]
