@@ -10,8 +10,11 @@ mod arch;
 /// Things that are central to Spinel's operation
 mod central;
 
+use arch::amd64::devices::serial::SerialPort;
+
 #[no_mangle]
 pub extern fn _start() -> ! {
+    SerialPort::Port1.initialize();
     println!(
         "{} {} on {} {}",
         central::version_info::OPERATING_SYSTEM_NAME,
