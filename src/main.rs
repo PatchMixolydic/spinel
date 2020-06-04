@@ -10,18 +10,21 @@ mod arch;
 /// Things that are central to Spinel's operation
 mod central;
 
-use arch::amd64::devices::serial::SerialPort;
+use arch::arch_init;
+use central::version_info;
 
 #[no_mangle]
 pub extern fn _start() -> ! {
-    SerialPort::Port1.initialize();
+    arch_init();
+
     println!(
         "{} {} on {} {}",
-        central::version_info::OPERATING_SYSTEM_NAME,
-        central::version_info::VERSION_STRING,
-        central::version_info::PROCESSOR_NAME,
-        central::version_info::MACHINE_NAME
+        version_info::OPERATING_SYSTEM_NAME,
+        version_info::VERSION_STRING,
+        version_info::PROCESSOR_NAME,
+        version_info::MACHINE_NAME
     );
     println!("Hello, Rust!");
+
     loop {}
 }
