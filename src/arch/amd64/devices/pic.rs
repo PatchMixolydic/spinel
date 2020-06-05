@@ -2,6 +2,11 @@
 
 use x86_64::instructions::port::Port;
 
+const MASTER_COMMAND_PORT: Port<u8> = Port::new(0x0020);
+const MASTER_DATA_PORT: Port<u8> = Port::new(0x0021);
+const SUBSERVIENT_COMMAND_PORT: Port<u8> = Port::new(0x00A0);
+const SUBSERVIENT_DATA_PORT: Port<u8> = Port::new(0x00A1);
+
 const COMMAND_END_OF_INTERRUPT: u8 = 0x20;
 const COMMAND_READ_IN_SERVICE_REGISTER: u8 = 0x0B;
 
@@ -39,20 +44,20 @@ pub fn init() {
     // SAFETY: This reads from and writes to port I/O, which might do anything
     unsafe {
         // Initialize, will provide control word 4
-        master_command_port().write(0b0001_0001);
-        subservient_command_port().write(0b0001_0001);
+        MASTER_COMMAND_PORT.write(0b0001_0001);
+        SUBSERVIENT_COMMAND_PORT.write(0b0001_0001);
 
         // CW2: set interrupt offsets
-        master_data_port().write(MASTER_INTERRUPT_OFFSET);
-        subservient_data_port().write(SUBSERVIENT_INTERRUPT_OFFSET);
+        MASTER_DATA_PORT.write(MASTER_INTERRUPT_OFFSET);
+        SUBSERVIENT_DATA_PORT.write(SUBSERVIENT_INTERRUPT_OFFSET);
 
         // CW3: PIC configuration
-        master_data_port().write(0b0000_0100); // Subserv. at IRQ2
-        subservient_data_port().write(0b0000_0010); // "Cascade identity", says OSDev Wiki
+        MASTER_DATA_PORT.write(0b0000_0100); // Subserv. at IRQ2
+        SUBSERVIENT_DATA_PORT.write(0b0000_0010); // "Cascade identity", says OSDev Wiki
 
         // CW4: This is an x86(-like)
-        master_data_port().write(0b0000_0001);
-        subservient_data_port().write(0b0000_0001);
+        MASTER_DATA_PORT.write(0b0000_0001);
+        SUBSERVIENT_DATA_PORT.write(0b0000_0001);
 
         // Mask all
         set_all_irqs_masked(true);
@@ -65,10 +70,10 @@ pub fn end_of_interrupt(irq: IRQ) {
     unsafe {
         if irq.id >= 8 {
             // Subservient PIC generated this one
-            subservient_command_port().write(COMMAND_END_OF_INTERRUPT);
+            SUBSERVIENT_COMMAND_PORT.write(COMMAND_END_OF_INTERRUPT);
         }
         // Master is always informed
-        master_command_port().write(COMMAND_END_OF_INTERRUPT);
+        MASTER_COMMAND_PORT.write(COMMAND_END_OF_INTERRUPT);
     }
 }
 
@@ -81,10 +86,10 @@ pub fn set_irq_masked(irq: IRQ, masked: bool) {
     let relative_irq;
 
     if irq.id < 8 {
-        port = master_data_port();
+        port = MASTER_DATA_PORT;
         relative_irq = irq.id;
     } else {
-        port = subservient_data_port();
+        port = SUBSERVIENT_DATA_PORT;
         relative_irq = irq.id - 8;
     }
 
@@ -104,8 +109,8 @@ pub fn set_all_irqs_masked(masked: bool) {
     let value = if masked { 0xFF } else { 0x00 };
     // SAFETY: This reads from and writes to port I/O, which might do anything
     unsafe {
-        master_data_port().write(value);
-        subservient_data_port().write(value);
+        MASTER_DATA_PORT.write(value);
+        SUBSERVIENT_DATA_PORT.write(value);
     }
 }
 
@@ -113,25 +118,9 @@ pub fn set_all_irqs_masked(masked: bool) {
 pub fn read_isr() -> u16 {
     // SAFETY: This reads from and writes to port I/O, which might do anything
     unsafe {
-        master_command_port().write(COMMAND_READ_IN_SERVICE_REGISTER);
-        subservient_command_port().write(COMMAND_READ_IN_SERVICE_REGISTER);
-        (u16::from(master_command_port().read()) << 8)
-            | u16::from(subservient_command_port().read())
+        MASTER_COMMAND_PORT.write(COMMAND_READ_IN_SERVICE_REGISTER);
+        SUBSERVIENT_COMMAND_PORT.write(COMMAND_READ_IN_SERVICE_REGISTER);
+        (u16::from(MASTER_COMMAND_PORT.read()) << 8)
+            | u16::from(SUBSERVIENT_COMMAND_PORT.read())
     }
-}
-
-fn master_command_port() -> Port<u8> {
-    Port::new(0x0020)
-}
-
-fn master_data_port() -> Port<u8> {
-    Port::new(0x0021)
-}
-
-fn subservient_command_port() -> Port<u8> {
-    Port::new(0x00A0)
-}
-
-fn subservient_data_port() -> Port<u8> {
-    Port::new(0x00A1)
 }
