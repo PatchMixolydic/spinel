@@ -1,9 +1,17 @@
 use core::panic::PanicInfo;
 
-use crate::println;
+use crate::{print, println};
 
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
-    println!("{}", info);
+    print!("panic: ");
+    if info.message().is_some() {
+        println!("{}", info.message().unwrap());
+        if info.location().is_some() {
+            println!("Location: {}", info.location().unwrap());
+        }
+    } else {
+        println!("{:?}", info)
+    }
     loop {}
 }
