@@ -1,6 +1,12 @@
 // There's a great deal of things which are left for future expansion
 // or for documentation.
 #![allow(dead_code)]
+
+#![feature(panic_info_message)]
+
+#![cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+#![feature(abi_x86_interrupt)]
+
 #![no_main]
 #![no_std]
 
