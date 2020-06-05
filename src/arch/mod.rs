@@ -6,7 +6,8 @@ cfg_if::cfg_if! {
         pub use amd64::central::arch_info;
         pub use amd64::central::init::arch_init;
         pub use x86_64::instructions::interrupts::{
-            enable as enable_interrupts, disable as disable_interrupts
+            enable as enable_interrupts, disable as disable_interrupts,
+            without_interrupts
         };
     }
 }
