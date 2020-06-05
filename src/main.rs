@@ -16,6 +16,8 @@ mod arch;
 /// Things that are central to Spinel's operation
 mod central;
 
+use core::sync::atomic::spin_loop_hint;
+
 use arch::arch_init;
 use central::version_info;
 
@@ -30,7 +32,9 @@ pub extern fn _start() -> ! {
         version_info::PROCESSOR_NAME,
         version_info::MACHINE_NAME
     );
-    println!("Hello, Rust!");
+    println!("The system is coming up.");
 
-    loop {}
+    loop {
+        spin_loop_hint();
+    }
 }
