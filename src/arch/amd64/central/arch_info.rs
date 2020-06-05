@@ -3,3 +3,4 @@
 pub const MACHINE_NAME: &str = "PC compatible";
 /// CPU which Spinel is running on.
 pub const PROCESSOR_NAME: &str = "amd64";
+pub const PAGE_SIZE: usize = 4096;
