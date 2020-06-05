@@ -1,12 +1,9 @@
 // There's a great deal of things which are left for future expansion
 // or for documentation.
 #![allow(dead_code)]
-
 #![feature(panic_info_message)]
-
 #![cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #![feature(abi_x86_interrupt)]
-
 #![no_main]
 #![no_std]
 
@@ -22,7 +19,7 @@ use arch::arch_init;
 use central::version_info;
 
 #[no_mangle]
-pub extern fn _start() -> ! {
+pub extern "C" fn _start() -> ! {
     arch_init();
 
     println!(

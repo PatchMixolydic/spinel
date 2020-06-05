@@ -33,20 +33,20 @@ pub enum VGAColour {
     LightRed,
     Pink,
     Yellow,
-    White
+    White,
 }
 
 /// Represents the data that makes up a VGA character
 #[derive(Clone, Copy)]
 struct VGAChar {
     colour: u8,
-    character: u8
+    character: u8,
 }
 
 impl VGAChar {
     fn new(fg_colour: VGAColour, bg_colour: VGAColour, character: u8) -> Self {
         let colour = (bg_colour.to_u8().unwrap()) << 4 | fg_colour.to_u8().unwrap();
-        Self {colour, character}
+        Self { colour, character }
     }
 
     fn fg_colour(&self) -> VGAColour {
@@ -67,14 +67,16 @@ impl VGAChar {
 /// but I like the association of functions :>
 #[repr(transparent)]
 struct VGABuffer {
-    chars: *mut u8
+    chars: *mut u8,
 }
 
 impl VGABuffer {
     /// Get the VGA text buffer.
     /// It's named "get" instead of "new" because there is only one such buffer.
     fn get() -> Self {
-        Self {chars: 0x000B_8000 as *mut u8}
+        Self {
+            chars: 0x000B_8000 as *mut u8,
+        }
     }
 
     /// Write a character at the given coordinates
@@ -87,8 +89,14 @@ impl VGABuffer {
         // which ensures the write will not be optimized out.
         // This block is guarded by a bounds check on the index into the buffer.
         unsafe {
-            write_volatile(self.chars.offset(row * SCREEN_COLUMNS * 2 + column), ch.character);
-            write_volatile(self.chars.offset(row * SCREEN_COLUMNS * 2 + column + 1), ch.colour);
+            write_volatile(
+                self.chars.offset(row * SCREEN_COLUMNS * 2 + column),
+                ch.character,
+            );
+            write_volatile(
+                self.chars.offset(row * SCREEN_COLUMNS * 2 + column + 1),
+                ch.colour,
+            );
         }
     }
 
@@ -106,7 +114,7 @@ impl VGABuffer {
             character = read_volatile(self.chars.offset(row * SCREEN_COLUMNS * 2 + column));
             colour = read_volatile(self.chars.offset(row * SCREEN_COLUMNS * 2 + column + 1));
         }
-        VGAChar {colour, character}
+        VGAChar { colour, character }
     }
 }
 
@@ -116,7 +124,7 @@ pub struct Writer {
     row: isize,
     column: isize,
     fg_colour: VGAColour,
-    bg_colour: VGAColour
+    bg_colour: VGAColour,
 }
 
 impl Writer {
@@ -162,7 +170,7 @@ impl Writer {
         for byte in s.bytes() {
             match byte {
                 0x20..=0x7E | b'\n' => self.write_character(byte),
-                _ => ()
+                _ => (),
             }
         }
     }
@@ -170,7 +178,12 @@ impl Writer {
 
 impl Default for Writer {
     fn default() -> Self {
-        Self {row: 0, column: 0, bg_colour: VGAColour::Black, fg_colour: VGAColour::White}
+        Self {
+            row: 0,
+            column: 0,
+            bg_colour: VGAColour::Black,
+            fg_colour: VGAColour::White,
+        }
     }
 }
 

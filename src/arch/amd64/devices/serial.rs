@@ -7,7 +7,7 @@ pub enum SerialPort {
     Port1,
     Port2,
     Port3,
-    Port4
+    Port4,
 }
 
 impl From<SerialPort> for u16 {
@@ -16,7 +16,7 @@ impl From<SerialPort> for u16 {
             SerialPort::Port1 => 0x03F8,
             SerialPort::Port2 => 0x02F8,
             SerialPort::Port3 => 0x03E8,
-            SerialPort::Port4 => 0x02E8
+            SerialPort::Port4 => 0x02E8,
         }
     }
 }
@@ -35,7 +35,7 @@ impl SerialPort {
         unsafe {
             self.interrupt_enable_register().write(0); // No interrupts
             self.line_control_register().write(0b0000_0011); // 8N1
-            // Trigger level 14 bytes(?), 16B FIFO, DMA off, clear Tx/Rx, enable
+                                                             // Trigger level 14 bytes(?), 16B FIFO, DMA off, clear Tx/Rx, enable
             self.fifo_control_register().write(0b1100_0111);
             // Enable request to send, data terminal ready lines
             self.modem_control_register().write(0b0000_0011);
@@ -71,16 +71,14 @@ impl SerialPort {
         // which can do anything.
         unsafe {
             // Enable divisor latch access bit
-            self.line_control_register().write(
-                self.line_control_register().read() | 0x80
-            );
+            self.line_control_register()
+                .write(self.line_control_register().read() | 0x80);
 
             self.divisor_register().write(divisor);
 
             // Clear DLAB
-            self.line_control_register().write(
-                self.line_control_register().read() & !0x80
-            );
+            self.line_control_register()
+                .write(self.line_control_register().read() & !0x80);
         }
     }
 

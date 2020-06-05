@@ -29,13 +29,13 @@ lazy_static! {
         let mut gdt = GlobalDescriptorTable::new();
         let kernel_code = gdt.add_entry(Descriptor::kernel_code_segment());
         let tss = gdt.add_entry(Descriptor::tss_segment(&TSS));
-        (gdt, GDTSelectors {kernel_code, tss})
+        (gdt, GDTSelectors { kernel_code, tss })
     };
 }
 
 struct GDTSelectors {
     kernel_code: SegmentSelector,
-    tss: SegmentSelector
+    tss: SegmentSelector,
 }
 
 pub fn init() {

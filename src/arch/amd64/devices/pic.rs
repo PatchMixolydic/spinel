@@ -24,13 +24,13 @@ const NUM_IRQS: u8 = 16;
 /// ```
 #[repr(transparent)]
 pub struct IRQ {
-    id: u8
+    id: u8,
 }
 
 impl From<u8> for IRQ {
     fn from(val: u8) -> Self {
         assert!(val < 16);
-        IRQ {id: val}
+        IRQ { id: val }
     }
 }
 
@@ -101,7 +101,7 @@ pub fn set_irq_masked(irq: IRQ, masked: bool) {
 }
 
 pub fn set_all_irqs_masked(masked: bool) {
-    let value = if masked {0xFF} else {0x00};
+    let value = if masked { 0xFF } else { 0x00 };
     // SAFETY: This reads from and writes to port I/O, which might do anything
     unsafe {
         master_data_port().write(value);
@@ -115,7 +115,8 @@ pub fn read_isr() -> u16 {
     unsafe {
         master_command_port().write(COMMAND_READ_IN_SERVICE_REGISTER);
         subservient_command_port().write(COMMAND_READ_IN_SERVICE_REGISTER);
-        (u16::from(master_command_port().read()) << 8) | u16::from(subservient_command_port().read())
+        (u16::from(master_command_port().read()) << 8)
+            | u16::from(subservient_command_port().read())
     }
 }
 

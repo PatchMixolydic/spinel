@@ -25,4 +25,3 @@ pub fn _print(args: core::fmt::Arguments) {
         }
     });
 }
-
