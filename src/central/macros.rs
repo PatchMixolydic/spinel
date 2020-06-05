@@ -1,3 +1,8 @@
+use core::fmt::Write;
+// TODO: replace with something more generic
+use crate::arch::amd64::devices::text_mode_tty::WRITER;
+use crate::arch::without_interrupts;
+
 #[macro_export]
 macro_rules! print {
     ($($arg:tt)*) => ($crate::central::macros::_print(format_args!($($arg)*)));
@@ -11,9 +16,6 @@ macro_rules! println {
 
 #[doc(hidden)]
 pub fn _print(args: core::fmt::Arguments) {
-    use core::fmt::Write;
-    use crate::arch::amd64::devices::text_mode_tty::WRITER;
-    use crate::arch::without_interrupts;
     without_interrupts(|| {
         WRITER.lock().write_fmt(args).unwrap();
 
