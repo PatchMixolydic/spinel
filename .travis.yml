@@ -1,20 +1,13 @@
-language: c
+language: rust
+rust:
+  - nightly
 os: linux
 dist: bionic
-compiler: gcc
-
-before_install:
-  - sudo apt update
-  - sudo apt -y install build-essential bison flex libgmp3-dev libmpc-dev libmpfr-dev texinfo libcloog-isl-dev libisl-0.18-dev wget dialog nasm
 
 install:
-  - cd ${TRAVIS_BUILD_DIR}
-  - cd $HOME
-  - wget https://pls.pet/u/cross.tar.gz
-  - tar -xf cross.tar.gz
-  - $HOME/opt/cross/bin/$TARGET-gcc --version
+  - rustup component add rust-src
+  - cargo install cargo-xbuild llvm-tools-preview bootimage
 
 script:
-  - cd ${TRAVIS_BUILD_DIR}
-  - ./build.sh build
-  - ./build.sh tests
+  - cargo xbuild --verbose --all
+  # - cargo xtest --verbose --all

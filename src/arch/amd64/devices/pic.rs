@@ -120,7 +120,6 @@ pub fn read_isr() -> u16 {
     unsafe {
         MASTER_COMMAND_PORT.write(COMMAND_READ_IN_SERVICE_REGISTER);
         SUBSERVIENT_COMMAND_PORT.write(COMMAND_READ_IN_SERVICE_REGISTER);
-        (u16::from(MASTER_COMMAND_PORT.read()) << 8)
-            | u16::from(SUBSERVIENT_COMMAND_PORT.read())
+        (u16::from(MASTER_COMMAND_PORT.read()) << 8) | u16::from(SUBSERVIENT_COMMAND_PORT.read())
     }
 }
