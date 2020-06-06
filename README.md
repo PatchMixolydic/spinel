@@ -42,6 +42,12 @@ contains several useful features that Spinel makes use of:
 $ rustup toolchain install nightly
 ```
 
+Now, you'll need rustc's source so that the `core` standard library crate
+can be built:
+```sh
+$ rustup component add rust-src
+```
+
 After that, you'll need a few helper utilities (feel free to collapse these
 into one `cargo install` command):
 ```sh
