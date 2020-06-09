@@ -4,10 +4,13 @@
 #![feature(alloc_error_handler)]
 #![feature(const_fn)]
 #![feature(panic_info_message)]
-#![cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-#![feature(abi_x86_interrupt)]
 #![no_main]
 #![no_std]
+
+#![cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+#![feature(abi_x86_interrupt)]
+
+extern crate alloc;
 
 /// Home of architecture specific code.
 /// Some interfaces to architecture specific data may be exported from here.
@@ -20,7 +23,7 @@ use bootloader::BootInfo;
 use core::sync::atomic::spin_loop_hint;
 
 use arch::arch_init;
-use central::version_info;
+use central::{kalloc, version_info};
 
 #[no_mangle]
 pub extern "C" fn _start(boot_info: &'static BootInfo) -> ! {
@@ -34,6 +37,7 @@ pub extern "C" fn _start(boot_info: &'static BootInfo) -> ! {
         version_info::MACHINE_NAME
     );
     println!("The system is coming up.");
+    kalloc::init();
 
     loop {
         spin_loop_hint();
