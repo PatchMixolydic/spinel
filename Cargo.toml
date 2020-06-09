@@ -18,11 +18,19 @@ num-derive = { version = "0.3", default-features = false }
 spin = "0.5.2"
 
 [target.'cfg(target_arch = "x86_64")'.dependencies]
-bootloader = "0.9.4"
+bootloader = { version = "0.9.4", features = ["map_physical_memory"] }
 x86_64 = "0.11.0"
 
 # TODO: how can this be restricted to x86_64 only? Does it need to be?
 [package.metadata.bootimage]
 run-command = [
-    "qemu-system-x86_64", "-drive", "format=raw,file={}", "-serial", "stdio"
+    "qemu-system-x86_64", "-drive", "format=raw,file={}", "-serial", "stdio",
+    "--enable-kvm", "-s"
 ]
+
+[package.metadata.bootloader]
+# 16 pages for the stack * 4 KiB per page = 64 KiB stack
+kernel-stack-address = "0xFFFF800000000000"
+kernel-stack-size = 15
+boot-info-address = "0xFFFF800100000000"
+physical-memory-offset = "0xFFFF900000000000"
