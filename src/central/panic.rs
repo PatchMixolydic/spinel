@@ -10,7 +10,7 @@ fn panic(info: &PanicInfo) -> ! {
     if info.message().is_some() {
         println!("{}", info.message().unwrap());
         if info.location().is_some() {
-            println!("Location: {}", info.location().unwrap());
+            println!("Panicked at {}", info.location().unwrap());
         }
     } else {
         println!("{:?}", info)
