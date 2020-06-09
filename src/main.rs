@@ -1,6 +1,8 @@
 // There's a great deal of things which are left for future expansion
 // or for documentation.
 #![allow(dead_code)]
+#![feature(alloc_error_handler)]
+#![feature(const_fn)]
 #![feature(panic_info_message)]
 #![cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #![feature(abi_x86_interrupt)]
@@ -13,14 +15,16 @@ mod arch;
 /// Things that are central to Spinel's operation
 mod central;
 
+// TODO: portability!
+use bootloader::BootInfo;
 use core::sync::atomic::spin_loop_hint;
 
 use arch::arch_init;
 use central::version_info;
 
 #[no_mangle]
-pub extern "C" fn _start() -> ! {
-    arch_init();
+pub extern "C" fn _start(boot_info: &'static BootInfo) -> ! {
+    arch_init(boot_info);
 
     println!(
         "{} {} on {} {}",

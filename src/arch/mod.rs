@@ -13,6 +13,31 @@ cfg_if::cfg_if! {
     }
 }
 
+/// Reexports for the virtual memory subsystem
+pub mod memory {
+    #[derive(Debug)]
+    pub enum MapError {
+        PhysicalAllocationFailed,
+        AlreadyMapped
+    }
+
+    cfg_if::cfg_if! {
+        if #[cfg(target_arch = "x86_64")] {
+            pub use super::amd64::memory::{
+                HEAP_END,
+                HEAP_SIZE,
+                HEAP_START,
+            };
+
+            pub use super::amd64::memory::virtual_memory::{
+                map_range,
+                map_virtual_address,
+                map_virtual_address_unlazily
+            };
+        }
+    }
+}
+
 /// Run a function with interrupts disabled.
 /// Afterwards, this function restores interrupts to their
 /// previous state, whether they were enabled or disabled.
