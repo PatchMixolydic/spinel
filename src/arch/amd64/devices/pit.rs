@@ -1,10 +1,9 @@
 use x86_64::instructions::port::{Port, PortWriteOnly};
 use x86_64::structures::idt::InterruptStackFrame;
 
-use crate::arch::without_interrupts;
+use crate::arch::interrupts::without_interrupts;
 use crate::arch::amd64::central::idt::register_irq_handler;
 use crate::arch::amd64::devices::pic::end_of_irq;
-use crate::print;
 
 const PIT_CHANNEL_0: Port<u8> = Port::new(0x0040);
 const PIT_COMMAND_PORT: PortWriteOnly<u8> = PortWriteOnly::new(0x0043);
