@@ -1,7 +1,7 @@
 use core::fmt::Write;
 // TODO: replace with something more generic
 use crate::arch::amd64::devices::text_mode_tty::WRITER;
-use crate::arch::without_interrupts;
+use crate::arch::interrupts::without_interrupts;
 
 #[macro_export]
 macro_rules! print {
