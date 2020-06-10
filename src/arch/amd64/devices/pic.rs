@@ -12,6 +12,8 @@ const COMMAND_READ_IN_SERVICE_REGISTER: u8 = 0x0B;
 
 const MASTER_INTERRUPT_OFFSET: u8 = 0x20;
 const SUBSERVIENT_INTERRUPT_OFFSET: u8 = 0x28;
+/// Interrupt number for IRQ0. All 15 other IRQs follow.
+pub const IRQ0_INTERRUPT: usize = MASTER_INTERRUPT_OFFSET as usize;
 
 /// Initialize the PIC and remap interrupts. Does not enable interrupts.
 pub fn init() {

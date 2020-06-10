@@ -3,6 +3,7 @@ use spin::Mutex;
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
 
 use crate::arch::amd64::central::gdt_tss::DOUBLE_FAULT_STACK;
+use crate::arch::amd64::devices::pic::IRQ0_INTERRUPT;
 
 pub const NUM_IRQS: u8 = 16;
 
@@ -60,7 +61,7 @@ pub fn init() {
 pub fn register_irq_handler(irq: IRQ, handler: IRQHandler) {
     // TODO: what should be done if an IRQ already has a handler?
     let mut idt = IDT.lock();
-    idt[32 + usize::from(irq.id())].set_handler_fn(handler);
+    idt[IRQ0_INTERRUPT + usize::from(irq.id())].set_handler_fn(handler);
 }
 
 extern "x86-interrupt" fn double_fault_handler(
