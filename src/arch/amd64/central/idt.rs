@@ -4,8 +4,42 @@ use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
 
 use crate::arch::amd64::central::gdt_tss::DOUBLE_FAULT_STACK;
 
+pub const NUM_IRQS: u8 = 16;
+
 lazy_static! {
     pub static ref IDT: Mutex<InterruptDescriptorTable> = Mutex::new(InterruptDescriptorTable::new());
+}
+
+type IRQHandler = extern "x86-interrupt" fn(&mut InterruptStackFrame);
+
+/// Wrapper for a u8 that enforces that its contents
+/// represent a valid IRQ.
+///
+/// It implements From<u8>, so for pretty much any
+/// function that takes an IRQ, you can use `into()`:
+/// ```
+/// fn foo(irq: IRQ) {
+///     // ...
+/// }
+///
+/// foo(1.into());
+/// ```
+#[repr(transparent)]
+pub struct IRQ {
+    id: u8,
+}
+
+impl IRQ {
+    pub fn id(&self) -> u8 {
+        self.id
+    }
+}
+
+impl From<u8> for IRQ {
+    fn from(val: u8) -> Self {
+        assert!(val < NUM_IRQS);
+        IRQ { id: val }
+    }
 }
 
 pub fn init() {

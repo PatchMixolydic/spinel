@@ -1,6 +1,6 @@
-//! Programmable Interrupt Controller
-
 use x86_64::instructions::port::Port;
+
+use crate::arch::amd64::central::idt::IRQ;
 
 const MASTER_COMMAND_PORT: Port<u8> = Port::new(0x0020);
 const MASTER_DATA_PORT: Port<u8> = Port::new(0x0021);
@@ -12,32 +12,6 @@ const COMMAND_READ_IN_SERVICE_REGISTER: u8 = 0x0B;
 
 const MASTER_INTERRUPT_OFFSET: u8 = 0x20;
 const SUBSERVIENT_INTERRUPT_OFFSET: u8 = 0x28;
-
-const NUM_IRQS: u8 = 16;
-
-/// Wrapper for a u8 that enforces that its contents
-/// represent a valid IRQ.
-///
-/// It implements From<u8>, so for pretty much any
-/// function that takes an IRQ, you can use `into()`:
-/// ```
-/// fn foo(irq: IRQ) {
-///     // ...
-/// }
-///
-/// foo(1.into());
-/// ```
-#[repr(transparent)]
-pub struct IRQ {
-    id: u8,
-}
-
-impl From<u8> for IRQ {
-    fn from(val: u8) -> Self {
-        assert!(val < 16);
-        IRQ { id: val }
-    }
-}
 
 /// Initialize the PIC and remap interrupts. Does not enable interrupts.
 pub fn init() {
@@ -65,10 +39,10 @@ pub fn init() {
 }
 
 /// Sends the end of interrupt signal to the PIC
-pub fn end_of_interrupt(irq: IRQ) {
+pub fn end_of_irq(irq: IRQ) {
     // SAFETY: This reads from and writes to port I/O, which might do anything
     unsafe {
-        if irq.id >= 8 {
+        if irq.id() >= 8 {
             // Subservient PIC generated this one
             SUBSERVIENT_COMMAND_PORT.write(COMMAND_END_OF_INTERRUPT);
         }
@@ -85,12 +59,12 @@ pub fn set_irq_masked(irq: IRQ, masked: bool) {
     // IRQ to this PIC
     let relative_irq;
 
-    if irq.id < 8 {
+    if irq.id() < 8 {
         port = MASTER_DATA_PORT;
-        relative_irq = irq.id;
+        relative_irq = irq.id();
     } else {
         port = SUBSERVIENT_DATA_PORT;
-        relative_irq = irq.id - 8;
+        relative_irq = irq.id() - 8;
     }
 
     // SAFETY: This reads from and writes to port I/O, which might do anything
