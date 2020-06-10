@@ -2,7 +2,7 @@ use bootloader::BootInfo;
 use x86_64::instructions::interrupts;
 
 use crate::arch::amd64::central::{gdt_tss, idt};
-use crate::arch::amd64::devices::{pic, serial};
+use crate::arch::amd64::devices::{pic, pit, serial};
 use crate::arch::amd64::memory::{physical_memory, virtual_memory};
 
 /// Architecture-specific device initialization.
@@ -22,4 +22,6 @@ pub fn arch_init(boot_info: &'static BootInfo) {
         physical_memory::init(&boot_info.memory_map);
         virtual_memory::init();
     }
+    pit::init();
+    pic::set_irq_masked(0.into(), false);
 }
