@@ -4,15 +4,16 @@ use x86_64::structures::idt::InterruptStackFrame;
 use crate::arch::interrupts::without_interrupts;
 use crate::arch::amd64::central::idt::register_irq_handler;
 use crate::arch::amd64::devices::pic::end_of_irq;
+use crate::devices::timer;
 
 const PIT_CHANNEL_0: Port<u8> = Port::new(0x0040);
 const PIT_COMMAND_PORT: PortWriteOnly<u8> = PortWriteOnly::new(0x0043);
 
-const BASE_FREQUENCY: u32 = 1193182;
+const BASE_FREQUENCY: u64 = 1193182;
 /// Clock divider for the PIT. This value was decided on in Spinel classic
 /// to avoid overwhelming QEMU, so this should work here.
-const CLOCK_DIVIDER: u32 = 500;
-const EFFECTIVE_FREQUENCY: u32 = BASE_FREQUENCY / CLOCK_DIVIDER;
+const CLOCK_DIVIDER: u64 = 500;
+const EFFECTIVE_FREQUENCY: u64 = BASE_FREQUENCY / CLOCK_DIVIDER;
 
 #[repr(u8)]
 enum Channel {
@@ -92,10 +93,11 @@ pub fn init() {
             PIT_CHANNEL_0.write(((CLOCK_DIVIDER >> 8) & 0xFF) as u8);
         }
         register_irq_handler(0.into(), irq0_handler);
+        timer::init(EFFECTIVE_FREQUENCY);
     });
 }
 
 extern "x86-interrupt" fn irq0_handler(_stack_frame: &mut InterruptStackFrame) {
-    // TODO: keep track of time
+    timer::tick();
     end_of_irq(0.into());
 }
