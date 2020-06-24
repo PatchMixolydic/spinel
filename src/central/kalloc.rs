@@ -6,6 +6,7 @@ use spin::{Mutex, MutexGuard};
 use crate::arch::memory::{
     HEAP_SIZE,
     HEAP_START,
+    MapError,
     map_range,
     map_virtual_address_unlazily
 };
@@ -13,6 +14,7 @@ use crate::arch::memory::{
 #[global_allocator]
 static ALLOCATOR: AllocMutex = AllocMutex::new(KernelAllocator::new());
 
+#[derive(Debug)]
 #[repr(C)]
 pub struct KernelAllocatorNode {
     next_free: Option<&'static mut KernelAllocatorNode>,
@@ -60,10 +62,16 @@ impl KernelAllocator {
     /// This function is unsafe because this function partially assumes that
     /// address and size are perfectly valid heap values.
     unsafe fn free_region(&mut self, address: usize, size: usize) {
+        assert_eq!(align_up(address, align_of::<KernelAllocatorNode>()), address);
         assert!(size >= size_of::<KernelAllocatorNode>());
 
         let mut node = KernelAllocatorNode::new(size);
         node.next_free = self.free_list.next_free.take();
+        match map_virtual_address_unlazily(address) {
+            Ok(_) | Err(MapError::AlreadyMapped) => (),
+            Err(e) => panic!("Failed to map address {:018X} to free it! {:?}", address, e)
+        };
+
         let node_ptr = address as *mut KernelAllocatorNode;
         node_ptr.write(node);
         self.free_list.next_free = Some(&mut *node_ptr);
@@ -82,7 +90,6 @@ impl KernelAllocator {
                 current = current.next_free.as_mut().unwrap();
             }
         }
-
         None
     }
 
