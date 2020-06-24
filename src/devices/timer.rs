@@ -2,7 +2,9 @@ use alloc::boxed::Box;
 use alloc::vec::Vec;
 use spin::Mutex;
 
-pub const TICKS_PER_SECOND: u64 = 1_000_000; // 1 us
+pub const TICKS_PER_NANOSECOND: u64 = 1; // 1 tick = 1 us
+pub const TICKS_PER_MILLISECOND: u64 = TICKS_PER_NANOSECOND * 1000;
+pub const TICKS_PER_SECOND: u64 = TICKS_PER_MILLISECOND * 1000;
 
 static TIMER_STATE: Mutex<Option<TimerState>> = Mutex::new(None);
 
@@ -78,6 +80,13 @@ pub fn init(frequency: u64) {
     }
 
     *state = Some(TimerState::new(frequency));
+}
+
+pub fn ticks_since_boot() -> u64 {
+    match &*TIMER_STATE.lock() {
+        Some(state) => state.ticks_since_boot,
+        None => panic!("Tried to get ticks since boot before initializing timer")
+    }
 }
 
 /// Tick the kernel timer. If it's time for any registered timers to fire,
