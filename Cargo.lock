@@ -17,7 +17,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "bootloader"
-version = "0.9.4"
+version = "0.9.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
@@ -76,7 +76,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "spinel"
 version = "0.1.0"
 dependencies = [
- "bootloader 0.9.4 (registry+https://github.com/rust-lang/crates.io-index)",
+ "bootloader 0.9.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "cfg-if 0.1.10 (registry+https://github.com/rust-lang/crates.io-index)",
  "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "num-derive 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -113,7 +113,7 @@ dependencies = [
 "checksum autocfg 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "f8aac770f1885fd7e387acedd76065302551364496e46b3dd00860b2f8359b9d"
 "checksum bit_field 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)" = "ed8765909f9009617974ab6b7d332625b320b33c326b1e9321382ef1999b5d56"
 "checksum bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "cf1de2fe8c75bc145a2f577add951f8134889b4795d47466a54a5c846d691693"
-"checksum bootloader 0.9.4 (registry+https://github.com/rust-lang/crates.io-index)" = "56452f4da420d25cf4bbf5b8fdc1529a8bde79a081f2619ce7ebc6d581117261"
+"checksum bootloader 0.9.8 (registry+https://github.com/rust-lang/crates.io-index)" = "0ad686b9b47363de7d36c05fb6885f17d08d0f2d15b1bc782a101fe3c94a2c7c"
 "checksum cfg-if 0.1.10 (registry+https://github.com/rust-lang/crates.io-index)" = "4785bdd1c96b2a846b2bd7cc02e86b6b3dbf14e7e53446c4f54c92a361040822"
 "checksum lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)" = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 "checksum num-derive 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)" = "0c8b15b261814f992e33760b1fca9fe8b693d8a65299f20c9901688636cfb746"
