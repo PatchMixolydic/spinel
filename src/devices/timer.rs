@@ -93,9 +93,15 @@ pub fn ticks_since_boot() -> u64 {
 /// fire them.
 /// It is recommended that only the architecture-specific timer calls
 /// this function.
+///
+/// ## Panics
+/// Panics if the timer system is not initialized or if the count of
+/// ticks since boot overflows
 pub fn tick() {
-    // TODO: might deadlock, perhaps use try_lock?
-    let mut state_guard = TIMER_STATE.lock();
+    let mut state_guard = match TIMER_STATE.try_lock() {
+        Some(guard) => guard,
+        None => return
+    };
     let mut state = match &mut *state_guard {
         Some(s) => s,
         None => panic!("Tried to tick timer before initializing it")
@@ -123,6 +129,12 @@ pub fn tick() {
     }
 }
 
+
+/// Register a timer to wait for at least the given duration and then call a callback.
+/// Returns an id wrapped in `Ok` on success.
+///
+/// ## Panics
+/// Panics when called before the timer system has been initialized.
 pub fn register_timer(duration: u64, one_shot: bool, callback: Box<TimerCallback>) -> Result<u128, TimerError> {
     let mut state_guard = match TIMER_STATE.try_lock() {
         Some(state) => state,
