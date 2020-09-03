@@ -129,7 +129,6 @@ pub fn tick() {
     }
 }
 
-
 /// Register a timer to wait for at least the given duration and then call a callback.
 /// Returns an id wrapped in `Ok` on success.
 ///

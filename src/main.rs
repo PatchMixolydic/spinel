@@ -2,7 +2,9 @@
 // or for documentation.
 #![allow(dead_code)]
 #![feature(alloc_error_handler)]
+#![feature(asm)]
 #![feature(const_fn)]
+#![feature(naked_functions)]
 #![feature(panic_info_message)]
 #![feature(vec_remove_item)]
 #![no_main]
@@ -20,15 +22,14 @@ mod arch;
 mod central;
 /// Architecture-independent devices
 mod devices;
+mod multitasking;
 
-use alloc::boxed::Box;
 // TODO: portability!
 use bootloader::BootInfo;
-use core::sync::atomic::spin_loop_hint;
 
 use arch::arch_init;
 use central::{kalloc, version_info};
-use devices::timer;
+use multitasking::scheduler;
 
 #[no_mangle]
 pub extern "C" fn _start(boot_info: &'static BootInfo) -> ! {
@@ -42,15 +43,9 @@ pub extern "C" fn _start(boot_info: &'static BootInfo) -> ! {
         version_info::MACHINE_NAME
     );
     println!("The system is coming up.");
+    println!("Allocator...");
     kalloc::init();
-    timer::register_timer(timer::TICKS_PER_SECOND / 2, false, Box::new(|| {
-        print!(".")
-    })).unwrap();
-    timer::register_timer(timer::TICKS_PER_SECOND * 4, true, Box::new(|| {
-        print!("!")
-    })).unwrap();
-
-    loop {
-        spin_loop_hint();
-    }
+    println!("Scheduler...");
+    scheduler::init();
+    unreachable!();
 }

@@ -33,16 +33,18 @@ pub mod memory {
     }
 }
 
+pub mod multitasking {
+    #[cfg(target_arch = "x86_64")]
+    pub use super::amd64::multitasking::arch_tasks;
+}
+
 pub mod interrupts {
-    cfg_if::cfg_if! {
-        if #[cfg(target_arch = "x86_64")] {
-            pub use x86_64::instructions::interrupts::{
-                are_enabled as are_interrupts_enabled,
-                enable as enable_interrupts,
-                disable as disable_interrupts
-            };
-        }
-    }
+    #[cfg(target_arch = "x86_64")]
+    pub use x86_64::instructions::interrupts::{
+        are_enabled as are_interrupts_enabled,
+        enable as enable_interrupts,
+        disable as disable_interrupts
+    };
 
     /// Run a function with interrupts disabled.
     /// Afterwards, this function restores interrupts to their

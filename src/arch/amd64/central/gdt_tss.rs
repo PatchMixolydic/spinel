@@ -1,7 +1,7 @@
 use lazy_static::lazy_static;
 use x86_64::instructions::segmentation::set_cs;
 use x86_64::instructions::tables::load_tss;
-use x86_64::structures::gdt::{Descriptor, GlobalDescriptorTable, SegmentSelector};
+use x86_64::structures::gdt::{Descriptor, DescriptorFlags, GlobalDescriptorTable, SegmentSelector};
 use x86_64::structures::tss::TaskStateSegment;
 use x86_64::VirtAddr;
 
@@ -25,17 +25,49 @@ lazy_static! {
 }
 
 lazy_static! {
-    static ref GDT: (GlobalDescriptorTable, GDTSelectors) = {
+    pub static ref GDT: (GlobalDescriptorTable, GDTSelectors) = {
         let mut gdt = GlobalDescriptorTable::new();
         let kernel_code = gdt.add_entry(Descriptor::kernel_code_segment());
+        let kernel_data = gdt.add_entry({
+            // User segment in contrast to things like a TSS
+            let flags = DescriptorFlags::USER_SEGMENT | DescriptorFlags::PRESENT | DescriptorFlags::WRITABLE;
+            Descriptor::UserSegment(flags.bits())
+        });
+        let user_code = gdt.add_entry(Descriptor::user_code_segment());
+        let user_data = gdt.add_entry(Descriptor::user_data_segment());
         let tss = gdt.add_entry(Descriptor::tss_segment(&TSS));
-        (gdt, GDTSelectors { kernel_code, tss })
+        (gdt, GDTSelectors { kernel_code, kernel_data, user_code, user_data, tss })
     };
 }
 
-struct GDTSelectors {
+pub struct GDTSelectors {
     kernel_code: SegmentSelector,
+    kernel_data: SegmentSelector,
+    user_code: SegmentSelector,
+    user_data: SegmentSelector,
     tss: SegmentSelector,
+}
+
+impl GDTSelectors {
+    pub fn kernel_code(&self) -> &SegmentSelector {
+        &self.kernel_code
+    }
+
+    pub fn kernel_data(&self) -> &SegmentSelector {
+        &self.kernel_data
+    }
+
+    pub fn user_code(&self) -> &SegmentSelector {
+        &self.user_code
+    }
+
+    pub fn user_data(&self) -> &SegmentSelector {
+        &self.user_data
+    }
+
+    pub fn tss(&self) -> &SegmentSelector {
+        &self.tss
+    }
 }
 
 pub fn init() {
