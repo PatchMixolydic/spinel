@@ -45,6 +45,10 @@ impl KernelAllocator {
         Self { free_list: KernelAllocatorNode::new(0), initialized: false }
     }
 
+    /// Initialize the allocator.
+    ///
+    /// ## Panics
+    /// Panics if the allocator is already initialized.
     fn init(&mut self) {
         assert!(!self.initialized);
         self.initialized = true;
@@ -61,6 +65,9 @@ impl KernelAllocator {
     /// ## Safety
     /// This function is unsafe because this function partially assumes that
     /// address and size are perfectly valid heap values.
+    ///
+    /// ## Panics
+    /// Panics if the given address cannot be mapped for freeing.
     unsafe fn free_region(&mut self, address: usize, size: usize) {
         assert_eq!(align_up(address, align_of::<KernelAllocatorNode>()), address);
         assert!(size >= size_of::<KernelAllocatorNode>());
@@ -77,6 +84,8 @@ impl KernelAllocator {
         self.free_list.next_free = Some(&mut *node_ptr);
     }
 
+    /// Given a size and an alignment, finds a region which can satisfy
+    /// the given requirements. Returns None if no such region is found.
     fn find_region(&mut self, size: usize, alignment: usize)
     -> Option<(&'static mut KernelAllocatorNode, usize)> {
         let mut current = &mut self.free_list;
@@ -93,6 +102,7 @@ impl KernelAllocator {
         None
     }
 
+    /// Takes a region and allocates it.
     fn region_to_allocation(region: &KernelAllocatorNode, size: usize, alignment: usize)
     -> Result<usize, ()> {
         let start = align_up(region.start_address(), alignment);
@@ -166,6 +176,10 @@ fn alloc_error_handler(layout: Layout) -> ! {
     panic!("Allocation failure for {:?}", layout);
 }
 
+/// Initialize the allocator.
+///
+/// ## Panics
+/// Panics if the allocator is already initialized.
 pub fn init() {
     ALLOCATOR.lock().init();
 }
