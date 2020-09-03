@@ -1,6 +1,7 @@
 use alloc::boxed::Box;
 use core::mem::size_of;
 use core::ops::Drop;
+use x86_64::PhysAddr;
 use x86_64::registers::control::Cr3Flags;
 use x86_64::structures::paging::frame::PhysFrame;
 

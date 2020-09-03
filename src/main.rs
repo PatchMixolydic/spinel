@@ -6,6 +6,7 @@
 #![feature(const_fn)]
 #![feature(naked_functions)]
 #![feature(const_mut_refs)]
+#![feature(naked_functions)]
 #![feature(panic_info_message)]
 #![feature(vec_remove_item)]
 #![no_main]
