@@ -21,7 +21,7 @@ num-derive = { version = "0.3", default-features = false }
 spin = "0.5.2"
 
 [target.'cfg(target_arch = "x86_64")'.dependencies]
-bootloader = { version = "0.9.4", features = ["map_physical_memory"] }
+bootloader = { version = "0.9.9", features = ["map_physical_memory"] }
 x86_64 = "0.11.0"
 
 # TODO: how can this be restricted to x86_64 only? Does it need to be?
