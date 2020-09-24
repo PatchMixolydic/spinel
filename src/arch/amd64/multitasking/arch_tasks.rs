@@ -1,7 +1,6 @@
 use alloc::boxed::Box;
 use core::mem::size_of;
 use core::ops::Drop;
-use x86_64::PhysAddr;
 use x86_64::registers::control::Cr3Flags;
 use x86_64::structures::paging::frame::PhysFrame;
 
@@ -15,10 +14,14 @@ const KERNEL_STACK_NUM_U64S: usize = PAGE_SIZE / size_of::<u64>();
 #[derive(Debug)]
 #[repr(C)]
 pub struct ArchTask {
-    /// Current value of the stack pointer
+    /// Value of the stack pointer on last switch
     kernel_stack_pointer: u64,
     /// The top of the kernel stack
     kernel_stack_top_pointer: u64,
+    /// Value of `rbp` on last switch
+    current_base_pointer: u64,
+    /// Value of `rip` on last switch
+    current_instruction_pointer: u64,
     page_map: (PhysFrame, Cr3Flags)
 }
 
@@ -60,9 +63,6 @@ impl ArchTask {
         println!("Putting RIP for interrupt frame at {}", stack_idx);
         kernel_stack[stack_idx] = instruction_pointer as u64;
         stack_idx -= 1;
-        // Instruction pointer for returning from task switch
-        println!("Putting RIP for return at {}", stack_idx);
-        kernel_stack[stack_idx] = process_init as u64;
 
         // Now we can get the stack pointer
         // Note that the code doesn't just initialize kernel_stack_pointer
@@ -99,7 +99,9 @@ impl ArchTask {
         Self {
             kernel_stack_pointer,
             kernel_stack_top_pointer,
-            page_map: x86_64::registers::control::Cr3::read()
+            current_base_pointer: kernel_stack_top_pointer,
+            current_instruction_pointer: process_init as u64,
+            page_map: x86_64::registers::control::Cr3::read(),
         }
     }
 }
@@ -130,16 +132,34 @@ impl Drop for ArchTask {
 /// and then swaps in the new task. This requires
 /// new_task to have a valid stack pointer and
 /// page map, or else things will go horribly wrong.
-pub unsafe fn switch_tasks(maybe_old_task: Option<&mut ArchTask>, new_task: &mut ArchTask) {
+pub unsafe extern "C" fn switch_tasks(maybe_old_task: Option<&mut ArchTask>, new_task: &mut ArchTask) {
     if let Some(old_task) = maybe_old_task {
+        // TODO: get EIP
+        // TODO: CR3
         asm!(
-            "mov {old_stack_ptr}, rsp",
-            old_stack_ptr = out(reg) old_task.kernel_stack_pointer
+            "
+            mov {old_stack_ptr}, rsp
+            mov {old_base_ptr}, rbp
+            ",
+            old_stack_ptr = out(reg) old_task.kernel_stack_pointer,
+            old_base_ptr = out(reg) old_task.current_base_pointer
         );
     }
     asm!(
-        "mov rsp, {new_stack_ptr}",
-        new_stack_ptr = in(reg) new_task.kernel_stack_pointer
+        "
+        mov rcx, {new_instruction_ptr}
+        mov rsp, {new_stack_ptr}
+        mov ss, {stack_segment:x}
+        mov rbp, {new_base_ptr}
+        jmp rcx
+        ",
+        new_instruction_ptr = in(reg) new_task.current_instruction_pointer,
+        new_stack_ptr = in(reg) new_task.kernel_stack_pointer,
+        // Always the kernel stack pointer
+        stack_segment = in(reg) GDT.1.kernel_data().0,
+        new_base_ptr = in(reg) new_task.current_base_pointer,
+        // rcx is clobbered
+        out("rcx") _
     );
 }
 
