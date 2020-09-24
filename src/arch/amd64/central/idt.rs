@@ -53,6 +53,7 @@ pub fn init() {
     // within the static mutex IDT.
     unsafe {
         idt.double_fault.set_handler_fn(double_fault_handler).set_stack_index(DOUBLE_FAULT_STACK);
+        idt.general_protection_fault.set_handler_fn(general_protection_fault_handler);
         idt.load_unsafe();
     }
 }
@@ -70,4 +71,11 @@ extern "x86-interrupt" fn double_fault_handler(
 ) -> ! {
     // Error code is always 0
     panic!("Double fault\nStack frame: {:#?}", stack_frame);
+}
+
+extern "x86-interrupt" fn general_protection_fault_handler(
+    stack_frame: &mut InterruptStackFrame,
+    error_code: u64
+) {
+    panic!("General protection fault\nError code {}\nStack frame: {:#?}", error_code, stack_frame);
 }
