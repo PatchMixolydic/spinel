@@ -1,8 +1,8 @@
 # Spinel
 
-[![Build Status](https://travis-ci.com/Sparkpin/spinel.svg?branch=spinel-nd)](https://travis-ci.com/Sparkpin/spinel)
+[![Build Status](https://travis-ci.com/Sparkpin/spinel.svg)](https://travis-ci.com/Sparkpin/spinel)
 
-*"...and [she] told me that **I~~I~/I can make a change!**"*
+*"I'm so excited to meet you!"*
 
 Spinel is a simple operating system written to allow me to explore the
 wonderful world of systems programming. Currently, it only supports
@@ -74,7 +74,7 @@ If you just want to run Spinel, please see Building Spinel.
 Right now, Spinel is in a very early state, so it is probably not too
 interesting to contribute to right now. However, if you are interested on
 getting on board once user mode applications are possible, please note that
-to keep Spinel from turning into Flamewar Central, there is a basic
+to prevent against flamewars, there is a basic
 [code of conduct](https://github.com/Sparkpin/spinel/blob/master/CodeOfConduct.md)
 for contributors. These rules should be fairly obvious, but feel free to have
 a look at them.
