@@ -3,6 +3,7 @@
 #![allow(dead_code)]
 #![feature(alloc_error_handler)]
 #![feature(const_fn)]
+#![feature(const_mut_refs)]
 #![feature(panic_info_message)]
 #![feature(vec_remove_item)]
 #![no_main]
