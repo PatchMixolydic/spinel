@@ -6,9 +6,6 @@ authors = ["Ruby Lazuli L. <nipkraps@gmail.com>"]
 license = "MIT"
 edition = "2018"
 
-[unstable]
-build-std = ["core", "compiler_builtins", "alloc"]
-
 [features]
 default = ["serial_logging"]
 serial_logging = []
