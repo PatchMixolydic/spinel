@@ -1,7 +1,6 @@
 use alloc::boxed::Box;
 use core::mem::size_of;
 use core::ops::Drop;
-use x86_64::PhysAddr;
 use x86_64::registers::control::Cr3Flags;
 use x86_64::structures::paging::frame::PhysFrame;
 
@@ -174,6 +173,6 @@ pub unsafe extern "C" fn switch_tasks(maybe_old_task: Option<&mut ArchTask>, new
 /// that when it's called, an interrupt stack frame
 /// is the next thing on the stack.
 #[naked]
-unsafe fn process_init() {
-    asm!("iret");
+unsafe extern "C" fn process_init() {
+    asm!("iret", options(noreturn));
 }

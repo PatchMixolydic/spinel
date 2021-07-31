@@ -75,6 +75,9 @@ const fn pit_command(
     ((channel as u8) << 6) | ((access_mode as u8) << 4) | ((op_mode as u8) << 1) | (counter_mode as u8)
 }
 
+// There should be no problem with copying the ports each time
+// since `PortGeneric` is just a wrapper for a `u16` and a `PhantomData`.
+#[allow(const_item_mutation)]
 pub fn init() {
     without_interrupts(|| {
         // SAFETY: This function uses port mapped I/O, which can do anything.

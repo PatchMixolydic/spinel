@@ -1,7 +1,7 @@
 use alloc::boxed::Box;
 use alloc::collections::VecDeque;
 use alloc::vec::Vec;
-use core::sync::atomic::spin_loop_hint;
+use core::hint::spin_loop;
 use lazy_static::lazy_static;
 use spin::Mutex;
 
@@ -60,7 +60,7 @@ fn idle() {
     println!("Idle thread");
     loop {
         enable_interrupts();
-        spin_loop_hint();
+        spin_loop();
     }
 }
 

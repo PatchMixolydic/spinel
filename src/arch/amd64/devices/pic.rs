@@ -1,3 +1,8 @@
+// TODO: necessary?
+// Without this, rustc will complain about the use of `Port`
+// in constants.
+#![allow(const_item_mutation)]
+
 use x86_64::instructions::port::Port;
 
 use crate::arch::amd64::central::idt::IRQ;

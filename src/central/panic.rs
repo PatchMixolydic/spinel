@@ -1,5 +1,5 @@
 use core::panic::PanicInfo;
-use core::sync::atomic::spin_loop_hint;
+use core::hint::spin_loop;
 
 use crate::{print, println};
 
@@ -17,6 +17,6 @@ fn panic(info: &PanicInfo) -> ! {
     }
 
     loop {
-        spin_loop_hint();
+        spin_loop();
     }
 }

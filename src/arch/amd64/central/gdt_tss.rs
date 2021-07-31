@@ -1,5 +1,5 @@
 use lazy_static::lazy_static;
-use x86_64::instructions::segmentation::set_cs;
+use x86_64::instructions::segmentation::{CS, Segment};
 use x86_64::instructions::tables::load_tss;
 use x86_64::structures::gdt::{Descriptor, DescriptorFlags, GlobalDescriptorTable, SegmentSelector};
 use x86_64::structures::tss::TaskStateSegment;
@@ -75,7 +75,7 @@ pub fn init() {
     // SAFETY: These write arbitrary values to CPU registers
     unsafe {
         // Set our code segment register to mark that we're in kernel code
-        set_cs(GDT.1.kernel_code);
+        CS::set_reg(GDT.1.kernel_code);
         // The task state segment is important, too
         load_tss(GDT.1.tss);
     }

@@ -1,5 +1,5 @@
 use core::fmt;
-use core::sync::atomic::spin_loop_hint;
+use core::hint::spin_loop;
 use x86_64::instructions::port::{Port, PortReadOnly, PortWriteOnly};
 
 #[derive(Clone, Copy)]
@@ -46,7 +46,7 @@ impl SerialPort {
         unsafe {
             // Spin while no data available (check data ready bit)
             while self.line_status_register().read() & 0b0000_0001 == 0 {
-                spin_loop_hint();
+                spin_loop();
             }
             self.data_register().read()
         }
@@ -56,7 +56,7 @@ impl SerialPort {
         unsafe {
             // Spin while line is busy (check empty Tx bit)
             while self.line_status_register().read() & 0b0010_0000 == 0 {
-                spin_loop_hint();
+                spin_loop();
             }
             self.data_register().write(val)
         }
