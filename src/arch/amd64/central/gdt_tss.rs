@@ -1,7 +1,9 @@
 use lazy_static::lazy_static;
-use x86_64::instructions::segmentation::{CS, Segment};
+use x86_64::instructions::segmentation::{Segment, CS};
 use x86_64::instructions::tables::load_tss;
-use x86_64::structures::gdt::{Descriptor, DescriptorFlags, GlobalDescriptorTable, SegmentSelector};
+use x86_64::structures::gdt::{
+    Descriptor, DescriptorFlags, GlobalDescriptorTable, SegmentSelector,
+};
 use x86_64::structures::tss::TaskStateSegment;
 use x86_64::VirtAddr;
 

@@ -8,7 +8,8 @@ use crate::arch::amd64::devices::pic::IRQ0_INTERRUPT;
 pub const NUM_IRQS: u8 = 16;
 
 lazy_static! {
-    pub static ref IDT: Mutex<InterruptDescriptorTable> = Mutex::new(InterruptDescriptorTable::new());
+    pub static ref IDT: Mutex<InterruptDescriptorTable> =
+        Mutex::new(InterruptDescriptorTable::new());
 }
 
 type IRQHandler = extern "x86-interrupt" fn(InterruptStackFrame);
@@ -19,27 +20,27 @@ type IRQHandler = extern "x86-interrupt" fn(InterruptStackFrame);
 /// It implements From<u8>, so for pretty much any
 /// function that takes an IRQ, you can use `into()`:
 /// ```
-/// fn foo(irq: IRQ) {
+/// fn foo(irq: Irq) {
 ///     // ...
 /// }
 ///
 /// foo(1.into());
 /// ```
 #[repr(transparent)]
-pub struct IRQ {
+pub struct Irq {
     id: u8,
 }
 
-impl IRQ {
+impl Irq {
     pub fn id(&self) -> u8 {
         self.id
     }
 }
 
-impl From<u8> for IRQ {
+impl From<u8> for Irq {
     fn from(val: u8) -> Self {
         assert!(val < NUM_IRQS);
-        IRQ { id: val }
+        Irq { id: val }
     }
 }
 
@@ -52,14 +53,17 @@ pub fn init() {
     // tell the interrupt descriptor table is static since it's contained
     // within the static mutex IDT.
     unsafe {
-        idt.double_fault.set_handler_fn(double_fault_handler).set_stack_index(DOUBLE_FAULT_STACK);
-        idt.general_protection_fault.set_handler_fn(general_protection_fault_handler);
+        idt.double_fault
+            .set_handler_fn(double_fault_handler)
+            .set_stack_index(DOUBLE_FAULT_STACK);
+        idt.general_protection_fault
+            .set_handler_fn(general_protection_fault_handler);
         idt.load_unsafe();
     }
 }
 
 /// Convenience function to register an IRQ handler
-pub fn register_irq_handler(irq: IRQ, handler: IRQHandler) {
+pub fn register_irq_handler(irq: Irq, handler: IRQHandler) {
     // TODO: what should be done if an IRQ already has a handler?
     let mut idt = IDT.lock();
     idt[IRQ0_INTERRUPT + usize::from(irq.id())].set_handler_fn(handler);
@@ -67,7 +71,7 @@ pub fn register_irq_handler(irq: IRQ, handler: IRQHandler) {
 
 extern "x86-interrupt" fn double_fault_handler(
     stack_frame: InterruptStackFrame,
-    _error_code: u64
+    _error_code: u64,
 ) -> ! {
     // Error code is always 0
     panic!("Double fault\nStack frame: {:#?}", stack_frame);
@@ -75,7 +79,10 @@ extern "x86-interrupt" fn double_fault_handler(
 
 extern "x86-interrupt" fn general_protection_fault_handler(
     stack_frame: InterruptStackFrame,
-    error_code: u64
+    error_code: u64,
 ) {
-    panic!("General protection fault\nError code {}\nStack frame: {:#?}", error_code, stack_frame);
+    panic!(
+        "General protection fault\nError code {}\nStack frame: {:#?}",
+        error_code, stack_frame
+    );
 }

@@ -13,7 +13,7 @@ pub mod memory {
     #[derive(Debug)]
     pub enum MapError {
         PhysicalAllocationFailed,
-        AlreadyMapped
+        AlreadyMapped,
     }
 
     cfg_if::cfg_if! {
@@ -41,9 +41,8 @@ pub mod multitasking {
 pub mod interrupts {
     #[cfg(target_arch = "x86_64")]
     pub use x86_64::instructions::interrupts::{
-        are_enabled as are_interrupts_enabled,
+        are_enabled as are_interrupts_enabled, disable as disable_interrupts,
         enable as enable_interrupts,
-        disable as disable_interrupts
     };
 
     /// Run a function with interrupts disabled.

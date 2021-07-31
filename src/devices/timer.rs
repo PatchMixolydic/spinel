@@ -12,7 +12,7 @@ type TimerCallback = dyn FnMut() + 'static + Send;
 
 #[derive(Clone, Copy, Debug)]
 pub enum TimerError {
-    CouldntLockState
+    CouldntLockState,
 }
 
 struct Timer {
@@ -20,12 +20,13 @@ struct Timer {
     next_time: u64,
     duration: u64,
     callback: Box<TimerCallback>,
-    one_shot: bool
+    one_shot: bool,
 }
 
 impl PartialEq for Timer {
     fn eq(&self, other: &Self) -> bool {
-        #[cfg(debug_assertions)] {
+        #[cfg(debug_assertions)]
+        {
             if self.id == other.id {
                 debug_assert_eq!(self.next_time, other.next_time);
                 debug_assert_eq!(self.duration, other.duration);
@@ -41,7 +42,7 @@ struct TimerState {
     ticks_per_clock_cycle: u64,
     timers: Vec<Timer>,
     // TODO: think of something better!
-    next_timer_id: u128
+    next_timer_id: u128,
 }
 
 impl TimerState {
@@ -50,7 +51,7 @@ impl TimerState {
             ticks_since_boot: 0,
             ticks_per_clock_cycle: TICKS_PER_SECOND / frequency,
             timers: Vec::new(),
-            next_timer_id: 0
+            next_timer_id: 0,
         }
     }
 
@@ -58,7 +59,7 @@ impl TimerState {
         // TODO: do something smarter
         self.next_timer_id = match self.next_timer_id.checked_add(1) {
             Some(val) => val,
-            None => panic!("Too many timers allocated; next_timer_id overflowed")
+            None => panic!("Too many timers allocated; next_timer_id overflowed"),
         };
         self.next_timer_id - 1
     }
@@ -72,7 +73,7 @@ impl TimerState {
 pub fn init(frequency: u64) {
     let mut state = match TIMER_STATE.try_lock() {
         Some(state) => state,
-        None => panic!("Couldn't lock the timer state while initializing")
+        None => panic!("Couldn't lock the timer state while initializing"),
     };
 
     if state.is_some() {
@@ -85,7 +86,7 @@ pub fn init(frequency: u64) {
 pub fn ticks_since_boot() -> u64 {
     match &*TIMER_STATE.lock() {
         Some(state) => state.ticks_since_boot,
-        None => panic!("Tried to get ticks since boot before initializing timer")
+        None => panic!("Tried to get ticks since boot before initializing timer"),
     }
 }
 
@@ -100,17 +101,20 @@ pub fn ticks_since_boot() -> u64 {
 pub fn tick() {
     let mut state_guard = match TIMER_STATE.try_lock() {
         Some(guard) => guard,
-        None => return
+        None => return,
     };
     let mut state = match &mut *state_guard {
         Some(s) => s,
-        None => panic!("Tried to tick timer before initializing it")
+        None => panic!("Tried to tick timer before initializing it"),
     };
 
     // TODO: should this be a hard error?
-    state.ticks_since_boot = match state.ticks_since_boot.checked_add(state.ticks_per_clock_cycle) {
+    state.ticks_since_boot = match state
+        .ticks_since_boot
+        .checked_add(state.ticks_per_clock_cycle)
+    {
         Some(res) => res,
-        None => panic!("ticks_since_boot overflowed")
+        None => panic!("ticks_since_boot overflowed"),
     };
 
     for timer in &mut state.timers {
@@ -134,15 +138,19 @@ pub fn tick() {
 ///
 /// ## Panics
 /// Panics when called before the timer system has been initialized.
-pub fn register_timer(duration: u64, one_shot: bool, callback: Box<TimerCallback>) -> Result<u128, TimerError> {
+pub fn register_timer(
+    duration: u64,
+    one_shot: bool,
+    callback: Box<TimerCallback>,
+) -> Result<u128, TimerError> {
     let mut state_guard = match TIMER_STATE.try_lock() {
         Some(state) => state,
-        None => return Err(TimerError::CouldntLockState)
+        None => return Err(TimerError::CouldntLockState),
     };
 
     let state = match &mut *state_guard {
         Some(s) => s,
-        None => panic!("Called register_timer before timer system was initialized")
+        None => panic!("Called register_timer before timer system was initialized"),
     };
 
     let id = state.next_id();
@@ -151,7 +159,7 @@ pub fn register_timer(duration: u64, one_shot: bool, callback: Box<TimerCallback
         duration,
         next_time: duration + state.ticks_since_boot,
         one_shot,
-        callback
+        callback,
     };
     state.timers.push(timer);
 

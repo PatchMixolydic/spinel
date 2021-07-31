@@ -9,12 +9,15 @@ const MAX_ID_INDEX: usize = u32::MAX as usize / core::mem::size_of::<u64>();
 /// u32::MAX (~4.27 billion) IDs.
 pub struct IDAllocator {
     id_bitmaps: Vec<u64>,
-    last_index: usize
+    last_index: usize,
 }
 
 impl IDAllocator {
     pub const fn new() -> Self {
-        Self { id_bitmaps: Vec::new(), last_index: 0 }
+        Self {
+            id_bitmaps: Vec::new(),
+            last_index: 0,
+        }
     }
 
     pub fn allocate(&mut self) -> u32 {
@@ -31,7 +34,7 @@ impl IDAllocator {
             println!("  Iteration {}", i);
             let bitmap = match self.id_bitmaps.get_mut(self.last_index) {
                 Some(x) => *x,
-                None => 0
+                None => 0,
             };
             println!("    Here's our bitmap: {:#X}", bitmap);
             if bitmap == u64::MAX {

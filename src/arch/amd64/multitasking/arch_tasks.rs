@@ -22,12 +22,15 @@ pub struct ArchTask {
     current_base_pointer: u64,
     /// Value of `rip` on last switch
     current_instruction_pointer: u64,
-    page_map: (PhysFrame, Cr3Flags)
+    page_map: (PhysFrame, Cr3Flags),
 }
 
 impl ArchTask {
     pub fn new(instruction_pointer: usize, user_mode: bool) -> Self {
-        println!("New arch task: IP {:#010X} user_mode {}", instruction_pointer, user_mode);
+        println!(
+            "New arch task: IP {:#010X} user_mode {}",
+            instruction_pointer, user_mode
+        );
         let mut kernel_stack = Box::new([0u64; PAGE_SIZE / size_of::<u64>()]);
         println!("Kernel stack {:?}", kernel_stack.as_ptr());
         // Index to the bottom of the stack
@@ -88,7 +91,10 @@ impl ArchTask {
                 // different from the kernel stack
                 panic!("Please add usermode stack creation")
             } else {
-                println!("Writing KSP {:?} to {:?}", kernel_stack_pointer, stack_pointer_loc);
+                println!(
+                    "Writing KSP {:?} to {:?}",
+                    kernel_stack_pointer, stack_pointer_loc
+                );
                 stack_pointer_loc.write(kernel_stack_pointer);
             }
 
@@ -96,6 +102,9 @@ impl ArchTask {
         };
 
         println!("return return return return return !!!!!!!!111");
+
+        // This is architecture-specific code, so we know that pointers are 64-bit
+        #[allow(clippy::fn_to_numeric_cast)]
         Self {
             kernel_stack_pointer,
             kernel_stack_top_pointer,
@@ -132,7 +141,10 @@ impl Drop for ArchTask {
 /// and then swaps in the new task. This requires
 /// new_task to have a valid stack pointer and
 /// page map, or else things will go horribly wrong.
-pub unsafe extern "C" fn switch_tasks(maybe_old_task: Option<&mut ArchTask>, new_task: &mut ArchTask) {
+pub unsafe extern "C" fn switch_tasks(
+    maybe_old_task: Option<&mut ArchTask>,
+    new_task: &mut ArchTask,
+) {
     if let Some(old_task) = maybe_old_task {
         // TODO: get EIP
         // TODO: CR3

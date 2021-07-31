@@ -1,7 +1,7 @@
-use bootloader::boot_info::{MemoryRegions, MemoryRegionKind};
+use bootloader::boot_info::{MemoryRegionKind, MemoryRegions};
 use spin::Mutex;
-use x86_64::PhysAddr;
 use x86_64::structures::paging::{FrameAllocator, PhysFrame, Size4KiB};
+use x86_64::PhysAddr;
 
 use crate::arch::arch_info::PAGE_SIZE;
 
@@ -13,7 +13,7 @@ pub static PAGE_FRAME_ALLOCATOR: Mutex<Option<PageFrameAllocator>> = Mutex::new(
 /// You probably shouldn't construct one of these outside of `physical_memory`.
 pub struct PageFrameAllocator {
     memory_map: &'static MemoryRegions,
-    next: usize
+    next: usize,
 }
 
 impl PageFrameAllocator {
@@ -23,11 +23,15 @@ impl PageFrameAllocator {
     /// The `MemoryMap` must be valid; all addresses marked usable
     /// must actually be usable.
     unsafe fn init(memory_map: &'static MemoryRegions) -> Self {
-        Self { memory_map, next: 0 }
+        Self {
+            memory_map,
+            next: 0,
+        }
     }
 
     fn usable_frames(&self) -> impl Iterator<Item = PhysFrame> {
-        self.memory_map.iter()
+        self.memory_map
+            .iter()
             .filter(|region| region.kind == MemoryRegionKind::Usable)
             .map(|region| region.start..region.end)
             .flat_map(|region| region.step_by(PAGE_SIZE))

@@ -1,7 +1,7 @@
 use alloc::string::String;
 use spin::Mutex;
 
-use crate::arch::multitasking::arch_tasks::{ArchTask, switch_tasks};
+use crate::arch::multitasking::arch_tasks::{switch_tasks, ArchTask};
 use crate::central::id_allocator::IDAllocator;
 use crate::multitasking::scheduler::Priority;
 use crate::println;
@@ -17,7 +17,7 @@ pub enum ThreadState {
     Active,
     Asleep,
     Blocked,
-    Dead
+    Dead,
 }
 
 #[derive(Debug)]
@@ -28,12 +28,15 @@ pub struct Thread {
     pub state: ThreadState,
     pub last_scheduled_time: u64,
     pub priority: Priority,
-    underlying_task: ArchTask
+    underlying_task: ArchTask,
 }
 
 impl Thread {
     fn new(
-        process_id: TaskId, instruction_pointer: usize, user_mode: bool, priority: Priority
+        process_id: TaskId,
+        instruction_pointer: usize,
+        user_mode: bool,
+        priority: Priority,
     ) -> Self {
         println!("new thread new thread brand new never before seen");
         let thread_id = TASK_ID_ALLOCATOR.lock().allocate();
@@ -46,7 +49,7 @@ impl Thread {
             state: ThreadState::Idle,
             last_scheduled_time: 0,
             priority,
-            underlying_task
+            underlying_task,
         }
     }
 
@@ -61,7 +64,7 @@ impl Thread {
         println!("Switch from {:#?} to {:#?}", old_thread, self);
         let old_task = match old_thread {
             Some(thread) => Some(&mut thread.underlying_task),
-            None => None
+            None => None,
         };
         switch_tasks(old_task, &mut self.underlying_task);
     }
@@ -91,18 +94,24 @@ pub struct Process {
 impl Process {
     pub fn new(name: impl Into<String>, user_mode: bool) -> Self {
         let process_id = TASK_ID_ALLOCATOR.lock().allocate();
-        Self { process_id, name: name.into(), user_mode }
+        Self {
+            process_id,
+            name: name.into(),
+            user_mode,
+        }
     }
 
     pub fn spawn_thread(&self, instruction_pointer: usize, priority: Priority) -> Thread {
         println!(
             "Spawning new thread for process {} ({}): IP {:#X} priority {:?}",
-            self.process_id,
-            self.name,
-            instruction_pointer,
-            priority
+            self.process_id, self.name, instruction_pointer, priority
         );
-        Thread::new(self.process_id, instruction_pointer, self.user_mode, priority)
+        Thread::new(
+            self.process_id,
+            instruction_pointer,
+            self.user_mode,
+            priority,
+        )
     }
 
     pub fn name(&self) -> &str {

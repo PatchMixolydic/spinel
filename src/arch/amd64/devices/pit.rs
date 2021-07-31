@@ -1,9 +1,9 @@
 use x86_64::instructions::port::{Port, PortWriteOnly};
 use x86_64::structures::idt::InterruptStackFrame;
 
-use crate::arch::interrupts::without_interrupts;
 use crate::arch::amd64::central::idt::register_irq_handler;
 use crate::arch::amd64::devices::pic::end_of_irq;
+use crate::arch::interrupts::without_interrupts;
 use crate::devices::timer;
 
 const PIT_CHANNEL_0: Port<u8> = Port::new(0x0040);
@@ -29,7 +29,7 @@ enum AccessMode {
     LatchCount,
     LowByteOnly,
     HighByteOnly,
-    LowByteHighByte
+    LowByteHighByte,
 }
 
 #[repr(u8)]
@@ -59,20 +59,26 @@ enum OperatingMode {
     /// TODO: is this the case for `InterruptOnTerminalCount`?
     SoftwareStrobe,
     /// Like `OneShot`
-    HardwareStrobe
+    HardwareStrobe,
 }
 
 #[repr(u8)]
 enum CounterMode {
     Binary,
-    BCD
+    Bcd,
 }
 
 /// Generates a u8 representing the provided configuration, which can be sent out to `PIT_COMMAND_PORT`
 const fn pit_command(
-    channel: Channel, access_mode: AccessMode, op_mode: OperatingMode, counter_mode: CounterMode
+    channel: Channel,
+    access_mode: AccessMode,
+    op_mode: OperatingMode,
+    counter_mode: CounterMode,
 ) -> u8 {
-    ((channel as u8) << 6) | ((access_mode as u8) << 4) | ((op_mode as u8) << 1) | (counter_mode as u8)
+    ((channel as u8) << 6)
+        | ((access_mode as u8) << 4)
+        | ((op_mode as u8) << 1)
+        | (counter_mode as u8)
 }
 
 // There should be no problem with copying the ports each time
@@ -83,14 +89,12 @@ pub fn init() {
         // SAFETY: This function uses port mapped I/O, which can do anything.
         // Fortunately, the PIT's IO ports seem fairly well known.
         unsafe {
-            PIT_COMMAND_PORT.write(
-                pit_command(
-                    Channel::Channel0,
-                    AccessMode::LowByteHighByte,
-                    OperatingMode::RateGenerator,
-                    CounterMode::Binary
-                )
-            );
+            PIT_COMMAND_PORT.write(pit_command(
+                Channel::Channel0,
+                AccessMode::LowByteHighByte,
+                OperatingMode::RateGenerator,
+                CounterMode::Binary,
+            ));
             // Write reload value as a 16-bit value
             PIT_CHANNEL_0.write((CLOCK_DIVIDER & 0xFF) as u8);
             PIT_CHANNEL_0.write(((CLOCK_DIVIDER >> 8) & 0xFF) as u8);

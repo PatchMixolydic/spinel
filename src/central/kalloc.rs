@@ -4,11 +4,7 @@ use core::ptr::null_mut;
 use spin::{Mutex, MutexGuard};
 
 use crate::arch::memory::{
-    HEAP_SIZE,
-    HEAP_START,
-    MapError,
-    map_range,
-    map_virtual_address_unlazily
+    map_range, map_virtual_address_unlazily, MapError, HEAP_SIZE, HEAP_START,
 };
 
 #[global_allocator]
@@ -23,7 +19,10 @@ pub struct KernelAllocatorNode {
 
 impl KernelAllocatorNode {
     const fn new(size: usize) -> Self {
-        Self { next_free: None, size }
+        Self {
+            next_free: None,
+            size,
+        }
     }
 
     fn start_address(&self) -> usize {
@@ -37,12 +36,15 @@ impl KernelAllocatorNode {
 
 struct KernelAllocator {
     free_list: KernelAllocatorNode,
-    initialized: bool
+    initialized: bool,
 }
 
 impl KernelAllocator {
     const fn new() -> Self {
-        Self { free_list: KernelAllocatorNode::new(0), initialized: false }
+        Self {
+            free_list: KernelAllocatorNode::new(0),
+            initialized: false,
+        }
     }
 
     /// Initialize the allocator.
@@ -69,14 +71,17 @@ impl KernelAllocator {
     /// ## Panics
     /// Panics if the given address cannot be mapped for freeing.
     unsafe fn free_region(&mut self, address: usize, size: usize) {
-        assert_eq!(align_up(address, align_of::<KernelAllocatorNode>()), address);
+        assert_eq!(
+            align_up(address, align_of::<KernelAllocatorNode>()),
+            address
+        );
         assert!(size >= size_of::<KernelAllocatorNode>());
 
         let mut node = KernelAllocatorNode::new(size);
         node.next_free = self.free_list.next_free.take();
         match map_virtual_address_unlazily(address) {
             Ok(_) | Err(MapError::AlreadyMapped) => (),
-            Err(e) => panic!("Failed to map address {:018X} to free it! {:?}", address, e)
+            Err(e) => panic!("Failed to map address {:018X} to free it! {:?}", address, e),
         };
 
         let node_ptr = address as *mut KernelAllocatorNode;
@@ -86,11 +91,14 @@ impl KernelAllocator {
 
     /// Given a size and an alignment, finds a region which can satisfy
     /// the given requirements. Returns None if no such region is found.
-    fn find_region(&mut self, size: usize, alignment: usize)
-    -> Option<(&'static mut KernelAllocatorNode, usize)> {
+    fn find_region(
+        &mut self,
+        size: usize,
+        alignment: usize,
+    ) -> Option<(&'static mut KernelAllocatorNode, usize)> {
         let mut current = &mut self.free_list;
         while let Some(ref mut region) = current.next_free {
-            if let Ok(alloc_start) = Self::region_to_allocation(&region, size, alignment) {
+            if let Ok(alloc_start) = Self::region_to_allocation(region, size, alignment) {
                 let next = region.next_free.take();
                 let res = Some((current.next_free.take().unwrap(), alloc_start));
                 current.next_free = next;
@@ -103,8 +111,11 @@ impl KernelAllocator {
     }
 
     /// Takes a region and allocates it.
-    fn region_to_allocation(region: &KernelAllocatorNode, size: usize, alignment: usize)
-    -> Result<usize, ()> {
+    fn region_to_allocation(
+        region: &KernelAllocatorNode,
+        size: usize,
+        alignment: usize,
+    ) -> Result<usize, ()> {
         let start = align_up(region.start_address(), alignment);
         let end = start.checked_add(size).ok_or(())?;
 
@@ -134,12 +145,14 @@ impl KernelAllocator {
 
 // Wrapper for mutex so GlobalAlloc can be implemented on it
 pub struct AllocMutex {
-    inner: Mutex<KernelAllocator>
+    inner: Mutex<KernelAllocator>,
 }
 
 impl AllocMutex {
     const fn new(inner: KernelAllocator) -> Self {
-        Self { inner: Mutex::new(inner) }
+        Self {
+            inner: Mutex::new(inner),
+        }
     }
 
     fn lock(&self) -> MutexGuard<KernelAllocator> {

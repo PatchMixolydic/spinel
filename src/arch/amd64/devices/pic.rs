@@ -5,7 +5,7 @@
 
 use x86_64::instructions::port::Port;
 
-use crate::arch::amd64::central::idt::IRQ;
+use crate::arch::amd64::central::idt::Irq;
 
 const MASTER_COMMAND_PORT: Port<u8> = Port::new(0x0020);
 const MASTER_DATA_PORT: Port<u8> = Port::new(0x0021);
@@ -46,7 +46,7 @@ pub fn init() {
 }
 
 /// Sends the end of interrupt signal to the PIC
-pub fn end_of_irq(irq: IRQ) {
+pub fn end_of_irq(irq: Irq) {
     // SAFETY: This reads from and writes to port I/O, which might do anything
     unsafe {
         if irq.id() >= 8 {
@@ -61,7 +61,7 @@ pub fn end_of_irq(irq: IRQ) {
 // We're initializing port and relative_irq simultaneously,
 // but Clippy wants us to assign the if expression to relative_irq
 #[allow(clippy::useless_let_if_seq)]
-pub fn set_irq_masked(irq: IRQ, masked: bool) {
+pub fn set_irq_masked(irq: Irq, masked: bool) {
     let mut port;
     // IRQ to this PIC
     let relative_irq;

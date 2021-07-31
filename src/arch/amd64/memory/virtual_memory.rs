@@ -2,15 +2,15 @@ use spin::Mutex;
 use x86_64::registers::control::{Cr2, Cr3};
 use x86_64::structures::idt::{InterruptStackFrame, PageFaultErrorCode};
 use x86_64::structures::paging::{
-    Mapper,
     // Rename to avoid confusion w/ the arch-generic MapError
     mapper::MapToError as MapToErrorX86_64,
+    Mapper,
     OffsetPageTable,
     Page,
     PageTable,
     PageTableFlags,
     PhysFrame,
-    Size4KiB
+    Size4KiB,
 };
 use x86_64::{PhysAddr, VirtAddr};
 
@@ -47,14 +47,16 @@ pub unsafe fn init() {
     }
     *top_map = Some(OffsetPageTable::new(
         active_top_level_page_map(),
-        VirtAddr::new(PHYSICAL_MEMORY_OFFSET)
+        VirtAddr::new(PHYSICAL_MEMORY_OFFSET),
     ));
 }
 
 /// Behind-the-scenes function that maps a given virtual address to a given physical frame.
 /// Used to DRY up the logic shared by `map_virtual_to_physical` and `map_virtual`.
 fn map_virtual_to_physical_frame(
-    virtual_address: VirtAddr, physical_frame: PhysFrame, flags: PageTableFlags
+    virtual_address: VirtAddr,
+    physical_frame: PhysFrame,
+    flags: PageTableFlags,
 ) -> Result<(), MapError> {
     let page = Page::containing_address(virtual_address);
 
@@ -64,9 +66,7 @@ fn map_virtual_to_physical_frame(
     let mut page_frame_alloc = PAGE_FRAME_ALLOCATOR.lock();
     let page_frame_alloc = page_frame_alloc.as_mut().unwrap();
 
-    let res = unsafe {
-        map.map_to(page, physical_frame, flags, page_frame_alloc)
-    };
+    let res = unsafe { map.map_to(page, physical_frame, flags, page_frame_alloc) };
 
     if let Err(e) = res {
         match e {
@@ -74,7 +74,8 @@ fn map_virtual_to_physical_frame(
                 // oh no
                 panic!(
                     "Couldn't map {:?} to {:?} because a frame allocation failed",
-                    virtual_address, physical_frame.start_address()
+                    virtual_address,
+                    physical_frame.start_address()
                 );
             }
             MapToErrorX86_64::PageAlreadyMapped(_) | MapToErrorX86_64::ParentEntryHugePage => {
@@ -97,12 +98,13 @@ fn map_virtual_to_physical_frame(
 /// Panics on failure to map the given virtual address.
 #[inline]
 pub fn map_virtual_to_physical(
-    virtual_address: VirtAddr, physical_address: PhysAddr
+    virtual_address: VirtAddr,
+    physical_address: PhysAddr,
 ) -> Result<(), MapError> {
     map_virtual_to_physical_frame(
         virtual_address,
         PhysFrame::containing_address(physical_address),
-        PageTableFlags::WRITABLE | PageTableFlags::PRESENT
+        PageTableFlags::WRITABLE | PageTableFlags::PRESENT,
     )
 }
 
@@ -119,7 +121,7 @@ pub fn map_virtual_address_unlazily(virtual_address: usize) -> Result<(), MapErr
     map_virtual_to_physical_frame(
         VirtAddr::new(virtual_address as u64),
         allocate_frame(),
-        PageTableFlags::WRITABLE | PageTableFlags::PRESENT
+        PageTableFlags::WRITABLE | PageTableFlags::PRESENT,
     )
 }
 
@@ -138,7 +140,7 @@ pub fn map_virtual_address(virtual_address: usize) -> Result<(), MapError> {
     map_virtual_to_physical_frame(
         VirtAddr::new(virtual_address as u64),
         PhysFrame::containing_address(PhysAddr::zero()),
-        PageTableFlags::WRITABLE | PageTableFlags::BIT_9
+        PageTableFlags::WRITABLE | PageTableFlags::BIT_9,
     )
 }
 
@@ -152,18 +154,18 @@ pub fn map_virtual_address(virtual_address: usize) -> Result<(), MapError> {
 /// Asserts in debug mode if the start address is less than the
 /// end address.
 #[inline]
-pub fn map_range(start_address: usize, end_address: usize)  -> Result<(), MapError> {
+pub fn map_range(start_address: usize, end_address: usize) -> Result<(), MapError> {
     debug_assert!(start_address < end_address);
     let range = Page::<Size4KiB>::range_inclusive(
         Page::containing_address(VirtAddr::new(start_address as u64)),
-        Page::containing_address(VirtAddr::new(end_address as u64))
+        Page::containing_address(VirtAddr::new(end_address as u64)),
     );
 
     for page in range {
         match map_virtual_address_unlazily(page.start_address().as_u64() as usize) {
             Ok(_) => (),
             Err(MapError::AlreadyMapped) => (),
-            Err(e) => return Err(e)
+            Err(e) => return Err(e),
         }
     }
 

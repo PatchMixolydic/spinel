@@ -8,7 +8,6 @@
 #![feature(panic_info_message)]
 #![no_main]
 #![no_std]
-
 #![cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #![feature(abi_x86_interrupt)]
 

@@ -6,7 +6,7 @@ use lazy_static::lazy_static;
 use spin::Mutex;
 
 use crate::arch::interrupts::enable_interrupts;
-use crate::devices::timer::{register_timer, TICKS_PER_MILLISECOND, ticks_since_boot};
+use crate::devices::timer::{register_timer, ticks_since_boot, TICKS_PER_MILLISECOND};
 use crate::multitasking::tasks::{Process, TaskId, Thread, ThreadState};
 use crate::println;
 
@@ -35,7 +35,7 @@ pub enum Priority {
     UserHigh,
     KernelHigh,
     Realtime,
-    NumPriorities
+    NumPriorities,
 }
 
 type RunQueues = [VecDeque<Thread>; Priority::NumPriorities as usize];
@@ -72,7 +72,11 @@ pub fn init() {
     println!("Scheduler start!");
     unsafe {
         println!("Add idle proces");
-        add_process(Process::new("idle", false), idle as usize, Priority::Abysmal);
+        add_process(
+            Process::new("idle", false),
+            idle as usize,
+            Priority::Abysmal,
+        );
     }
     println!("Switch!");
     next_task();
@@ -84,14 +88,16 @@ fn timeslice_for_priority(priority: Priority) -> u64 {
     match priority {
         Priority::Abysmal | Priority::KernelLow | Priority::UserLow => LOW_PRIORITY_TIMESLICE,
 
-        Priority::UserNormal | Priority::KernelNormal |
-            Priority::UserHigh | Priority::KernelHigh => NORMAL_TIMESLICE,
+        Priority::UserNormal
+        | Priority::KernelNormal
+        | Priority::UserHigh
+        | Priority::KernelHigh => NORMAL_TIMESLICE,
 
         Priority::Realtime => REALTIME_TIMESLICE,
 
         // SAFETY: this is actually checked by the above assertion, so
         // we should panic before UB happens
-        Priority::NumPriorities => unsafe { core::hint::unreachable_unchecked() }
+        Priority::NumPriorities => unsafe { core::hint::unreachable_unchecked() },
     }
 }
 
@@ -121,7 +127,6 @@ pub fn next_task() {
         run_queues[priority as usize].back_mut()
     });
 
-
     if current_thread.is_none() {
         // That shouldn't be, the idle thread should be scheduled!
         panic!("No threads found, not even the idle thread!");
@@ -133,8 +138,11 @@ pub fn next_task() {
     next_thread.last_scheduled_time = ticks_since_boot();
     println!("Thread scheduled at {}", next_thread.last_scheduled_time);
     register_timer(
-        timeslice_for_priority(next_thread.priority), true, Box::new(next_task)
-    ).unwrap();
+        timeslice_for_priority(next_thread.priority),
+        true,
+        Box::new(next_task),
+    )
+    .unwrap();
     println!("Timer registered");
     unsafe {
         println!("Switch!");
@@ -147,8 +155,15 @@ pub fn next_task() {
 /// ## Safety
 /// This function assumes that the instruction_pointer points to valid
 /// machine code in executable memory.
-pub unsafe fn add_process(process: Process, instruction_pointer: usize, priority: Priority) -> TaskId {
-    println!("Add process {:#?} with IP {:#010X} and priority {:?}", process, instruction_pointer, priority);
+pub unsafe fn add_process(
+    process: Process,
+    instruction_pointer: usize,
+    priority: Priority,
+) -> TaskId {
+    println!(
+        "Add process {:#?} with IP {:#010X} and priority {:?}",
+        process, instruction_pointer, priority
+    );
     assert!(priority != Priority::NumPriorities);
     println!("Spawn thread...");
     let thread = process.spawn_thread(instruction_pointer, priority);
@@ -170,8 +185,9 @@ pub unsafe fn add_process(process: Process, instruction_pointer: usize, priority
 pub unsafe fn spawn_thread_from_active(instruction_pointer: usize, priority: Priority) {
     let current_process_id = {
         let current_thread_guard = CURRENT_THREAD.lock();
-        let current_thread = current_thread_guard.as_ref()
-            .unwrap_or_else(|| panic!("Tried to spawn a thread from the active process with no active process"));
+        let current_thread = current_thread_guard.as_ref().unwrap_or_else(|| {
+            panic!("Tried to spawn a thread from the active process with no active process")
+        });
         current_thread.process_id()
     };
 

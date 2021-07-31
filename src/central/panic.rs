@@ -1,5 +1,5 @@
-use core::panic::PanicInfo;
 use core::hint::spin_loop;
+use core::panic::PanicInfo;
 
 use crate::{print, println};
 
