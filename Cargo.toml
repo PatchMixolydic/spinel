@@ -21,8 +21,8 @@ num-derive = { version = "0.3", default-features = false }
 spin = "0.5.2"
 
 [target.'cfg(target_arch = "x86_64")'.dependencies]
-bootloader = { version = "0.9.11", features = ["map_physical_memory"] }
-x86_64 = "0.12.2"
+bootloader = { version = "0.10.6" }
+x86_64 = "0.14.4"
 
 # TODO: how can this be restricted to x86_64 only? Does it need to be?
 [package.metadata.bootimage]
@@ -37,3 +37,5 @@ kernel-stack-address = "0xFFFF800000000000"
 kernel-stack-size = 15
 boot-info-address = "0xFFFF800100000000"
 physical-memory-offset = "0xFFFF900000000000"
+map-physical-memory = true
+target = "x86_64-unknown-spinel_kernel"

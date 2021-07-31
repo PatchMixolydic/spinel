@@ -11,7 +11,7 @@ lazy_static! {
     pub static ref IDT: Mutex<InterruptDescriptorTable> = Mutex::new(InterruptDescriptorTable::new());
 }
 
-type IRQHandler = extern "x86-interrupt" fn(&mut InterruptStackFrame);
+type IRQHandler = extern "x86-interrupt" fn(InterruptStackFrame);
 
 /// Wrapper for a u8 that enforces that its contents
 /// represent a valid IRQ.
@@ -66,7 +66,7 @@ pub fn register_irq_handler(irq: IRQ, handler: IRQHandler) {
 }
 
 extern "x86-interrupt" fn double_fault_handler(
-    stack_frame: &mut InterruptStackFrame,
+    stack_frame: InterruptStackFrame,
     _error_code: u64
 ) -> ! {
     // Error code is always 0
@@ -74,7 +74,7 @@ extern "x86-interrupt" fn double_fault_handler(
 }
 
 extern "x86-interrupt" fn general_protection_fault_handler(
-    stack_frame: &mut InterruptStackFrame,
+    stack_frame: InterruptStackFrame,
     error_code: u64
 ) {
     panic!("General protection fault\nError code {}\nStack frame: {:#?}", error_code, stack_frame);

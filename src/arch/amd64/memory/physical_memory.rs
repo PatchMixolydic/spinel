@@ -1,4 +1,4 @@
-use bootloader::bootinfo::{MemoryMap, MemoryRegionType};
+use bootloader::boot_info::{MemoryRegions, MemoryRegionKind};
 use spin::Mutex;
 use x86_64::PhysAddr;
 use x86_64::structures::paging::{FrameAllocator, PhysFrame, Size4KiB};
@@ -12,7 +12,7 @@ pub static PAGE_FRAME_ALLOCATOR: Mutex<Option<PageFrameAllocator>> = Mutex::new(
 /// Behind-the-scenes memory allocator.
 /// You probably shouldn't construct one of these outside of `physical_memory`.
 pub struct PageFrameAllocator {
-    memory_map: &'static MemoryMap,
+    memory_map: &'static MemoryRegions,
     next: usize
 }
 
@@ -22,14 +22,14 @@ impl PageFrameAllocator {
     /// ## Safety
     /// The `MemoryMap` must be valid; all addresses marked usable
     /// must actually be usable.
-    unsafe fn init(memory_map: &'static MemoryMap) -> Self {
+    unsafe fn init(memory_map: &'static MemoryRegions) -> Self {
         Self { memory_map, next: 0 }
     }
 
     fn usable_frames(&self) -> impl Iterator<Item = PhysFrame> {
         self.memory_map.iter()
-            .filter(|region| region.region_type == MemoryRegionType::Usable)
-            .map(|region| region.range.start_addr()..region.range.end_addr())
+            .filter(|region| region.kind == MemoryRegionKind::Usable)
+            .map(|region| region.start..region.end)
             .flat_map(|region| region.step_by(PAGE_SIZE))
             .map(|address| PhysFrame::containing_address(PhysAddr::new(address)))
     }
@@ -44,6 +44,13 @@ unsafe impl FrameAllocator<Size4KiB> for PageFrameAllocator {
     }
 }
 
+// SAFETY: This is safe since `PageFrameAllocator` can only
+// be constructed in this module, and the only instance of it
+// (`PAGE_FRAME_ALLOCATOR`) is protected by a mutex. Additionally,
+// the pointee of `MemoryRegions` should be the same on all threads
+// since the kernel memory mappings are global.
+unsafe impl Send for PageFrameAllocator {}
+
 /// Initializes the physical memory system.
 ///
 /// ## Safety
@@ -52,7 +59,7 @@ unsafe impl FrameAllocator<Size4KiB> for PageFrameAllocator {
 ///
 /// ## Panics
 /// Panics if this function has already been called.
-pub unsafe fn init(memory_map: &'static MemoryMap) {
+pub unsafe fn init(memory_map: &'static MemoryRegions) {
     let mut alloc = PAGE_FRAME_ALLOCATOR.lock();
     if alloc.is_some() {
         panic!("Tried to initialize the physical memory system twice");

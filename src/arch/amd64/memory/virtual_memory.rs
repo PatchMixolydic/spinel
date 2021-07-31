@@ -171,7 +171,7 @@ pub fn map_range(start_address: usize, end_address: usize)  -> Result<(), MapErr
 }
 
 extern "x86-interrupt" fn page_fault_handler(
-    stack_frame: &mut InterruptStackFrame,
+    stack_frame: InterruptStackFrame,
     error_code: PageFaultErrorCode,
 ) {
     let fault_address = Cr2::read();

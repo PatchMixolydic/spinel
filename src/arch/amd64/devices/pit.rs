@@ -97,7 +97,7 @@ pub fn init() {
     });
 }
 
-extern "x86-interrupt" fn irq0_handler(_stack_frame: &mut InterruptStackFrame) {
+extern "x86-interrupt" fn irq0_handler(_stack_frame: InterruptStackFrame) {
     timer::tick();
     end_of_irq(0.into());
 }
