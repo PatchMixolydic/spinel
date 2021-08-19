@@ -1,4 +1,3 @@
-use alloc::boxed::Box;
 use alloc::collections::VecDeque;
 use alloc::vec::Vec;
 use core::hint::spin_loop;
@@ -140,7 +139,7 @@ pub fn next_task() {
     register_timer(
         timeslice_for_priority(next_thread.priority),
         true,
-        Box::new(next_task),
+        next_task,
     )
     .unwrap();
     println!("Timer registered");

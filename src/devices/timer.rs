@@ -1,4 +1,3 @@
-use alloc::boxed::Box;
 use alloc::vec::Vec;
 use spin::Mutex;
 
@@ -8,7 +7,7 @@ pub const TICKS_PER_SECOND: u64 = TICKS_PER_MILLISECOND * 1000;
 
 static TIMER_STATE: Mutex<Option<TimerState>> = Mutex::new(None);
 
-type TimerCallback = dyn FnMut() + 'static + Send;
+type TimerCallback = fn();
 
 #[derive(Clone, Copy, Debug)]
 pub enum TimerError {
@@ -19,7 +18,7 @@ struct Timer {
     id: u128,
     next_time: u64,
     duration: u64,
-    callback: Box<TimerCallback>,
+    callback: TimerCallback,
     one_shot: bool,
 }
 
@@ -68,7 +67,7 @@ impl TimerState {
 /// Initialize the timer subsystem.
 /// This should most likely be called when initializing the
 /// architecture's backing timer device.
-/// This is the only function in this submodule than can be called
+/// This is the only function in this submodule that can be called
 /// before the memory allocator is initialized.
 pub fn init(frequency: u64) {
     let mut state = match TIMER_STATE.try_lock() {
@@ -117,9 +116,15 @@ pub fn tick() {
         None => panic!("ticks_since_boot overflowed"),
     };
 
+    // TODO: not this, probably
+    // this is needed so we can unlock `TIMER_STATE`
+    // before running the callbacks, which may try to
+    // use some part of the timer system (such as `ticks_since_boot`)
+    let mut callbacks = Vec::new();
+
     for timer in &mut state.timers {
         if timer.next_time <= state.ticks_since_boot {
-            (timer.callback)();
+            callbacks.push(timer.callback);
             if timer.one_shot {
                 // TODO: actually remove from the list
                 // I can't think of a sound way to do this rn
@@ -131,6 +136,12 @@ pub fn tick() {
             }
         }
     }
+
+    drop(state_guard);
+
+    for callback in callbacks {
+        callback();
+    }
 }
 
 /// Register a timer to wait for at least the given duration and then call a callback.
@@ -141,7 +152,7 @@ pub fn tick() {
 pub fn register_timer(
     duration: u64,
     one_shot: bool,
-    callback: Box<TimerCallback>,
+    callback: TimerCallback,
 ) -> Result<u128, TimerError> {
     let mut state_guard = match TIMER_STATE.try_lock() {
         Some(state) => state,
