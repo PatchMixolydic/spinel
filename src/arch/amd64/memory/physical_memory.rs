@@ -1,4 +1,4 @@
-use bootloader::boot_info::{MemoryRegionKind, MemoryRegions};
+use bootloader::bootinfo::{MemoryMap, MemoryRegionType};
 use spin::Mutex;
 use x86_64::structures::paging::{FrameAllocator, PhysFrame, Size4KiB};
 use x86_64::PhysAddr;
@@ -12,7 +12,7 @@ pub static PAGE_FRAME_ALLOCATOR: Mutex<Option<PageFrameAllocator>> = Mutex::new(
 /// Behind-the-scenes memory allocator.
 /// You probably shouldn't construct one of these outside of `physical_memory`.
 pub struct PageFrameAllocator {
-    memory_map: &'static MemoryRegions,
+    memory_map: &'static MemoryMap,
     next: usize,
 }
 
@@ -22,7 +22,7 @@ impl PageFrameAllocator {
     /// ## Safety
     /// The `MemoryMap` must be valid; all addresses marked usable
     /// must actually be usable.
-    unsafe fn init(memory_map: &'static MemoryRegions) -> Self {
+    unsafe fn init(memory_map: &'static MemoryMap) -> Self {
         Self {
             memory_map,
             next: 0,
@@ -32,8 +32,8 @@ impl PageFrameAllocator {
     fn usable_frames(&self) -> impl Iterator<Item = PhysFrame> {
         self.memory_map
             .iter()
-            .filter(|region| region.kind == MemoryRegionKind::Usable)
-            .map(|region| region.start..region.end)
+            .filter(|region| region.region_type == MemoryRegionType::Usable)
+            .map(|region| region.range.start_addr()..region.range.end_addr())
             .flat_map(|region| region.step_by(PAGE_SIZE))
             .map(|address| PhysFrame::containing_address(PhysAddr::new(address)))
     }
@@ -63,7 +63,7 @@ unsafe impl Send for PageFrameAllocator {}
 ///
 /// ## Panics
 /// Panics if this function has already been called.
-pub unsafe fn init(memory_map: &'static MemoryRegions) {
+pub unsafe fn init(memory_map: &'static MemoryMap) {
     let mut alloc = PAGE_FRAME_ALLOCATOR.lock();
     if alloc.is_some() {
         panic!("Tried to initialize the physical memory system twice");

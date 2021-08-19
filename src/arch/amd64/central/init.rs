@@ -19,7 +19,7 @@ pub fn arch_init(boot_info: &'static BootInfo) {
     // at `boot_info.physical_memory_offset`. physical_memory::init requires that the
     // memory_map is set up correctly. Fortunately, the bootloader guarantees this!
     unsafe {
-        physical_memory::init(&boot_info.memory_regions);
+        physical_memory::init(&boot_info.memory_map);
         virtual_memory::init();
     }
     pit::init();

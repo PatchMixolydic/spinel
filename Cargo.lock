@@ -22,9 +22,9 @@ checksum = "cf1de2fe8c75bc145a2f577add951f8134889b4795d47466a54a5c846d691693"
 
 [[package]]
 name = "bootloader"
-version = "0.10.6"
+version = "0.9.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8d14f17b82e24a31d32e9b05b2f2e6144bab94086ef636770f2bb2d96adf9f77"
+checksum = "b7c452074efc3c0bfb241fb7bc87df04741c7c85e926f6a07c05f8fbd6008240"
 
 [[package]]
 name = "cfg-if"
