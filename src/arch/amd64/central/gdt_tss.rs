@@ -31,7 +31,7 @@ lazy_static! {
         let mut gdt = GlobalDescriptorTable::new();
         let kernel_code = gdt.add_entry(Descriptor::kernel_code_segment());
         let kernel_data = gdt.add_entry({
-            // User segment in contrast to things like a TSS
+            // "User segment" indicates this is data/code, not something like a TSS
             let flags = DescriptorFlags::USER_SEGMENT | DescriptorFlags::PRESENT | DescriptorFlags::WRITABLE;
             Descriptor::UserSegment(flags.bits())
         });

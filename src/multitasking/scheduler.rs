@@ -63,6 +63,14 @@ fn idle() {
     }
 }
 
+fn idle_2() {
+    println!("Idle 2!");
+    loop {
+        enable_interrupts();
+        spin_loop();
+    }
+}
+
 /// Starts the scheduler.
 /// Note that this will start scheduling processes immediately,
 /// so you will probably want to create any bootstrap processes
@@ -76,6 +84,11 @@ pub fn init() {
             idle as usize,
             Priority::Abysmal,
         );
+        // add_process(
+        //     Process::new("idle_2", false),
+        //     idle_2 as usize,
+        //     Priority::Abysmal,
+        // );
     }
     println!("Switch!");
     next_task();
@@ -102,36 +115,48 @@ fn timeslice_for_priority(priority: Priority) -> u64 {
 
 pub fn next_task() {
     println!("Time to switch!");
-    let mut run_queues = RUN_QUEUES.try_lock().unwrap();
-    let mut current_thread = CURRENT_THREAD.try_lock().unwrap();
-    let old_thread = current_thread.take();
-    println!("Old thread: {:#?}", old_thread);
+    let mut run_queues_guard = RUN_QUEUES.try_lock().unwrap();
+    let mut current_thread_guard = CURRENT_THREAD.try_lock().unwrap();
+    let old_thread = current_thread_guard.take();
+    println!("Old thread: {:#X?}", old_thread);
 
     println!("Traverse priority runqueues");
     for priority in (0..Priority::NumPriorities as usize).rev() {
         println!("  {:?}", priority);
-        if run_queues[priority].is_empty() {
+        if run_queues_guard[priority].is_empty() {
             println!("    Empty");
             continue;
         }
-        *current_thread = Some(run_queues[priority].pop_front().unwrap());
-        println!("    OK, got {:#?}", *current_thread);
+        *current_thread_guard = Some(run_queues_guard[priority].pop_front().unwrap());
+        println!("    OK, got {:#X?}", *current_thread_guard);
+        break;
     }
 
-    let old_thread = old_thread.and_then(|mut thread| {
+    let mut old_thread = old_thread.and_then(|mut thread| {
         println!("Store old thread");
         thread.state = ThreadState::Idle;
         let priority = thread.priority;
-        run_queues[priority as usize].push_back(thread);
-        run_queues[priority as usize].back_mut()
+        run_queues_guard[priority as usize].push_back(thread);
+        // TODO: remove clone
+        run_queues_guard[priority as usize].back_mut().cloned()
     });
 
-    if current_thread.is_none() {
-        // That shouldn't be, the idle thread should be scheduled!
-        panic!("No threads found, not even the idle thread!");
-    }
+    // Unlock `RUN_QUEUES`
+    drop(run_queues_guard);
 
-    let next_thread = current_thread.as_mut().unwrap();
+    let mut next_thread = match &*current_thread_guard {
+        // TODO: remove clone
+        Some(current_thread) => current_thread.clone(),
+
+        // Awkward... `old_thread` is the only thread. Reschedule it.
+        None => old_thread
+            .as_ref()
+            .expect("tried to run `next_task` with no threads queued!")
+            .clone(),
+    };
+    // Unlock `CURRENT_THREAD`
+    drop(current_thread_guard);
+
     println!("Set next thread state");
     next_thread.state = ThreadState::Active;
     next_thread.last_scheduled_time = ticks_since_boot();
@@ -145,7 +170,7 @@ pub fn next_task() {
     println!("Timer registered");
     unsafe {
         println!("Switch!");
-        next_thread.switch_to_this_from(old_thread);
+        next_thread.switch_to_this_from(old_thread.as_mut());
     }
 }
 

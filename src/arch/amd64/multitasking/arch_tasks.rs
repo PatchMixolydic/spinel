@@ -1,17 +1,17 @@
 use alloc::boxed::Box;
-use core::mem::size_of;
-use core::ops::Drop;
-use x86_64::registers::control::Cr3Flags;
-use x86_64::structures::paging::frame::PhysFrame;
+use core::{mem::size_of, ops::Drop};
+use x86_64::{registers::control::Cr3Flags, structures::paging::frame::PhysFrame};
 
-use crate::arch::amd64::central::arch_info::PAGE_SIZE;
-use crate::arch::amd64::central::gdt_tss::GDT;
-use crate::println;
+use crate::{
+    arch::amd64::central::{arch_info::PAGE_SIZE, gdt_tss::GDT},
+    println,
+};
 
 // Number of u64s that comprise a kernel stack
 const KERNEL_STACK_NUM_U64S: usize = PAGE_SIZE / size_of::<u64>();
 
-#[derive(Debug)]
+// TODO: don't derive `Clone`
+#[derive(Clone, Debug)]
 #[repr(C)]
 pub struct ArchTask {
     /// Value of the stack pointer on last switch
@@ -31,13 +31,11 @@ impl ArchTask {
             "New arch task: IP {:#010X} user_mode {}",
             instruction_pointer, user_mode
         );
-        let mut kernel_stack = Box::new([0u64; PAGE_SIZE / size_of::<u64>()]);
+        let mut kernel_stack = Box::new([0u64; KERNEL_STACK_NUM_U64S]);
         println!("Kernel stack {:?}", kernel_stack.as_ptr());
         // Index to the bottom of the stack
         let mut stack_idx: usize = KERNEL_STACK_NUM_U64S - 1;
         println!("Starting stack_idx {}", stack_idx);
-        // Index for the stack pointer that will be used after executing iret
-        let stack_rsp_idx: usize;
 
         // Setting up the stack...
         // Stack segment
@@ -48,10 +46,11 @@ impl ArchTask {
         // This requires unboxing kernel_stack if user_mode is false,
         // so this will be taken care of later
         println!("Will put RSP at {}", stack_idx);
-        stack_rsp_idx = stack_idx;
+        let stack_rsp_idx = stack_idx;
         stack_idx -= 1;
         // Flags
         println!("Putting flags at {}", stack_idx);
+        // enable interrupts after `iret`
         kernel_stack[stack_idx] = 0x0202;
         stack_idx -= 1;
         // Code segment
@@ -65,7 +64,6 @@ impl ArchTask {
         // Instruction pointer for interrupt stack frame
         println!("Putting RIP for interrupt frame at {}", stack_idx);
         kernel_stack[stack_idx] = instruction_pointer as u64;
-        stack_idx -= 1;
 
         // Now we can get the stack pointer
         // Note that the code doesn't just initialize kernel_stack_pointer
@@ -92,7 +90,7 @@ impl ArchTask {
                 panic!("Please add usermode stack creation")
             } else {
                 println!(
-                    "Writing KSP {:?} to {:?}",
+                    "Writing KSP {:X?} to {:?}",
                     kernel_stack_pointer, stack_pointer_loc
                 );
                 stack_pointer_loc.write(kernel_stack_pointer);
@@ -109,7 +107,7 @@ impl ArchTask {
             kernel_stack_pointer,
             kernel_stack_top_pointer,
             current_base_pointer: kernel_stack_top_pointer,
-            current_instruction_pointer: process_init as u64,
+            current_instruction_pointer: process_continue as u64,
             page_map: x86_64::registers::control::Cr3::read(),
         }
     }
@@ -124,7 +122,7 @@ impl Drop for ArchTask {
         println!("Boxing it all up and dropping it...");
         unsafe {
             // The box will free the allocation for the task's kernel stack when dropped
-            core::mem::drop(Box::from_raw(self.kernel_stack_top_pointer as *mut u64));
+            drop(Box::from_raw(self.kernel_stack_top_pointer as *mut u64));
         }
         println!("OK");
     }
@@ -154,8 +152,9 @@ pub unsafe extern "C" fn switch_tasks(
             mov {old_base_ptr}, rbp
             ",
             old_stack_ptr = out(reg) old_task.kernel_stack_pointer,
-            old_base_ptr = out(reg) old_task.current_base_pointer
+            old_base_ptr = out(reg) old_task.current_base_pointer,
         );
+        old_task.current_instruction_pointer = process_continue as u64;
     }
     asm!(
         "
@@ -175,9 +174,11 @@ pub unsafe extern "C" fn switch_tasks(
     );
 }
 
-/// The code all processes run when they start.
+/// The code all threads run when resuming
+/// execution.
+///
 /// This is just a trampoline to pretend like
-/// we're returning from an interrupt. You probably
+/// we're returning from IRQ0 specifically. You probably
 /// don't want to call this function directly.
 ///
 /// ## Safety
@@ -185,6 +186,13 @@ pub unsafe extern "C" fn switch_tasks(
 /// that when it's called, an interrupt stack frame
 /// is the next thing on the stack.
 #[naked]
-unsafe extern "C" fn process_init() {
-    asm!("iret", options(noreturn));
+unsafe extern "C" fn process_continue() {
+    asm!(
+        "push ax",
+        "mov al, 0x20",
+        "out 0x20, al",
+        "pop ax",
+        "iretq",
+        options(noreturn)
+    );
 }

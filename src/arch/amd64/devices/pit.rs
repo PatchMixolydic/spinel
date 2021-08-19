@@ -5,6 +5,7 @@ use crate::arch::amd64::central::idt::register_irq_handler;
 use crate::arch::amd64::devices::pic::end_of_irq;
 use crate::arch::interrupts::without_interrupts;
 use crate::devices::timer;
+use crate::println;
 
 const PIT_CHANNEL_0: Port<u8> = Port::new(0x0040);
 const PIT_COMMAND_PORT: PortWriteOnly<u8> = PortWriteOnly::new(0x0043);
@@ -105,6 +106,8 @@ pub fn init() {
 }
 
 extern "x86-interrupt" fn irq0_handler(_stack_frame: InterruptStackFrame) {
+    // println!("irq0 RESPONSE!");
     timer::tick();
+    // println!("irq0 untick");
     end_of_irq(0.into());
 }

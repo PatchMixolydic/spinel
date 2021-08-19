@@ -20,7 +20,7 @@ pub enum ThreadState {
     Dead,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Thread {
     /// ID of the parent process.
     process_id: TaskId,
@@ -61,7 +61,7 @@ impl Thread {
     /// swap out memory mappings and/or the stack, which may lead to trouble
     /// if this thread's ArchTask is invalid!
     pub unsafe fn switch_to_this_from(&mut self, old_thread: Option<&mut Thread>) {
-        println!("Switch from {:#?} to {:#?}", old_thread, self);
+        println!("Switch from {:#X?} to {:#X?}", old_thread, self);
         let old_task = match old_thread {
             Some(thread) => Some(&mut thread.underlying_task),
             None => None,
